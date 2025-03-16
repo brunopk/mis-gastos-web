@@ -1,8 +1,14 @@
 {
   "name": "mis-gastos-web",
-  "private": true,
   "version": "0.0.0",
+  "description": "Part of Mis gastos project",
+  "repository": "git@github.com:brunopk/mis-gastos-web.git",
+  "author": "Bruno Piaggio <brunopiaggiok@gmail.com>",
+  "private": true,
   "type": "module",
+  "engines": {
+    "node":  ">=22.13.1 <=22.14.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
