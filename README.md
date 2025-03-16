@@ -1,5 +1,6 @@
 # Mis gastos web
 
+
 Part of the Mis gastos project, intended to be served as static content from Home Assistant OS.
 
 ## Requirements to install Mis gastos web in Home Assistant
