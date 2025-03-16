@@ -1,0 +1,11 @@
+{
+  "plugins": ["prettier-plugin-organize-imports"],
+  "semi": false,
+  "tabWidth": 2,
+  "printWidth": 100,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "importOrder": ["^@mui/(.*)$", "^[./]", "^react(.*)$"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
