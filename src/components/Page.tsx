@@ -75,21 +75,19 @@ function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
         <DrawerHeader />
         {children}
       </Main>
-      <Drawer
-        widthInRem={menuWidthInRem}
-        content={sideBarMenu}
-        open={mainDrawerOpen}
-        setOpen={setMainDrawerOpen}
-      />
-      {isUpSm && (
+      {mainDrawerOpen && (
+        <Drawer
+          widthInRem={menuWidthInRem}
+          content={sideBarMenu}
+          open={mainDrawerOpen}
+          setOpen={setMainDrawerOpen}
+        />
+      )}
+      {isUpSm && !mainDrawerOpen && (
         <SecondaryDrawer open={secondaryDrawerOpen} onToggle={handleSecondaryDrawerToggle} />
       )}
-      {!isUpSm && (
-        <SecondaryDrawerMobile
-          open={secondaryDrawerOpen}
-          mainDrawerOpen={mainDrawerOpen}
-          onToggle={handleSecondaryDrawerToggle}
-        />
+      {!isUpSm && !mainDrawerOpen && (
+        <SecondaryDrawerMobile open={secondaryDrawerOpen} onToggle={handleSecondaryDrawerToggle} />
       )}
     </Box>
   )

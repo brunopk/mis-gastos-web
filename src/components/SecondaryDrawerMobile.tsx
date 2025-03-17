@@ -1,4 +1,4 @@
-import { Global } from '@emotion/react'
+import { Global, Interpolation, Theme } from '@emotion/react'
 import { Skeleton, SwipeableDrawer, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { styled } from '@mui/material/styles'
@@ -31,27 +31,20 @@ const Puller = styled('div')(({ theme }) => ({
 
 type SecondaryDrawerMobileProps = {
   open: boolean
-  mainDrawerOpen: boolean
   onToggle: (newOpen: boolean) => void
 }
 
-function SecondaryDrawerMobile({ open, mainDrawerOpen, onToggle }: SecondaryDrawerMobileProps) {
+function SecondaryDrawerMobile({ open, onToggle }: SecondaryDrawerMobileProps) {
   const handleToggle = (newOpen: boolean) => () => {
     onToggle(newOpen)
   }
 
-  const globalStyles = mainDrawerOpen
-    ? {
-        '.MuiDrawer-root > .MuiPaper-root': {
-          overflow: 'visible'
-        }
-      }
-    : {
-        '.MuiDrawer-root > .MuiPaper-root': {
-          overflow: 'visible',
-          height: `calc(50% - ${DRAWER_BLEEDING}px)`
-        }
-      }
+  const globalStyles: Interpolation<Theme> = {
+    '.MuiDrawer-root > .MuiPaper-root': {
+      overflow: 'visible',
+      height: `calc(50% - ${DRAWER_BLEEDING}px)`
+    }
+  }
 
   return (
     <Root>
