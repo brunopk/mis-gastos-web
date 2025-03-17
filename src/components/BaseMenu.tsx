@@ -1,24 +1,26 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import BookmarkIcon from '@mui/icons-material/Bookmark'
+import PaidIcon from '@mui/icons-material/Paid'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import SettingsIcon from '@mui/icons-material/Settings'
-import SummarizeIcon from '@mui/icons-material/Summarize'
-import { useTheme } from '@mui/material'
+import * as Mui from '@mui/material'
+import { styled, useTheme } from '@mui/material'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
-import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BOOKMARKS_PATH, SETTINGS_PATH, STATS_PATH } from '../config'
+import { SPENDS_PATH } from '../config'
 import DrawerHeader from './DrawerHeader'
 
 const DEFAULT_MENU_WIDTH_IN_REM = 15
+
+const List = styled(Mui.List)<Mui.ListProps>(() => ({
+  width: `${DEFAULT_MENU_WIDTH_IN_REM}rem`
+}))
 
 type BaseMenuProps = {
   content?: ReactNode
@@ -28,26 +30,17 @@ type BaseMenuProps = {
 }
 
 function BaseMenu({ content, open, widthInRem, setOpen }: BaseMenuProps) {
-  widthInRem = typeof widthInRem === 'undefined' ? DEFAULT_MENU_WIDTH_IN_REM : widthInRem
-
   const theme = useTheme()
-
-  const handleDrawerClose = () => setOpen(false)
 
   const navigate = useNavigate()
 
+  const spendsTitle = 'Spends'
+
+  const handleSpendsClick = () => navigate(SPENDS_PATH, { state: { page: { title: spendsTitle } } })
+
   const handleBackClick = () => navigate(-1)
 
-  const bookmarksTitle = 'Bookmarks'
-  const handleStatsClick = () => navigate(STATS_PATH, { state: { page: { title: statsTitle } } })
-
-  const statsTitle = 'Stats'
-  const handleBookmarksClick = () =>
-    navigate(BOOKMARKS_PATH, { state: { page: { title: bookmarksTitle } } })
-
-  const settingsTitle = 'Settings'
-  const handleSettingsClick = () =>
-    navigate(SETTINGS_PATH, { state: { page: { title: settingsTitle } } })
+  const handleDrawerClose = () => setOpen(false)
 
   return (
     <Fragment>
@@ -66,32 +59,16 @@ function BaseMenu({ content, open, widthInRem, setOpen }: BaseMenuProps) {
         ) : (
           <></>
         )}
-        <List sx={{ width: `${widthInRem}rem` }}>
-          <ListItem key={0} onClick={() => handleBookmarksClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(BOOKMARKS_PATH)}>
+        <List>
+          <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
+            <ListItemButton selected={location.pathname.startsWith(SPENDS_PATH)}>
               <ListItemIcon>
-                <BookmarkIcon />
+                <PaidIcon />
               </ListItemIcon>
-              <ListItemText primary={bookmarksTitle} />
+              <ListItemText primary={spendsTitle} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={1} onClick={() => handleStatsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(STATS_PATH)}>
-              <ListItemIcon>
-                <SummarizeIcon />
-              </ListItemIcon>
-              <ListItemText primary={statsTitle} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem key={2} onClick={() => handleSettingsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(SETTINGS_PATH)}>
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText primary={settingsTitle} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem key={3} onClick={() => handleBackClick()} disablePadding>
+          <ListItem key={1} onClick={() => handleBackClick()} disablePadding>
             <ListItemButton>
               <ListItemIcon>
                 <ArrowBackIcon />
