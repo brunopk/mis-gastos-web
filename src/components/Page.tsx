@@ -9,8 +9,6 @@ import { useLocation } from 'react-router-dom'
 import Drawer from './Drawer'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
-import SecondaryDrawer from './SecondaryDrawer'
-import SecondaryDrawerMobile from './SecondaryDrawerMobile'
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -38,26 +36,16 @@ type PageProps = {
 function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
   const location = useLocation()
 
-  const theme = Mui.useTheme()
-
-  const isUpSm = Mui.useMediaQuery(theme.breakpoints.up('sm'))
-
   const {
     page: { title: dashboardTitle }
   } = location.state || { page: { title: '' } }
 
   const [mainDrawerOpen, setMainDrawerOpen] = useState<boolean>(false)
 
-  const [secondaryDrawerOpen, setSecondaryDrawerOpen] = useState<boolean>(false)
-
   const handleMainDrawerOpen = () => setMainDrawerOpen(true)
 
-  const handleSecondaryDrawerToggle = (newOpen: boolean) => {
-    setSecondaryDrawerOpen(newOpen)
-  }
-
   const handleThreeDotsIconClick = () => {
-    setSecondaryDrawerOpen(true)
+    alert('Not implemented!')
   }
 
   return (
@@ -77,20 +65,13 @@ function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
         <DrawerHeader />
         {children}
       </Main>
-      {mainDrawerOpen && (
-        <Drawer
-          widthInRem={menuWidthInRem}
-          content={sideBarMenu}
-          open={mainDrawerOpen}
-          setOpen={setMainDrawerOpen}
-        />
-      )}
-      {isUpSm && !mainDrawerOpen && (
-        <SecondaryDrawer open={secondaryDrawerOpen} onToggle={handleSecondaryDrawerToggle} />
-      )}
-      {!isUpSm && !mainDrawerOpen && (
-        <SecondaryDrawerMobile open={secondaryDrawerOpen} onToggle={handleSecondaryDrawerToggle} />
-      )}
+
+      <Drawer
+        widthInRem={menuWidthInRem}
+        content={sideBarMenu}
+        open={mainDrawerOpen}
+        setOpen={setMainDrawerOpen}
+      />
     </Box>
   )
 }
