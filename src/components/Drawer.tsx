@@ -5,7 +5,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import Divider from '@mui/material/Divider'
-import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -29,7 +28,7 @@ type BaseMenuProps = {
   setOpen: Dispatch<boolean>
 }
 
-function BaseMenu({ content, open, widthInRem, setOpen }: BaseMenuProps) {
+function Drawer({ content, open, widthInRem, setOpen }: BaseMenuProps) {
   const theme = useTheme()
 
   const navigate = useNavigate()
@@ -44,7 +43,7 @@ function BaseMenu({ content, open, widthInRem, setOpen }: BaseMenuProps) {
 
   return (
     <Fragment>
-      <Drawer anchor="left" open={open} onClose={handleDrawerClose} sx={{ width: '24rem' }}>
+      <Mui.Drawer anchor="left" open={open} onClose={handleDrawerClose} >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -77,9 +76,9 @@ function BaseMenu({ content, open, widthInRem, setOpen }: BaseMenuProps) {
             </ListItemButton>
           </ListItem>
         </List>
-      </Drawer>
+      </Mui.Drawer>
     </Fragment>
   )
 }
 
-export default BaseMenu
+export default Drawer
