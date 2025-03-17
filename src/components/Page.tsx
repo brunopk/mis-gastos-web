@@ -17,8 +17,10 @@ const Main = styled('main')(() => ({
   top: 0,
   left: 0,
   width: '100%',
-  flexGrow: 1,
-  padding: '2rem 1rem 1rem 1rem'
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '0 0.5rem'
 }))
 
 const DashboardTitle = styled(Mui.Typography)<Mui.TypographyProps>(() => ({
