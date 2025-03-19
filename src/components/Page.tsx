@@ -4,7 +4,7 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { ReactNode, useState } from 'react'
+import { MouseEventHandler, ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Drawer from './Drawer'
 import DrawerButton from './DrawerButton'
@@ -31,9 +31,10 @@ type PageProps = {
   sideBarMenu?: ReactNode
   children: ReactNode
   menuWidthInRem?: number
+  onThreeDotsIconClick?: () => void
 }
 
-function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
+function Page({ children, menuWidthInRem, sideBarMenu, onThreeDotsIconClick }: PageProps) {
   const location = useLocation()
 
   const {
@@ -44,9 +45,10 @@ function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
 
   const handleMainDrawerOpen = () => setMainDrawerOpen(true)
 
-  const handleThreeDotsIconClick = () => {
-    alert('Not implemented!')
-  }
+  const handleThreeDotsIconClick = useCallback(() => {
+    if (typeof onThreeDotsIconClick !== 'undefined')
+      onThreeDotsIconClick()
+  }, [onThreeDotsIconClick])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -56,9 +58,12 @@ function Page({ children, menuWidthInRem, sideBarMenu }: PageProps) {
           <DashboardTitle variant="h6" noWrap component="div">
             {dashboardTitle}
           </DashboardTitle>
-          <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
-            <MoreVert />
-          </Mui.IconButton>
+          {typeof onThreeDotsIconClick !== 'undefined' && (
+  <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
+  <MoreVert />
+</Mui.IconButton>
+          )}
+        
         </Toolbar>
       </AppBar>
       <Main>

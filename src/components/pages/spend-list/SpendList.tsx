@@ -1,52 +1,17 @@
-import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp'
 import * as Mui from '@mui/material'
-import { Box } from '@mui/material'
-import { accordionSummaryClasses } from '@mui/material/AccordionSummary'
-import * as XDatePickers from '@mui/x-date-pickers'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import ModalBase from '../../modal/ModalBase'
 import Page from '../../Page'
+import ListControls from './ListControls'
 
-const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
-  display: 'flex'
-}))
-
-const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
-  display: 'flex'
-}))
-
-const Accordion = Mui.styled(Mui.Accordion)(() => ({
-  p: 1,
-  width: '100%',
-  marginTop: '1rem',
-  flex: 0
-}))
-
-const TableContainer = Mui.styled(Mui.TableContainer)(({ theme }) => ({
-  maxHeight: '90%',
-  [theme.breakpoints.up('sm')]: {
-    maxHeight: '100%'
-  }
+const TableContainer = Mui.styled(Mui.TableContainer)(() => ({
+  maxHeight: '90%'
 }))
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   marginTop: '1rem',
   overflow: 'hidden',
   flex: 1
-}))
-
-const AccordionSummary = Mui.styled((props: Mui.AccordionSummaryProps) => (
-  <Mui.AccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
-    {...props}
-  />
-))(({ theme }) => ({
-  flexDirection: 'row-reverse',
-  [`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]: {
-    transform: 'rotate(90deg)'
-  },
-  [`& .${accordionSummaryClasses.content}`]: {
-    marginLeft: theme.spacing(1)
-  }
 }))
 
 interface Column {
@@ -71,15 +36,15 @@ function createData(name: string, code: string, population: number, size: number
 }
 
 function SpendList() {
-  const [age, setAge] = useState('')
+  const theme = Mui.useTheme()
+
+  const isSmallScreen = Mui.useMediaQuery(theme.breakpoints.down('sm'))
 
   const [page, setPage] = useState(0)
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  const handleChange = (event: Mui.SelectChangeEvent) => {
-    setAge(event.target.value as string)
-  }
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage)
@@ -89,6 +54,14 @@ function SpendList() {
     setRowsPerPage(+event.target.value)
     setPage(0)
   }
+
+  const handleThreeDotsIconClick = useCallback(() => {
+    setIsModalOpen(true)
+  }, [setIsModalOpen])
+
+  const handleModalCancel = useCallback(() => {
+    setIsModalOpen(false)
+  }, [setIsModalOpen])
 
   const columns: readonly Column[] = [
     { id: 'name', label: 'Name', minWidth: 170 },
@@ -145,86 +118,35 @@ function SpendList() {
     createData('Brazil', 'BR', 210147125, 8515767)
   ]
 
+  const PrimaryActionButton = (
+    <Mui.Button onClick={() => alert('Not implemented')} autoFocus>
+      OK
+    </Mui.Button>
+  )
+
+  const SecondaryActionButton = (
+    <Mui.Button onClick={handleModalCancel} color="inherit">
+      Cancel
+    </Mui.Button>
+  )
+
+  const modalBaseProps: Omit<ModalBaseProps, 'children'> = {
+    title: '',
+    primaryActionButton: PrimaryActionButton,
+    secondaryActionButton: SecondaryActionButton,
+    open: isModalOpen,
+    onClose: () => alert('Not implemented')
+  }
+
   return (
-    <Page>
-      <Accordion elevation={0} variant="outlined">
-        <AccordionSummary aria-controls="panel1-content" id="panel1-header">
-          <Mui.Typography component="span" sx={{ paddingLeft: '1rem' }}>
-            Dates
-          </Mui.Typography>
-        </AccordionSummary>
-        <Mui.AccordionDetails>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-            <Box sx={{ flexGrow: 1 }}>
-              <DatePicker />
-            </Box>
-            <Box sx={{ flexGrow: 1 }}>
-              <DatePicker />
-            </Box>
-          </Stack>
-        </Mui.AccordionDetails>
-      </Accordion>
-
-      <Accordion elevation={0} variant="outlined">
-        <AccordionSummary aria-controls="panel1-content" id="panel1-header">
-          <Mui.Typography component="span" sx={{ paddingLeft: '1rem' }}>
-            Filters
-          </Mui.Typography>
-        </AccordionSummary>
-        <Mui.AccordionDetails>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-            <Box sx={{ flexGrow: 1 }}>
-              <Mui.FormControl fullWidth>
-                <Mui.InputLabel id="demo-simple-select-label">Category</Mui.InputLabel>
-                <Mui.Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={age}
-                  label="Category"
-                  onChange={handleChange}
-                >
-                  <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                  <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                  <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-                </Mui.Select>
-              </Mui.FormControl>
-            </Box>
-            <Box sx={{ flexGrow: 1 }}>
-              <Mui.FormControl fullWidth>
-                <Mui.InputLabel id="demo-simple-select-label">Subcategory</Mui.InputLabel>
-                <Mui.Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={age}
-                  label="Subcategory"
-                  onChange={handleChange}
-                >
-                  <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                  <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                  <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-                </Mui.Select>
-              </Mui.FormControl>
-            </Box>
-            <Box sx={{ flexGrow: 1 }}>
-              <Mui.FormControl fullWidth>
-                <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
-                <Mui.Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={age}
-                  label="Group"
-                  onChange={handleChange}
-                >
-                  <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                  <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                  <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-                </Mui.Select>
-              </Mui.FormControl>
-            </Box>
-          </Stack>
-        </Mui.AccordionDetails>
-      </Accordion>
-
+    <Page onThreeDotsIconClick={handleThreeDotsIconClick}>
+      {isSmallScreen ? (
+        <ModalBase {...modalBaseProps}>
+          <ListControls />
+        </ModalBase>
+      ) : (
+        <ListControls />
+      )}
       <Paper variant="outlined">
         <TableContainer>
           <Mui.Table stickyHeader aria-label="sticky table">
