@@ -28,7 +28,6 @@ const DialogActions = Mui.styled(
 )<Mui.DialogActionsProps>(() => ({
   display: 'flex',
   flexGrow: 1,
-  justifyContent: 'space-between',
   padding: `${PADDING_IN_REM * 4}rem ${PADDING_IN_REM * 6}rem`
 }))
 
@@ -63,8 +62,8 @@ function ModalBase({
           </DialogTitle>
           <DialogContent>{children}</DialogContent>
           <DialogActions>
-            {primaryActionButton}
             {secondaryActionButton}
+            {primaryActionButton}
           </DialogActions>
       </Mui.Dialog>
     </Fragment>
