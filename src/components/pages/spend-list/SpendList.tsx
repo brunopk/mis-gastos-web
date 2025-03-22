@@ -36,10 +36,6 @@ function createData(name: string, code: string, population: number, size: number
 }
 
 function SpendList() {
-  const theme = Mui.useTheme()
-
-  const isSmallScreen = Mui.useMediaQuery(theme.breakpoints.down('sm'))
-
   const [page, setPage] = useState(0)
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -119,13 +115,24 @@ function SpendList() {
   ]
 
   const PrimaryActionButton = (
-    <Mui.Button onClick={() => alert('Not implemented')} autoFocus>
-      OK
+    <Mui.Button
+      sx={{ width: '7rem' }}
+      onClick={() => alert('Not implemented')}
+      variant="contained"
+      color="primary"
+      autoFocus
+    >
+      APPLY
     </Mui.Button>
   )
 
   const SecondaryActionButton = (
-    <Mui.Button onClick={handleModalCancel} color="inherit">
+    <Mui.Button
+      sx={{ width: '7rem' }}
+      onClick={handleModalCancel}
+      variant="contained"
+      color="inherit"
+    >
       Cancel
     </Mui.Button>
   )
@@ -140,13 +147,9 @@ function SpendList() {
 
   return (
     <Page onThreeDotsIconClick={handleThreeDotsIconClick}>
-      {isSmallScreen ? (
-        <ModalBase {...modalBaseProps}>
-          <ListControls />
-        </ModalBase>
-      ) : (
+      <ModalBase {...modalBaseProps}>
         <ListControls />
-      )}
+      </ModalBase>
       <Paper variant="outlined">
         <TableContainer>
           <Mui.Table stickyHeader aria-label="sticky table">

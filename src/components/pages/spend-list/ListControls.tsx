@@ -7,17 +7,15 @@ const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
 }))
 
 const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
-  display: 'flex'
+  display: 'flex',
 }))
 
-const Paper = Mui.styled(Mui.Paper)(({ theme }) => ({
+const Paper = Mui.styled(Mui.Paper)(() => ({
   width: '100%',
-  marginTop: '1rem',
-  padding: '1rem',
+  marginTop: '0.4rem',
+  padding: '0.4rem',
   flex: 0,
-  [theme.breakpoints.between('xs', 'sm')]: {
-    backgroundColor: 'inherit'
-  }
+  backgroundColor: 'inherit'
 }))
 
 function ListControls() {
@@ -30,20 +28,17 @@ function ListControls() {
   return (
     <Mui.Box>
       <Paper elevation={0} variant="outlined">
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          <Mui.Box sx={{ textAlign: 'start', paddingBottom: '1rem' }}>
-            <Mui.Typography component="span" sx={{ alignContent: 'flex-start', flexGrow: 1 }}>
+        <Stack>
+          <Mui.Box sx={{ textAlign: 'start' }}>
+            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem'}}>
               Dates
             </Mui.Typography>
           </Mui.Box>
         </Stack>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <Stack direction='row' spacing={1} sx={{marginTop: '0.4rem'}}>
           <Mui.Box sx={{ flexGrow: 1 }}>
-            <DatePicker />
-          </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <DatePicker />
+            <DatePicker/>
           </Mui.Box>
           <Mui.Box sx={{ flexGrow: 1 }}>
             <DatePicker />
@@ -52,15 +47,15 @@ function ListControls() {
       </Paper>
 
       <Paper elevation={0} variant="outlined">
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          <Mui.Box sx={{ textAlign: 'start', paddingBottom: '1rem' }}>
-            <Mui.Typography component="span" sx={{ alignContent: 'flex-start', flexGrow: 1 }}>
+        <Stack>
+          <Mui.Box sx={{ textAlign: 'start' }}>
+            <Mui.Typography component="span" sx={{flexGrow: 1, marginLeft: '0.4rem'}}>
               Filters
             </Mui.Typography>
           </Mui.Box>
         </Stack>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
           <Mui.Box sx={{ flexGrow: 1 }}>
             <Mui.FormControl fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Category</Mui.InputLabel>
@@ -109,8 +104,54 @@ function ListControls() {
               </Mui.Select>
             </Mui.FormControl>
           </Mui.Box>
+          <Mui.Box sx={{ flexGrow: 1 }}>
+            <Mui.FormControl fullWidth>
+              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
+              <Mui.Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={age}
+                label="Group"
+                onChange={handleChange}
+              >
+                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
+                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
+                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
+              </Mui.Select>
+            </Mui.FormControl>
+          </Mui.Box>
         </Stack>
       </Paper>
+
+      <Paper elevation={0} variant="outlined">
+        <Stack>
+          <Mui.Box sx={{ textAlign: 'start'}}>
+            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
+              Columns
+            </Mui.Typography>
+          </Mui.Box>
+        </Stack>
+        <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
+          <Mui.Box sx={{ flexGrow: 1 }}>
+            <Mui.FormControl fullWidth>
+              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
+              <Mui.Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={age}
+                label="Group"
+                onChange={handleChange}
+              >
+                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
+                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
+                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
+                <Mui.MenuItem value={40}>Forty</Mui.MenuItem>
+              </Mui.Select>
+            </Mui.FormControl>
+          </Mui.Box>
+        </Stack>
+      </Paper>
+   
     </Mui.Box>
   )
 }
