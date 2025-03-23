@@ -1,6 +1,8 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {getGroups} from '../../../api/mis-gastos'
 
 const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -21,8 +23,16 @@ const Paper = Mui.styled(Mui.Paper)(() => ({
 function ListControls() {
   const [age, setAge] = useState('')
 
+  const [group, setGroup] = useState<string>()
+
+  const query = useQuery({ queryKey: ['groups'], queryFn: getGroups, staleTime: Infinity})
+
   const handleChange = (event: Mui.SelectChangeEvent) => {
     setAge(event.target.value as string)
+  }
+
+  const handleGroupChange = (event: Mui.SelectChangeEvent) => {
+    setGroup(event.target.value)
   }
 
   return (
@@ -96,22 +106,22 @@ function ListControls() {
                 id="demo-simple-select"
                 value={age}
                 label="Group"
-                onChange={handleChange}
+                onChange={handleGroupChange}
               >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
+                 {query.data?.map((group) => (
+                  <Mui.MenuItem value={group.id} key={group.id}>{group.name}</Mui.MenuItem>
+                ))}
               </Mui.Select>
             </Mui.FormControl>
           </Mui.Box>
           <Mui.Box sx={{ flexGrow: 1 }}>
             <Mui.FormControl fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
+              <Mui.InputLabel id="demo-simple-select-label">Account</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={age}
-                label="Group"
+                label="Account"
                 onChange={handleChange}
               >
                 <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
