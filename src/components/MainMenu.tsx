@@ -1,7 +1,7 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import PaidIcon from '@mui/icons-material/Paid'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ReceiptIcon from '@mui/icons-material/Receipt'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import Divider from '@mui/material/Divider'
@@ -12,30 +12,28 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SPENDS_PATH } from '../config'
+import ROUTES from '../routes'
+import { MENU_WIDTH_IN_REM } from '../style'
 import DrawerHeader from './DrawerHeader'
 
-const DEFAULT_MENU_WIDTH_IN_REM = 15
+// TODO: use styled components
 
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
-  width: `${DEFAULT_MENU_WIDTH_IN_REM}rem`
+  width: `${MENU_WIDTH_IN_REM}rem`
 }))
 
 type BaseMenuProps = {
   content?: ReactNode
   open: boolean
-  widthInRem?: number
   setOpen: Dispatch<boolean>
 }
 
-function Drawer({ content, open, widthInRem, setOpen }: BaseMenuProps) {
+function MainMenu({ content, open, setOpen }: BaseMenuProps) {
   const theme = useTheme()
 
   const navigate = useNavigate()
 
-  const spendsTitle = 'Spends'
-
-  const handleSpendsClick = () => navigate(SPENDS_PATH, { state: { page: { title: spendsTitle } } })
+  const handleSpendsClick = () => navigate(ROUTES.SPENDS.NEW)
 
   const handleBackClick = () => navigate(-1)
 
@@ -43,28 +41,28 @@ function Drawer({ content, open, widthInRem, setOpen }: BaseMenuProps) {
 
   return (
     <Fragment>
-      <Mui.Drawer anchor="left" open={open} onClose={handleDrawerClose} >
+      <Mui.Drawer anchor="left" open={open} onClose={handleDrawerClose}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
-        <Divider sx={{ width: `${widthInRem}rem` }} />
+        <Divider sx={{ width: `${MENU_WIDTH_IN_REM}rem` }} />
         {typeof content !== 'undefined' ? (
           <>
             <List>{content}</List>
-            <Divider sx={{ width: `${widthInRem}rem` }} />
+            <Divider sx={{ width: `${MENU_WIDTH_IN_REM}rem` }} />
           </>
         ) : (
           <></>
         )}
         <List>
           <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(SPENDS_PATH)}>
+            <ListItemButton selected={location.pathname.startsWith(ROUTES.SPENDS.NEW)}>
               <ListItemIcon>
-                <PaidIcon />
+                <ReceiptIcon />
               </ListItemIcon>
-              <ListItemText primary={spendsTitle} />
+              <ListItemText primary="Spends" />
             </ListItemButton>
           </ListItem>
           <ListItem key={1} onClick={() => handleBackClick()} disablePadding>
@@ -81,4 +79,4 @@ function Drawer({ content, open, widthInRem, setOpen }: BaseMenuProps) {
   )
 }
 
-export default Drawer
+export default MainMenu

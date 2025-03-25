@@ -1,12 +1,14 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import NotFound from './components/NotFound'
-import SpendList from './components/pages/spend-list/SpendList'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import NewSpend from './components/pages/spends/sub-pages/new-spend/NewSpend'
+import SpendList from './components/pages/spends/sub-pages/spend-list/SpendList'
+import ROUTES from './routes'
 
 const queryClient = new QueryClient()
 
@@ -48,14 +50,15 @@ function App() {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <QueryClientProvider client={queryClient}>
           <CssBaseline />
-          <ReactQueryDevtools initialIsOpen={false} buttonPosition='top-right'/>
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
           <BrowserRouter>
             <Routes>
-              <Route path="/spends" element={<SpendList />} />
+              <Route path={ROUTES.SPENDS.LIST} element={<SpendList />} />
+              <Route path={ROUTES.SPENDS.NEW} element={<NewSpend />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </QueryClientProvider >
+        </QueryClientProvider>
       </LocalizationProvider>
     </ThemeProvider>
   )

@@ -2,7 +2,7 @@ import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {getGroups} from '../../../api/mis-gastos'
+import {getCategories} from '../../../api/mis-gastos'
 
 const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -25,7 +25,7 @@ function ListControls() {
 
   const [group, setGroup] = useState<string>()
 
-  const query = useQuery({ queryKey: ['groups'], queryFn: getGroups, staleTime: Infinity})
+  const query = useQuery({ queryKey: ['categories'], queryFn: getCategories, staleTime: Infinity})
 
   const handleChange = (event: Mui.SelectChangeEvent) => {
     setAge(event.target.value as string)

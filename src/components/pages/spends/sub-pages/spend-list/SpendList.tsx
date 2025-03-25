@@ -1,8 +1,9 @@
 import * as Mui from '@mui/material'
 import { useCallback, useState } from 'react'
-import ModalBase from '../../modal/ModalBase'
-import Page from '../../Page'
-import ListControls from './ListControls'
+import ModalBase from '../../../../modal/ModalBase'
+import Page from '../../../../Page'
+import ListControls from '../../ListControls'
+import MainMenu from '../../MainMenu'
 
 const TableContainer = Mui.styled(Mui.TableContainer)(() => ({
   maxHeight: '90%'
@@ -146,7 +147,7 @@ function SpendList() {
   }
 
   return (
-    <Page onThreeDotsIconClick={handleThreeDotsIconClick}>
+    <Page onThreeDotsIconClick={handleThreeDotsIconClick} mainMenu={<MainMenu/>}>
       <ModalBase {...modalBaseProps}>
         <ListControls />
       </ModalBase>

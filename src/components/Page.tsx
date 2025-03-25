@@ -4,11 +4,12 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import Drawer from './Drawer'
+import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
+import MainMenu from './MainMenu'
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -28,55 +29,44 @@ const DashboardTitle = styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 }))
 
 type PageProps = {
-  sideBarMenu?: ReactNode
+  mainMenu?: ReactNode
   children: ReactNode
-  menuWidthInRem?: number
   onThreeDotsIconClick?: () => void
 }
 
-function Page({ children, menuWidthInRem, sideBarMenu, onThreeDotsIconClick }: PageProps) {
+function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
   const location = useLocation()
 
-  const {
-    page: { title: dashboardTitle }
-  } = location.state || { page: { title: '' } }
+  const title = getPageTitle(location.pathname)
 
-  const [mainDrawerOpen, setMainDrawerOpen] = useState<boolean>(false)
+  const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
-  const handleMainDrawerOpen = () => setMainDrawerOpen(true)
+  const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
   const handleThreeDotsIconClick = useCallback(() => {
-    if (typeof onThreeDotsIconClick !== 'undefined')
-      onThreeDotsIconClick()
+    if (typeof onThreeDotsIconClick !== 'undefined') onThreeDotsIconClick()
   }, [onThreeDotsIconClick])
 
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed">
         <Toolbar>
-          <DrawerButton handleDrawerOpen={handleMainDrawerOpen} />
+          <DrawerButton handleDrawerOpen={handleDrawerButtonClick} />
           <DashboardTitle variant="h6" noWrap component="div">
-            {dashboardTitle}
+            {title}
           </DashboardTitle>
           {typeof onThreeDotsIconClick !== 'undefined' && (
-  <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
-  <MoreVert />
-</Mui.IconButton>
+            <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
+              <MoreVert />
+            </Mui.IconButton>
           )}
-        
         </Toolbar>
       </AppBar>
       <Main>
         <DrawerHeader />
         {children}
       </Main>
-
-      <Drawer
-        widthInRem={menuWidthInRem}
-        content={sideBarMenu}
-        open={mainDrawerOpen}
-        setOpen={setMainDrawerOpen}
-      />
+      <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
     </Box>
   )
 }
