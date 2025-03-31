@@ -39,7 +39,7 @@ function ListControls() {
     <Mui.Box>
       <Paper elevation={0} variant="outlined">
         <Stack>
-          <Mui.Box sx={{ textAlign: 'start' }}>
+          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem'}}>
             <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem'}}>
               Dates
             </Mui.Typography>
@@ -58,7 +58,7 @@ function ListControls() {
 
       <Paper elevation={0} variant="outlined">
         <Stack>
-          <Mui.Box sx={{ textAlign: 'start' }}>
+          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
             <Mui.Typography component="span" sx={{flexGrow: 1, marginLeft: '0.4rem'}}>
               Filters
             </Mui.Typography>
@@ -66,8 +66,8 @@ function ListControls() {
         </Stack>
 
         <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <Mui.FormControl fullWidth>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem'}}>
+            <Mui.FormControl variant='standard' fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Category</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
@@ -82,8 +82,8 @@ function ListControls() {
               </Mui.Select>
             </Mui.FormControl>
           </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <Mui.FormControl fullWidth>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+            <Mui.FormControl variant='standard' fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Subcategory</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
@@ -98,8 +98,8 @@ function ListControls() {
               </Mui.Select>
             </Mui.FormControl>
           </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <Mui.FormControl fullWidth>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem'}}>
+            <Mui.FormControl variant='standard' fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
@@ -114,8 +114,8 @@ function ListControls() {
               </Mui.Select>
             </Mui.FormControl>
           </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <Mui.FormControl fullWidth>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+            <Mui.FormControl variant='standard' fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Account</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
@@ -135,15 +135,15 @@ function ListControls() {
 
       <Paper elevation={0} variant="outlined">
         <Stack>
-          <Mui.Box sx={{ textAlign: 'start'}}>
-            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
+          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem'}}>
+            <Mui.Typography component="strong" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
               Columns
             </Mui.Typography>
           </Mui.Box>
         </Stack>
         <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
-          <Mui.Box sx={{ flexGrow: 1 }}>
-            <Mui.FormControl fullWidth>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+            <Mui.FormControl variant='standard' fullWidth>
               <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
               <Mui.Select
                 labelId="demo-simple-select-label"
