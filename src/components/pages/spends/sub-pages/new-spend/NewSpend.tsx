@@ -82,7 +82,7 @@ function NewSpend() {
               label="Group"
               onChange={handleGroupChange}
             >
-              {query.data?.map((group) => (
+              {typeof query.data === 'function' && query.data?.map((group) => (
                 <Mui.MenuItem value={group.id} key={group.id}>
                   {group.name}
                 </Mui.MenuItem>
