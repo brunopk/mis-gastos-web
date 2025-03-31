@@ -7,12 +7,11 @@ type ModalBaseProps = {
   onClose: () => void
 }
 
-namespace Api {
+declare namespace Api {
 
   type Category = {
     id: number
     name: string,
-    subcategories: Subcategory[]
   }
   
   type Subcategory = {

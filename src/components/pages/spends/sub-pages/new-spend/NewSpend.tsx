@@ -1,7 +1,5 @@
 import * as Mui from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { getCategories } from '../../../../../api/mis-gastos'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
@@ -24,8 +22,6 @@ function NewSpend() {
   const [age, setAge] = useState('')
 
   const [group, setGroup] = useState<string>()
-
-  const query = useQuery({ queryKey: ['categories'], queryFn: getCategories, staleTime: Infinity })
 
   const handleChange = () => {
     alert('Not implemented')
@@ -82,11 +78,9 @@ function NewSpend() {
               label="Group"
               onChange={handleGroupChange}
             >
-              {typeof query.data === 'function' && query.data?.map((group) => (
-                <Mui.MenuItem value={group.id} key={group.id}>
-                  {group.name}
-                </Mui.MenuItem>
-              ))}
+              <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
+              <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
+              <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
             </Mui.Select>
           </Mui.FormControl>
         </Box>
