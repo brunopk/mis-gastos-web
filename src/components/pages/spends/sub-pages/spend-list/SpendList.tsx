@@ -2,7 +2,7 @@ import * as Mui from '@mui/material'
 import { useCallback, useState } from 'react'
 import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
-import ListControls from '../../ListControls'
+import ListControls from './ListControls'
 import MainMenu from '../../MainMenu'
 
 const TableContainer = Mui.styled(Mui.TableContainer)(() => ({

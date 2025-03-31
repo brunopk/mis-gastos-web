@@ -2,7 +2,7 @@ import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {getCategories} from '../../../api/mis-gastos'
+import {getCategories} from '../../../../../api/mis-gastos'
 
 const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
