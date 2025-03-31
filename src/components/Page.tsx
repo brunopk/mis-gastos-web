@@ -4,19 +4,13 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { useQuery } from '@tanstack/react-query'
 import { ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { getCategories } from '../api/mis-gastos'
-import { ApiDataProvider } from '../context/ApiDataContext'
+import useApiData from '../hooks/useApiData'
 import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
 import MainMenu from './MainMenu'
-
-// TODO: CONTINUE check why useQuery is fetching forever
-
-// TODO: consider moving ApiDataProvider to App.tsx
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -44,11 +38,11 @@ type PageProps = {
 function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
   const location = useLocation()
 
-  const query = useQuery({ queryKey: ['categories'], queryFn: getCategories, staleTime: Infinity })
-
   const title = getPageTitle(location.pathname)
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
+
+  const { isFetching } = useApiData()
 
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
@@ -57,34 +51,32 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
   }, [onThreeDotsIconClick])
 
   return (
-    <ApiDataProvider categories={query.data}>
-      <Box sx={{ display: 'flex' }}>
-        <AppBar position="fixed">
-          <Toolbar>
-            <DrawerButton handleDrawerOpen={handleDrawerButtonClick} />
-            <DashboardTitle variant="h6" noWrap component="div">
-              {title}
-            </DashboardTitle>
-            {typeof onThreeDotsIconClick !== 'undefined' && (
-              <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
-                <MoreVert />
-              </Mui.IconButton>
-            )}
-          </Toolbar>
-        </AppBar>
-        <Main>
-          <DrawerHeader />
-          {query.isFetching ? (
-            <Mui.Backdrop open>
-              <Mui.CircularProgress color="inherit" />
-            </Mui.Backdrop>
-          ) : (
-            children
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="fixed">
+        <Toolbar>
+          <DrawerButton handleDrawerOpen={handleDrawerButtonClick} />
+          <DashboardTitle variant="h6" noWrap component="div">
+            {title}
+          </DashboardTitle>
+          {typeof onThreeDotsIconClick !== 'undefined' && (
+            <Mui.IconButton color="inherit" onClick={handleThreeDotsIconClick}>
+              <MoreVert />
+            </Mui.IconButton>
           )}
-        </Main>
-        <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
-      </Box>
-    </ApiDataProvider>
+        </Toolbar>
+      </AppBar>
+      <Main>
+        <DrawerHeader />
+        {isFetching ? (
+          <Mui.Backdrop open>
+            <Mui.CircularProgress color="inherit" />
+          </Mui.Backdrop>
+        ) : (
+          children
+        )}
+      </Main>
+      <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
+    </Box>
   )
 }
 
