@@ -119,7 +119,6 @@ function SpendList() {
     <Mui.Button
       sx={{ width: '7rem' }}
       onClick={() => alert('Not implemented')}
-      variant="contained"
       color="primary"
       autoFocus
     >
@@ -131,8 +130,7 @@ function SpendList() {
     <Mui.Button
       sx={{ width: '7rem' }}
       onClick={handleModalCancel}
-      variant="contained"
-      color="inherit"
+      color="primary"
     >
       Cancel
     </Mui.Button>
