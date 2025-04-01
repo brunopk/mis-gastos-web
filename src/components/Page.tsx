@@ -11,7 +11,7 @@ import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
 import MainMenu from './MainMenu'
-import SnackBar from './SnackBar'
+import useSnackBar from '../hooks/useSnackBar'
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -44,7 +44,7 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
   const { isFetching } = useApiData()
-
+  
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
   const handleThreeDotsIconClick = useCallback(() => {
@@ -77,7 +77,6 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
         )}
       </Main>
       <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
-      <SnackBar />
     </Box>
   )
 }

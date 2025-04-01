@@ -11,6 +11,7 @@ import SpendList from './components/pages/spends/sub-pages/spend-list/SpendList'
 import { ApiDataProvider } from './context/ApiDataContext'
 import { SnackBarProvider } from './context/SnackBarContext'
 import ROUTES from './routes'
+import SnackBar from './components/SnackBar'
 
 const queryClient = new QueryClient()
 
@@ -54,6 +55,7 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <ApiDataProvider>
               <CssBaseline />
+              <SnackBar />
               <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
               <BrowserRouter>
                 <Routes>
