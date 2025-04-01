@@ -25,5 +25,15 @@ declare namespace Api {
     id: number
     name: string
   }
+}
 
+declare namespace UI {
+
+  type SnackBarMessage = {
+    text: string,
+    severity?: SnackBarSeverity
+  }
+
+  type SnackBarSeverity = 'success' | 'error' | 'warning'
+  
 }

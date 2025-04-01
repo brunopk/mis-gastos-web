@@ -11,6 +11,7 @@ import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
 import MainMenu from './MainMenu'
+import SnackBar from './SnackBar'
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -76,6 +77,7 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
         )}
       </Main>
       <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
+      <SnackBar />
     </Box>
   )
 }

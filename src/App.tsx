@@ -9,6 +9,7 @@ import NotFound from './components/NotFound'
 import NewSpend from './components/pages/spends/sub-pages/new-spend/NewSpend'
 import SpendList from './components/pages/spends/sub-pages/spend-list/SpendList'
 import { ApiDataProvider } from './context/ApiDataContext'
+import { SnackBarProvider } from './context/SnackBarContext'
 import ROUTES from './routes'
 
 const queryClient = new QueryClient()
@@ -49,19 +50,21 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <QueryClientProvider client={queryClient}>
-          <ApiDataProvider>
-            <CssBaseline />
-            <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
-            <BrowserRouter>
-              <Routes>
-                <Route path={ROUTES.SPENDS.LIST} element={<SpendList />} />
-                <Route path={ROUTES.SPENDS.NEW} element={<NewSpend />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </ApiDataProvider>
-        </QueryClientProvider>
+        <SnackBarProvider>
+          <QueryClientProvider client={queryClient}>
+            <ApiDataProvider>
+              <CssBaseline />
+              <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
+              <BrowserRouter>
+                <Routes>
+                  <Route path={ROUTES.SPENDS.LIST} element={<SpendList />} />
+                  <Route path={ROUTES.SPENDS.NEW} element={<NewSpend />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </ApiDataProvider>
+          </QueryClientProvider>
+        </SnackBarProvider>
       </LocalizationProvider>
     </ThemeProvider>
   )
