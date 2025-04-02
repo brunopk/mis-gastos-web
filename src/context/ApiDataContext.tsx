@@ -1,15 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { createContext, ReactNode, useEffect } from 'react'
-import { getCategories, ApiError } from '../api/mis-gastos'
+import { ApiError, getCategories } from '../api/mis-gastos'
 import useSnackBar from '../hooks/useSnackBar'
 
 const ApiDataContext = createContext<ApiDataContextValue>({
-  isFetching: false
+  isFetching: false,
+  categories: []
 })
 
 type ApiDataContextValue = {
   isFetching: boolean
-  categories?: Api.Category[]
+  categories: Api.Category[]
 }
 
 type ApiDataProviderProps = {
@@ -27,13 +28,14 @@ function ApiDataProvider({ children }: ApiDataProviderProps) {
 
   const contextValue: ApiDataContextValue = {
     isFetching,
-    categories: data
+    categories: data ? data : []
   }
 
   useEffect(() => {
     if (isError) {
-      const severity: UI.SnackBarSeverity = (error as ApiError).statusCode < 500 ? 'warning' : 'error'
-      pushSnackBarMessage({text: `${error.name} ${error.message}`, severity })
+      const severity: UI.SnackBarSeverity =
+        (error as ApiError).statusCode < 500 ? 'warning' : 'error'
+      pushSnackBarMessage({ text: `${error.name} ${error.message}`, severity })
     }
   }, [isError, error, pushSnackBarMessage])
 
