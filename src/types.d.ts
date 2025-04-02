@@ -9,21 +9,21 @@ type ModalBaseProps = {
 
 declare namespace Api {
 
-  type Category = {
-    id: number
-    name: string,
+  type ListItem = {
+    id: number,
+    name: string
+  }
+
+  type Account = ListItem
+
+  type Category = ListItem
+  
+  type Subcategory = ListItem & {
+    categoryId: number
   }
   
-  type Subcategory = {
-    id: number
-    name: string
-    groups: Group[]
-  }
-  
-  
-  type Group = {
-    id: number
-    name: string
+  type Group = ListItem & {
+    subcategoryId: number
   }
 }
 

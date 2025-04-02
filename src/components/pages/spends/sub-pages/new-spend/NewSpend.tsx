@@ -1,5 +1,5 @@
 import * as Mui from '@mui/material'
-import { useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import useStaticApiLists from '../../../../../hooks/useStaticApiLists'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
@@ -23,44 +23,103 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
   flex: 1
 }))
 
+// TODO: filter accounts based on category/subcategory/group
+
+// TODO: investigate how to validate form fields (maybe using tanstack)
+
+// TODO: investigate why tanstack some queries got stuck, maybe its the backend not the frontend, to reproduce it is just reloading the page two or three times
+
+// TODO: avoid unnecessary re-renders maybe removing (not using) useStaticApiLists at all
+
+function defaultListItem(list: Api.ListItem[]): string {
+  return list.length > 0 ? list[0].id.toString() : ''
+}
+
 function NewSpend() {
-  const [age, setAge] = useState('')
+  const apiLists = useStaticApiLists()
 
-  const [group, setGroup] = useState<string>()
+  const [categories, setCategories] = useState<Api.Category[]>([])
 
-  const { categories } = useStaticApiLists()
+  const [subcategories, setSubcategories] = useState<Api.Subcategory[]>([])
 
-  const [category, setCategory] = useState<string>(
-    categories.length > 0 ? categories[0].id.toString() : ''
-  )
+  const [groups, setGroups] = useState<Api.Group[]>([])
 
-  const handleChange = () => {
-    alert('Not implemented')
-  }
+  const [accounts, setAccounts] = useState<Api.Account[]>([])
+  
+  const [category, setCategory] = useState<string>('')
 
-  const handleGroupChange = (event: Mui.SelectChangeEvent) => {
-    setGroup(event.target.value)
-  }
+  const [subcategory, setSubcategory] = useState<string>('')
+
+  const [group, setGroup] = useState<string>('')
+
+  const [account, setAccount] = useState<string>('')
 
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const categoryId = parseInt(event.target.value as string)
+    const subcategories = apiLists.filterSubcategories(categoryId)
+    const defaultSubcategory = defaultListItem(subcategories)
     setCategory(event.target.value as string)
+    setSubcategory(defaultSubcategory)
+    setSubcategories(subcategories)
   }
 
-  const selectVariant = 'standard'
+  const handleSubcategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const subcategoryId = parseInt(event.target.value as string)
+    const groups = apiLists.filterGroups(subcategoryId)
+    const defaultGroup = defaultListItem(groups)
+    setSubcategory(event.target.value as string)
+    setGroup(defaultGroup)
+    setGroups(groups)
+  }
 
-  const selectFullWidth = true
+  const handleGroupChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    setGroup(event.target.value as string)
+  }
+
+  const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    setAccount(event.target.value as string)
+  }
+
+  useEffect(() => {
+    setCategories(apiLists.categories)
+    setSubcategories(apiLists.subcategories)
+    setGroups(apiLists.groups)
+    setAccounts(apiLists.accounts)
+  }, [apiLists])
+
+  const variant = 'standard'
+
+  const fullWidth = true
+
+  const formControlProps: Mui.FormControlProps = {
+    variant, 
+    fullWidth
+  }
 
   const categorySelectLabel = 'Category'
 
   const categorySelectLabelId = 'category-select-label'
+
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectLabelId = 'subcategory-select-label'
+
+  const groupSelectLabel = 'Group'
+
+  const groupSelectLabelId = 'group-select-label'
+
+  const accountSelectLabel = 'Account'
+
+  const accountSelectLabelId = 'account-select-label'
 
   const categorySelectProps: Mui.SelectProps = {
     id: 'category-select',
     label: categorySelectLabel,
     labelId: categorySelectLabelId,
     value: category,
-    variant: selectVariant,
-    fullWidth: selectFullWidth,
+    disabled: categories.length === 0,
+    variant,
+    fullWidth,
     onChange: handleCategoryChange
   }
 
@@ -68,12 +127,56 @@ function NewSpend() {
     id: categorySelectLabelId
   }
 
+  const subcategorySelectProps: Mui.SelectProps = {
+    id: 'subcategory-select',
+    label: subcategorySelectLabel,
+    labelId: subcategorySelectLabelId,
+    value: subcategory,
+    disabled: subcategories.length == 0,
+    variant,
+    fullWidth,
+    onChange: handleSubcategoryChange
+  }
+
+  const subcategoryInputLabelProps: Mui.InputLabelProps = {
+    id: subcategorySelectLabelId
+  }
+
+  const groupSelectProps: Mui.SelectProps = {
+    id: 'group-select',
+    label: groupSelectLabel,
+    labelId: groupSelectLabelId,
+    value: group,
+    disabled: groups.length == 0,
+    variant,
+    fullWidth,
+    onChange: handleGroupChange
+  }
+
+  const groupInputLabelProps: Mui.InputLabelProps = {
+    id: groupSelectLabelId
+  }
+
+  const accountSelectProps: Mui.SelectProps = {
+    id: 'group-select',
+    label: accountSelectLabel,
+    labelId: accountSelectLabelId,
+    value: account,
+    disabled: accounts.length == 0,
+    variant,
+    fullWidth,
+    onChange: handleAccountChange
+  }
+
+  const accountInputLabelProps: Mui.InputLabelProps = {
+    id: accountSelectLabelId
+  }
+
   return (
     <Page mainMenu={<MainMenu />}>
-      {categories.length > 0 && (
         <FormControl>
           <Box>
-            <Mui.FormControl variant="standard" fullWidth>
+            <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
               <Select {...categorySelectProps}>
                 {categories.map((category) => (
@@ -85,51 +188,39 @@ function NewSpend() {
             </Mui.FormControl>
           </Box>
           <Box>
-            <Mui.FormControl variant="standard" fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Subcategory</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Subcategory"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
+            <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...subcategoryInputLabelProps}>{subcategorySelectLabel}</Mui.InputLabel>
+              <Select {...subcategorySelectProps}>
+                {subcategories.map((subcategory) => (
+                  <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
+                    {subcategory.name}
+                  </Mui.MenuItem>
+                ))}
+              </Select>
             </Mui.FormControl>
           </Box>
           <Box>
-            <Mui.FormControl variant="standard" fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Group"
-                onChange={handleGroupChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
+          <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
+              <Select {...groupSelectProps}>
+                {groups.map((group) => (
+                  <Mui.MenuItem value={group.id} key={group.id}>
+                    {group.name}
+                  </Mui.MenuItem>
+                ))}
+              </Select>
             </Mui.FormControl>
           </Box>
           <Box>
-            <Mui.FormControl variant="standard" fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Account</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Account"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
+          <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
+              <Select {...accountSelectProps}>
+                {accounts.map((account) => (
+                  <Mui.MenuItem value={account.id} key={account.id}>
+                    {account.name}
+                  </Mui.MenuItem>
+                ))}
+              </Select>
             </Mui.FormControl>
           </Box>
           <Box>
@@ -142,9 +233,8 @@ function NewSpend() {
             />
           </Box>
         </FormControl>
-      )}
     </Page>
   )
 }
 
-export default NewSpend
+export default memo(NewSpend)
