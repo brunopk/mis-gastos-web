@@ -1,10 +1,10 @@
 import { useContext } from "react"
 import { ApiDataContext } from "../context/ApiDataContext"
 
-function useApiData() {
+function useStaticApiLists() {
   const {isFetching} = useContext(ApiDataContext)
 
   return {isFetching}
 }
 
-export default useApiData
+export default useStaticApiLists

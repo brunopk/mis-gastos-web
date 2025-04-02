@@ -6,12 +6,11 @@ import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import useApiData from '../hooks/useApiData'
+import useStaticApiLists from '../hooks/useStaticApiLists'
 import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
 import MainMenu from './MainMenu'
-import useSnackBar from '../hooks/useSnackBar'
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -43,7 +42,7 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
-  const { isFetching } = useApiData()
+  const { isFetching } = useStaticApiLists ()
   
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
