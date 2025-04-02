@@ -42,7 +42,7 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
-  const { isFetching } = useStaticApiLists ()
+  const { isFetching } = useStaticApiLists()
   
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
