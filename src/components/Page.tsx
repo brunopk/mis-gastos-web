@@ -4,9 +4,9 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useCallback, useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import useStaticApiLists from '../hooks/useStaticApiLists'
+import { ApiDataContext } from '../context/ApiDataContext'
 import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
@@ -42,8 +42,8 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
-  const { isFetching } = useStaticApiLists()
-  
+  const { isFetching } = useContext(ApiDataContext)
+
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
   const handleThreeDotsIconClick = useCallback(() => {
