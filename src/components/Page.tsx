@@ -4,9 +4,8 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { ReactNode, useCallback, useContext, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { ApiDataContext } from '../context/ApiDataContext'
 import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
@@ -38,11 +37,9 @@ type PageProps = {
 function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
   const location = useLocation()
 
-  const title = getPageTitle(location.pathname)
-
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
 
-  const { isFetching } = useContext(ApiDataContext)
+  const title = getPageTitle(location.pathname)
 
   const handleDrawerButtonClick = () => setMainMenuOpen(true)
 
@@ -67,13 +64,7 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
       </AppBar>
       <Main>
         <DrawerHeader />
-        {isFetching ? (
-          <Mui.Backdrop open>
-            <Mui.CircularProgress color="inherit" />
-          </Mui.Backdrop>
-        ) : (
-          children
-        )}
+        {children}
       </Main>
       <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
     </Box>

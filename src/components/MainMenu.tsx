@@ -6,11 +6,10 @@ import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ROUTES from '../routes'
+import {paths} from '../Routes'
 import { MENU_WIDTH_IN_REM } from '../style'
 import DrawerHeader from './DrawerHeader'
 
@@ -26,7 +25,22 @@ const ListItemButton = Mui.styled(
     {
       props: ({ selected }) => selected,
       style: {
-        backgroundColor: `${theme.palette.warning.main}!important`
+        backgroundColor: `${theme.palette.primary.main}!important`,
+        color: theme.palette.getContrastText(theme.palette.primary.main)
+      }
+    }
+  ]
+}))
+
+const ListItemIcon = Mui.styled(
+  Mui.ListItemIcon,
+  {}
+)<Mui.ListItemIconProps & { selected: boolean }>(({theme}) => ({
+  variants: [
+    {
+      props: ({ selected }) => selected,
+      style: {
+        color: theme.palette.getContrastText(theme.palette.primary.main)
       }
     }
   ]
@@ -47,7 +61,7 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
 
   const navigate = useNavigate()
 
-  const handleSpendsClick = () => navigate(ROUTES.SPENDS.NEW)
+  const handleSpendsClick = () => navigate(paths.spends.new)
 
   const handleIncomeClick = () => {
     throw new Error(`Not implemented`)
@@ -65,8 +79,8 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
         </DrawerHeader>
         <List>
           <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(ROUTES.SPENDS.INDEX)}>
-              <ListItemIcon>
+            <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
+              <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)} >
                 <ReceiptIcon />
               </ListItemIcon>
               <ListItemText primary="Spends" />

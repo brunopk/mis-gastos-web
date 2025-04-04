@@ -25,6 +25,13 @@ declare namespace Api {
   type Group = ListItem & {
     subcategoryId: number
   }
+
+  type FixedLists = {
+    categories: Category[],
+    subcategories: Subcategory[],
+    groups: Group[],
+    accounts: Account[]
+  }
 }
 
 declare namespace UI {

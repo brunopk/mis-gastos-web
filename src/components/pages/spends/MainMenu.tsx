@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import ListIcon from '@mui/icons-material/List'
 import { useLocation, useNavigate } from 'react-router-dom'
-import ROUTES from '../../../routes'
+import { paths } from '../../../Routes'
 import MainMenuItem from '../../MainMenuItem'
 
 function MainMenu() {
@@ -9,9 +9,9 @@ function MainMenu() {
 
   const location = useLocation()
 
-  const handleNewSpendClick = () => navigate(ROUTES.SPENDS.NEW)
+  const handleNewSpendClick = () => navigate(paths.spends.new)
 
-  const handleSpendListClick = () => navigate(ROUTES.SPENDS.LIST)
+  const handleSpendListClick = () => navigate(paths.spends.list)
 
   return (
     <>
@@ -19,13 +19,13 @@ function MainMenu() {
         text="New"
         onClick={handleNewSpendClick}
         icon={<AddIcon />}
-        selected={location.pathname.startsWith(ROUTES.SPENDS.NEW)}
+        selected={location.pathname.startsWith(paths.spends.new)}
       />
       <MainMenuItem
         text="List"
         onClick={handleSpendListClick}
         icon={<ListIcon />}
-        selected={location.pathname.startsWith(ROUTES.SPENDS.LIST)}
+        selected={location.pathname.startsWith(paths.spends.list)}
       />
     </>
   )

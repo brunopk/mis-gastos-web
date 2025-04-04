@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useReducer } from 'react'
-import { ApiDataContext } from '../context/ApiDataContext'
+import { useCallback, useEffect, useReducer } from 'react'
+import { useLoaderData } from 'react-router-dom'
 
 const INITIAL_STATE: State = {
   originalLists: {
@@ -78,7 +78,7 @@ type Action = SelectAction | InitializeAction
 
 
 function useApiLists() {
-  const { categories, subcategories, groups, accounts, isReady } = useContext(ApiDataContext)
+  const apiLists = useLoaderData<Api.FixedLists>()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
@@ -227,12 +227,11 @@ function useApiLists() {
   )
 
   useEffect(() => {
-    if (isReady)
       dispatch({
         type: 'INITIALIZE',
-        data: { categories, subcategories, groups, accounts }
+        data: apiLists
       })
-  }, [categories, subcategories, groups, accounts, isReady])
+  }, [apiLists])
 
   return {
     selection: { ...state.selection },
