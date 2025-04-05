@@ -7,6 +7,8 @@ type ModalBaseProps = {
   onClose: () => void
 }
 
+// TODO: convert types to (interfaces if possible)
+
 declare namespace Api {
 
   type ListItem = {
@@ -32,9 +34,27 @@ declare namespace Api {
     groups: Group[],
     accounts: Account[]
   }
+
+  interface Spend {
+    id: number
+    date: string
+    categoryId: number | null
+    subcategoryId: number | null
+    groupId: number | null
+    accountId: number
+    description: string
+    value: number
+  }
 }
 
 declare namespace UI {
+
+  type PageProps = {
+    mainMenu?: ReactNode
+    children: ReactNode
+    isFetching?: boolean,
+    onThreeDotsIconClick?: () => void
+  }
 
   type SnackBarMessage = {
     text: string,

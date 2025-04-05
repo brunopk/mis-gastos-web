@@ -61,3 +61,16 @@ export async function getAccounts(): Promise<Api.Account[]> {
 
   return body
 }
+
+export async function getSpends(): Promise<Api.Spend[]> {
+  const response = await fetch(`${API_MIS_GASTOS_HOST}/spends`)
+
+  const body = await response.json()
+
+  if (!response.ok) {
+    const stringifiedBody = JSON.stringify(body)
+    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
+  }
+
+  return body
+}

@@ -1,5 +1,7 @@
 import { createContext, ReactElement, useCallback, useState } from 'react'
 
+// TODO: maybe snackbar should go on Page.tsx (also consider using snackbar hook documented in MUI site)
+
 const SnackBarContext = createContext<SnackBarProviderValue>({
   pushSnackBarMessage: () => {
     throw new Error('pushSnackBarMessage not initialized correctly')

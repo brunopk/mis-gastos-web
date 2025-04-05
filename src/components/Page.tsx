@@ -28,13 +28,7 @@ const DashboardTitle = styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 1
 }))
 
-type PageProps = {
-  mainMenu?: ReactNode
-  children: ReactNode
-  onThreeDotsIconClick?: () => void
-}
-
-function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
+function Page({ children, mainMenu, isFetching, onThreeDotsIconClick }: UI.PageProps) {
   const location = useLocation()
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
@@ -64,7 +58,13 @@ function Page({ children, mainMenu, onThreeDotsIconClick }: PageProps) {
       </AppBar>
       <Main>
         <DrawerHeader />
-        {children}
+        {isFetching ? (
+          <Mui.Backdrop open>
+            <Mui.CircularProgress color="inherit" />
+          </Mui.Backdrop>
+        ) : (
+          children
+        )}
       </Main>
       <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
     </Box>
