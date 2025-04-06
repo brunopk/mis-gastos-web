@@ -15,6 +15,10 @@ import { useLoaderData } from 'react-router-dom'
 
 // TODO: remove TanStack as dependency (use just fetch)
 
+// TODO: filter data based on filters
+
+// TODO: implement column selection 
+
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
   month: '2-digit',

@@ -29,6 +29,10 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
 
 // TODO: avoid unnecessary re-renders if possible
 
+// TODO: allow to set "Sin definir" (value="") items for all selects
+
+// TODO: set maxHeight for selects lists
+
 
 function NewSpend() {
   const {lists, selection, functions } = useApiLists()

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
+// TODO: reimplement based on useSpendsFilters
+
 const INITIAL_STATE: State = {
   originalLists: {
     categories: [],

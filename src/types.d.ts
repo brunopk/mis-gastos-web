@@ -1,3 +1,5 @@
+// TODO: Move ModalBaseProps to UI.Components (and other components too)
+
 type ModalBaseProps = {
   children: ReactNode
   title: string
@@ -10,28 +12,29 @@ type ModalBaseProps = {
 // TODO: convert types to (interfaces if possible)
 
 declare namespace Api {
-
   type ListItem = {
-    id: number,
+    id: number
     name: string
   }
 
   type Account = ListItem
 
   type Category = ListItem
-  
+
   type Subcategory = ListItem & {
     categoryId: number
   }
-  
+
   type Group = ListItem & {
     subcategoryId: number
   }
 
+  // TODO: remove this type (if possible)
+  
   type FixedLists = {
-    categories: Category[],
-    subcategories: Subcategory[],
-    groups: Group[],
+    categories: Category[]
+    subcategories: Subcategory[]
+    groups: Group[]
     accounts: Account[]
   }
 
@@ -52,15 +55,14 @@ declare namespace UI {
   type PageProps = {
     mainMenu?: ReactNode
     children: ReactNode
-    isFetching?: boolean,
+    isFetching?: boolean
     onThreeDotsIconClick?: () => void
   }
 
   type SnackBarMessage = {
-    text: string,
+    text: string
     severity?: SnackBarSeverity
   }
 
   type SnackBarSeverity = 'success' | 'error' | 'warning'
-  
 }
