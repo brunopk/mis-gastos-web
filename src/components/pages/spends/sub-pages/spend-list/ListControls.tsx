@@ -1,13 +1,19 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
-import { useState } from 'react'
+import useSpendsFilters from '../../../../../hooks/useSpendsFilters'
+
+// TODO: implement column selection
+
+// TODO: continue the same idea as in categories and subcategories for groups etc
+
+// TODO: use styled components
 
 const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
 }))
 
 const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
-  display: 'flex',
+  display: 'flex'
 }))
 
 const Paper = Mui.styled(Mui.Paper)(() => ({
@@ -18,33 +24,143 @@ const Paper = Mui.styled(Mui.Paper)(() => ({
   backgroundColor: 'inherit'
 }))
 
-function ListControls() {
-  const [age, setAge] = useState('')
+const Select = Mui.styled(Mui.Select)<Mui.SelectProps>(() => ({
+  textAlign: 'justify'
+}))
 
-  const [group, setGroup] = useState<string>()
+function ListFilters() {
+  const { lists, selection, functions, isOpen } = useSpendsFilters()
 
-  const handleChange = (event: Mui.SelectChangeEvent) => {
-    setAge(event.target.value as string)
+  const handleCategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const {
+      target: { value }
+    } = event
+    functions.categories.select(
+      typeof value === 'string'
+        ? value.split(',').map((value) => parseInt(value))
+        : (value as number[])
+    )
   }
 
-  const handleGroupChange = (event: Mui.SelectChangeEvent) => {
-    setGroup(event.target.value)
+  const handleCategoriesClick = () => {
+    functions.categories.toggle()
+  }
+
+  const handleCategoriesRenderValue = (selected: unknown) => {
+    return <Mui.Typography>{functions.categories.getNames(selected)}</Mui.Typography>
+  }
+
+  const handleSubcategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const {
+      target: { value }
+    } = event
+    console.log('handleSubcategoriesChange')
+    console.log(event)
+    functions.subcategories.select(
+      typeof value === 'string'
+        ? value.split(',').map((value) => parseInt(value))
+        : (value as number[])
+    )
+  }
+
+  const handleSubcategoriesClick = () => {
+    functions.subcategories.toggle()
+  }
+
+  const handleSubcategoriesRenderValue = (selected: unknown) => {
+    return <Mui.Typography>{functions.subcategories.getNames(selected)}</Mui.Typography>
+  }
+
+  const commonMenuProps: Mui.MenuProps = {
+    open: false,
+    slotProps: {
+      root: {
+        style: {
+          maxHeight: 300
+        }
+      }
+    }
+  }
+
+  const variant = 'standard'
+
+  const fullWidth = true
+
+  const multiple = true
+
+  const categorySelectLabel = 'Category'
+
+  const categorySelectId = 'category-select'
+
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectId = 'subcategory-select'
+
+  const formControlProps: Mui.FormControlProps = {
+    variant,
+    fullWidth
+  }
+
+  const categoryInputLabelProps: Mui.InputLabelProps = {
+    htmlFor: categorySelectId
+  }
+
+  const categoryMenuProps: Mui.MenuProps = {
+    ...commonMenuProps,
+    open: isOpen.categories
+  }
+
+  const categorySelectProps: Mui.SelectProps = {
+    id: categorySelectId,
+    label: categorySelectLabel,
+    value: selection.category.ids,
+    disabled: lists.categories.length == 0,
+    MenuProps: categoryMenuProps,
+    variant,
+    fullWidth,
+    multiple,
+    renderValue: handleCategoriesRenderValue,
+    onChange: handleCategoriesChange,
+    onClick: handleCategoriesClick
+  }
+
+  const subcategoryMenuProps: Mui.MenuProps = {
+    ...commonMenuProps,
+    open: isOpen.subcategories
+  }
+
+  const subcategorySelectProps: Mui.SelectProps = {
+    id: subcategorySelectId,
+    label: subcategorySelectLabel,
+    value: selection.subcategory.ids,
+    disabled: lists.subcategories.length == 0,
+    MenuProps: subcategoryMenuProps,
+    variant,
+    fullWidth,
+    multiple,
+    renderValue: handleSubcategoriesRenderValue,
+    onChange: handleSubcategoriesChange,
+    onClick: handleSubcategoriesClick
+  }
+
+  const subcategoryInputLabelProps: Mui.InputLabelProps = {
+    htmlFor: subcategorySelectId
   }
 
   return (
     <Mui.Box>
       <Paper elevation={0} variant="outlined">
         <Stack>
-          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem'}}>
-            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem'}}>
+          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
+            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
               Dates
             </Mui.Typography>
           </Mui.Box>
         </Stack>
 
-        <Stack direction='row' spacing={1} sx={{marginTop: '0.4rem'}}>
+        <Stack direction="row" spacing={1} sx={{ marginTop: '0.4rem' }}>
           <Mui.Box sx={{ flexGrow: 1 }}>
-            <DatePicker/>
+            <DatePicker />
           </Mui.Box>
           <Mui.Box sx={{ flexGrow: 1 }}>
             <DatePicker />
@@ -55,111 +171,65 @@ function ListControls() {
       <Paper elevation={0} variant="outlined">
         <Stack>
           <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
-            <Mui.Typography component="span" sx={{flexGrow: 1, marginLeft: '0.4rem'}}>
+            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
               Filters
             </Mui.Typography>
           </Mui.Box>
         </Stack>
 
-        <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem'}}>
-            <Mui.FormControl variant='standard' fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Category</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Category"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
+        <Stack direction="column" spacing={1} sx={{ marginTop: '0.4rem' }}>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+            <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
+              <Select {...categorySelectProps}>
+                {lists.categories.map((category) => (
+                  <Mui.MenuItem key={category.id} value={category.id}>
+                    <Mui.Checkbox checked={category.checked} />
+                    <Mui.ListItemText primary={category.name} />
+                  </Mui.MenuItem>
+                ))}
+              </Select>
             </Mui.FormControl>
           </Mui.Box>
           <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
-            <Mui.FormControl variant='standard' fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Subcategory</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Subcategory"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
+            <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...subcategoryInputLabelProps}>
+                {subcategorySelectLabel}
+              </Mui.InputLabel>
+              <Select {...subcategorySelectProps}>
+                {lists.subcategories.flatMap((list, index) => [
+                  <Mui.ListSubheader key={`header-${index}`}>
+                    {functions.subcategories.getParentName(list[0].parentId!)}
+                  </Mui.ListSubheader>,
+                  ...list.map((subcategory) => (
+                    <Mui.MenuItem key={subcategory.id} value={subcategory.id}>
+                      <Mui.Checkbox checked={subcategory.checked} />
+                      <Mui.ListItemText primary={subcategory.id} />
+                    </Mui.MenuItem>
+                  ))
+                ])}
+              </Select>
             </Mui.FormControl>
           </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem'}}>
-            <Mui.FormControl variant='standard' fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Group"
-                onChange={handleGroupChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
-            </Mui.FormControl>
-          </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
-            <Mui.FormControl variant='standard' fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Account</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Account"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-              </Mui.Select>
-            </Mui.FormControl>
-          </Mui.Box>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
         </Stack>
       </Paper>
 
       <Paper elevation={0} variant="outlined">
         <Stack>
-          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem'}}>
+          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
             <Mui.Typography component="strong" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
               Columns
             </Mui.Typography>
           </Mui.Box>
         </Stack>
-        <Stack direction='column' spacing={1} sx={{marginTop: '0.4rem'}}>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
-            <Mui.FormControl variant='standard' fullWidth>
-              <Mui.InputLabel id="demo-simple-select-label">Group</Mui.InputLabel>
-              <Mui.Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Group"
-                onChange={handleChange}
-              >
-                <Mui.MenuItem value={10}>Ten</Mui.MenuItem>
-                <Mui.MenuItem value={20}>Twenty</Mui.MenuItem>
-                <Mui.MenuItem value={30}>Thirty</Mui.MenuItem>
-                <Mui.MenuItem value={40}>Forty</Mui.MenuItem>
-              </Mui.Select>
-            </Mui.FormControl>
-          </Mui.Box>
+        <Stack direction="column" spacing={1} sx={{ marginTop: '0.4rem' }}>
+          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
         </Stack>
       </Paper>
-   
     </Mui.Box>
   )
 }
 
-export default ListControls
+export default ListFilters
