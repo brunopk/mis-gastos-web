@@ -1,8 +1,7 @@
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
 export class ApiError extends Error {
-
-  statusCode: number 
+  statusCode: number
 
   constructor(statusCode: number, message: string) {
     super(message)
@@ -33,7 +32,11 @@ export async function getSubcategories(): Promise<Api.Subcategory[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return body
+  return (body as { id: number; name: string; category_id: number }[]).map((subcategory) => ({
+    id: subcategory.id,
+    name: subcategory.name,
+    categoryId: subcategory.category_id
+  }))
 }
 
 export async function getGroups(): Promise<Api.Group[]> {
@@ -46,7 +49,11 @@ export async function getGroups(): Promise<Api.Group[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return body
+  return (body as { id: number; name: string; subcategory_id: number }[]).map((group) => ({
+    id: group.id,
+    name: group.name,
+    subcategoryId: group.subcategory_id
+  }))
 }
 
 export async function getAccounts(): Promise<Api.Account[]> {
