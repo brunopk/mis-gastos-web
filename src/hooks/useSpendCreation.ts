@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
+const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
+  id: -1,
+  name: 'Sin definir',
+  categoryId: -1
+}
+
+const UNDEFINED_GROUP: Api.Group = {
+  id: -1,
+  name: 'Sin definir',
+  subcategoryId: -1
+}
+
 const INITIAL_STATE: State = {
   lists: {
     original: {
@@ -80,16 +92,9 @@ type State = {
 
 type Action = SelectAction | InitializeAction
 
-export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
-  id: -1,
-  name: 'Sin definir',
-  categoryId: -1
-}
-
-export const UNDEFINED_GROUP: Api.Group = {
-  id: -1,
-  name: 'Sin definir',
-  subcategoryId: -1
+export const constants = {
+  UNDEFINED_SUBCATEGORY,
+  UNDEFINED_GROUP
 }
 
 export function useSpendCreation() {

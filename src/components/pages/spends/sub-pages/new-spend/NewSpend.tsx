@@ -1,12 +1,12 @@
 import * as Mui from '@mui/material'
 import { memo } from 'react'
-import * as customHook from '../../../../../hooks/useSpendCreation'
+import {constants, useSpendCreation} from '../../../../../hooks/useSpendCreation'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
-const UNDEFINED_SUBCATEGORY = customHook.UNDEFINED_SUBCATEGORY
+const UNDEFINED_SUBCATEGORY = constants.UNDEFINED_SUBCATEGORY
 
-const UNDEFINED_GROUP = customHook.UNDEFINED_GROUP
+const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
 
 const Box = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
@@ -38,7 +38,7 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
 // TODO: CONTINUE adding missing fields (description, etc)
 
 function NewSpend() {
-  const { lists, selection, functions } = hooks.useSpendCreation()
+  const { lists, selection, functions } = useSpendCreation()
 
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const categoryId = parseInt(event.target.value as string)
