@@ -217,19 +217,6 @@ function ListFilters() {
           <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
         </Stack>
       </Paper>
-
-      <Paper elevation={0} variant="outlined">
-        <Stack>
-          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
-            <Mui.Typography component="strong" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
-              Columns
-            </Mui.Typography>
-          </Mui.Box>
-        </Stack>
-        <Stack direction="column" spacing={1} sx={{ marginTop: '0.4rem' }}>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
-        </Stack>
-      </Paper>
     </Mui.Box>
   )
 }
