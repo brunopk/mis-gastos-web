@@ -1,8 +1,12 @@
 import * as Mui from '@mui/material'
 import { memo } from 'react'
-import useSpendCreation from '../../../../../hooks/useSpendCreation'
+import * as customHook from '../../../../../hooks/useSpendCreation'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
+
+const UNDEFINED_SUBCATEGORY = customHook.UNDEFINED_SUBCATEGORY
+
+const UNDEFINED_GROUP = customHook.UNDEFINED_GROUP
 
 const Box = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
@@ -29,13 +33,12 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
 
 // TODO: avoid unnecessary re-renders if possible
 
-// TODO: allow to set "Sin definir" (value="") items for all selects
-
 // TODO: set maxHeight for selects lists
 
+// TODO: CONTINUE adding missing fields (description, etc)
 
 function NewSpend() {
-  const {lists, selection, functions } = useSpendCreation()
+  const { lists, selection, functions } = hooks.useSpendCreation()
 
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const categoryId = parseInt(event.target.value as string)
@@ -165,7 +168,11 @@ function NewSpend() {
             <Select {...subcategorySelectProps}>
               {lists.subcategories.map((subcategory) => (
                 <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
-                  {subcategory.name}
+                  {subcategory.id == UNDEFINED_SUBCATEGORY.id ? (
+                    <em>{subcategory.name}</em>
+                  ) : (
+                    subcategory.name
+                  )}
                 </Mui.MenuItem>
               ))}
             </Select>
@@ -177,7 +184,7 @@ function NewSpend() {
             <Select {...groupSelectProps}>
               {lists.groups.map((group) => (
                 <Mui.MenuItem value={group.id} key={group.id}>
-                  {group.name}
+                  {group.id == UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
                 </Mui.MenuItem>
               ))}
             </Select>

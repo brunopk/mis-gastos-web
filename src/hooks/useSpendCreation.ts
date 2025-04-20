@@ -80,22 +80,36 @@ type State = {
 
 type Action = SelectAction | InitializeAction
 
-function useSpendCreation() {
+export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
+  id: -1,
+  name: 'Sin definir',
+  categoryId: -1
+}
+
+export const UNDEFINED_GROUP: Api.Group = {
+  id: -1,
+  name: 'Sin definir',
+  subcategoryId: -1
+}
+
+export function useSpendCreation() {
   const apiLists = useLoaderData<Api.FixedLists>()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
         const selectedCategory = action.data.categories[0].id
-        const filteredSubcategories = action.data.subcategories.filter(
-          (subcategory) => subcategory.categoryId == selectedCategory
-        )
-        const selectedSubcategory =
-          filteredSubcategories.length > 0 ? filteredSubcategories[0].id : null
-        const filteredGroups = action.data.groups.filter(
-          (group) => group.subcategoryId == selectedSubcategory
-        )
-        const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
+
+        const filteredSubcategories = action.data.subcategories
+          .filter((subcategory) => subcategory.categoryId == selectedCategory)
+          .concat([UNDEFINED_SUBCATEGORY])
+        const selectedSubcategory = filteredSubcategories[0].id
+
+        const filteredGroups = action.data.groups
+          .filter((group) => group.subcategoryId == selectedSubcategory)
+          .concat([UNDEFINED_GROUP])
+        const selectedGroup = filteredGroups[0].id
+
         const selectedAccount = action.data.accounts[0].id
 
         return {
@@ -126,15 +140,17 @@ function useSpendCreation() {
 
       case 'SELECT_CATEGORY': {
         const selectedCategory = action.data.id
-        const filteredSubcategories = prevState.lists.original.subcategories.filter(
-          (subcategory) => subcategory.categoryId == selectedCategory
-        )
-        const selectedSubcategory =
-          filteredSubcategories.length > 0 ? filteredSubcategories[0].id : null
-        const filteredGroups = prevState.lists.original.groups.filter(
-          (group) => group.subcategoryId == selectedSubcategory
-        )
-        const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
+
+        const filteredSubcategories = prevState.lists.original.subcategories
+          .filter((subcategory) => subcategory.categoryId == selectedCategory)
+          .concat([UNDEFINED_SUBCATEGORY])
+        const selectedSubcategory = filteredSubcategories[0].id
+
+        const filteredGroups = prevState.lists.original.groups
+          .filter((group) => group.subcategoryId == selectedSubcategory)
+          .concat([UNDEFINED_GROUP])
+        const selectedGroup = filteredGroups[0].id
+
         const selectedAccount = prevState.lists.original.accounts[0].id
 
         return {
@@ -165,10 +181,11 @@ function useSpendCreation() {
 
       case 'SELECT_SUBCATEGORY': {
         const selectedSubcategory = action.data.id
-        const filteredGroups = prevState.lists.original.groups.filter(
-          (group) => group.subcategoryId == selectedSubcategory
-        )
-        const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
+
+        const filteredGroups = prevState.lists.original.groups
+          .filter((group) => group.subcategoryId == selectedSubcategory)
+          .concat([UNDEFINED_GROUP])
+        const selectedGroup = filteredGroups[0].id
 
         return {
           lists: {
@@ -261,5 +278,3 @@ function useSpendCreation() {
     }
   }
 }
-
-export default useSpendCreation
