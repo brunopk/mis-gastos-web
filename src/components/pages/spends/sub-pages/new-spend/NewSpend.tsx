@@ -145,6 +145,14 @@ function NewSpend() {
     id: accountSelectLabelId
   }
 
+  const valueFieldProps: Mui.TextFieldProps = {
+    id: 'timeout-textfield',
+    label: 'Value',
+    defaultValue: "0",
+    variant: "filled",
+    type: "number"
+  }
+
   return (
     <Page mainMenu={<MainMenu />}>
       <FormControl>
@@ -203,13 +211,7 @@ function NewSpend() {
           </Mui.FormControl>
         </Box>
         <Box>
-          <TextField
-            id="timeout-textfield"
-            label="Value"
-            defaultValue="0"
-            variant="filled"
-            type="number"
-          />
+          <TextField {...valueFieldProps}/>
         </Box>
       </FormControl>
     </Page>
