@@ -1,6 +1,6 @@
 import * as Mui from '@mui/material'
 import { memo } from 'react'
-import useApiLists from '../../../../../hooks/useApiLists'
+import useSpendCreation from '../../../../../hooks/useSpendCreation'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
@@ -35,7 +35,7 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
 
 
 function NewSpend() {
-  const {lists, selection, functions } = useApiLists()
+  const {lists, selection, functions } = useSpendCreation()
 
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const categoryId = parseInt(event.target.value as string)

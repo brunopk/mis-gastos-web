@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
-// TODO: reimplement based on useSpendsFilters
-
 const INITIAL_STATE: State = {
-  originalLists: {
-    categories: [],
-    subcategories: [],
-    groups: [],
-    accounts: []
-  },
-  filteredLists: {
-    categories: [],
-    subcategories: [],
-    groups: []
+  lists: {
+    original: {
+      categories: [],
+      subcategories: [],
+      groups: [],
+      accounts: []
+    },
+    filtered: {
+      categories: [],
+      subcategories: [],
+      groups: []
+    }
   },
   selection: {
     category: {
@@ -49,16 +49,18 @@ type InitializeAction = {
 }
 
 type State = {
-  originalLists: {
-    categories: Api.Category[]
-    subcategories: Api.Subcategory[]
-    groups: Api.Group[]
-    accounts: Api.Account[]
-  }
-  filteredLists: {
-    categories: Api.Category[]
-    subcategories: Api.Subcategory[]
-    groups: Api.Group[]
+  lists: {
+    original: {
+      categories: Api.Category[]
+      subcategories: Api.Subcategory[]
+      groups: Api.Group[]
+      accounts: Api.Account[]
+    }
+    filtered: {
+      categories: Api.Category[]
+      subcategories: Api.Subcategory[]
+      groups: Api.Group[]
+    }
   }
   selection: {
     category: {
@@ -78,8 +80,7 @@ type State = {
 
 type Action = SelectAction | InitializeAction
 
-
-function useApiLists() {
+function useSpendCreation() {
   const apiLists = useLoaderData<Api.FixedLists>()
 
   const reducer = (prevState: State, action: Action): State => {
@@ -96,12 +97,15 @@ function useApiLists() {
         )
         const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
         const selectedAccount = action.data.accounts[0].id
+
         return {
-          originalLists: { ...action.data },
-          filteredLists: {
-            categories: action.data.categories,
-            subcategories: filteredSubcategories,
-            groups: filteredGroups
+          lists: {
+            original: { ...action.data },
+            filtered: {
+              categories: action.data.categories,
+              subcategories: filteredSubcategories,
+              groups: filteredGroups
+            }
           },
           selection: {
             category: {
@@ -119,24 +123,28 @@ function useApiLists() {
           }
         }
       }
+
       case 'SELECT_CATEGORY': {
         const selectedCategory = action.data.id
-        const filteredSubcategories = prevState.originalLists.subcategories.filter(
+        const filteredSubcategories = prevState.lists.original.subcategories.filter(
           (subcategory) => subcategory.categoryId == selectedCategory
         )
         const selectedSubcategory =
           filteredSubcategories.length > 0 ? filteredSubcategories[0].id : null
-        const filteredGroups = prevState.originalLists.groups.filter(
+        const filteredGroups = prevState.lists.original.groups.filter(
           (group) => group.subcategoryId == selectedSubcategory
         )
         const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
-        const selectedAccount = prevState.originalLists.accounts[0].id
+        const selectedAccount = prevState.lists.original.accounts[0].id
+
         return {
-          ...prevState,
-          filteredLists: {
-            categories: prevState.originalLists.categories,
-            subcategories: filteredSubcategories,
-            groups: filteredGroups
+          lists: {
+            original: prevState.lists.original,
+            filtered: {
+              categories: prevState.lists.original.categories,
+              subcategories: filteredSubcategories,
+              groups: filteredGroups
+            }
           },
           selection: {
             category: {
@@ -154,18 +162,22 @@ function useApiLists() {
           }
         }
       }
+
       case 'SELECT_SUBCATEGORY': {
         const selectedSubcategory = action.data.id
-        const filteredGroups = prevState.originalLists.groups.filter(
+        const filteredGroups = prevState.lists.original.groups.filter(
           (group) => group.subcategoryId == selectedSubcategory
         )
         const selectedGroup = filteredGroups.length > 0 ? filteredGroups[0].id : null
+
         return {
-          ...prevState,
-          filteredLists: {
-            categories: prevState.originalLists.categories,
-            subcategories: prevState.filteredLists.subcategories,
-            groups: filteredGroups
+          lists: {
+            original: prevState.lists.original,
+            filtered: {
+              categories: prevState.lists.filtered.categories,
+              subcategories: prevState.lists.filtered.subcategories,
+              groups: filteredGroups
+            }
           },
           selection: {
             ...prevState.selection,
@@ -178,11 +190,12 @@ function useApiLists() {
           }
         }
       }
+
       case 'SELECT_GROUP': {
         const selectedGroup = action.data.id
+
         return {
           ...prevState,
-          filteredLists: { ...prevState.filteredLists },
           selection: {
             ...prevState.selection,
             group: {
@@ -191,8 +204,10 @@ function useApiLists() {
           }
         }
       }
+
       case 'SELECT_ACCOUNT': {
         const selectedAccount = action.data.id
+
         return {
           ...prevState,
           selection: {
@@ -229,15 +244,15 @@ function useApiLists() {
   )
 
   useEffect(() => {
-      dispatch({
-        type: 'INITIALIZE',
-        data: apiLists
-      })
+    dispatch({
+      type: 'INITIALIZE',
+      data: apiLists
+    })
   }, [apiLists])
 
   return {
     selection: { ...state.selection },
-    lists: { ...state.filteredLists, accounts: state.originalLists.accounts },
+    lists: { ...state.lists.filtered, accounts: state.lists.original.accounts },
     functions: {
       selectCategory,
       selectSubcategory,
@@ -247,4 +262,4 @@ function useApiLists() {
   }
 }
 
-export default useApiLists
+export default useSpendCreation

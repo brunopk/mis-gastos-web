@@ -6,6 +6,8 @@ import useSpendsFilters from '../../../../../hooks/useSpendsFilters'
 
 // TODO: continue the same idea as in categories and subcategories for groups etc
 
+// TODO: Fix to set names (strings) for subcategories  instead of numbers
+
 // TODO: use styled components
 
 const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({

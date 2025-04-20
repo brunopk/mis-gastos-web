@@ -9,16 +9,18 @@ const INITIAL_STATE: State = {
     accounts: false
   },
   lists: {
-    categories: [],
-    subcategories: [],
-    groups: [],
-    accounts: []
-  },
-  filtered: {
-    categories: [],
-    subcategories: [],
-    groups: [],
-    accounts: []
+    original: {
+      categories: [],
+      subcategories: [],
+      groups: [],
+      accounts: []
+    },
+    filtered: {
+      categories: [],
+      subcategories: [],
+      groups: [],
+      accounts: []
+    }
   },
   functions: {
     categories: {
@@ -87,21 +89,29 @@ type InitializeAction = {
 
 type State = {
   isOpen: {
-    categories: boolean,
-    subcategories: boolean,
-    groups: boolean,
+    categories: boolean
+    subcategories: boolean
+    groups: boolean
     accounts: boolean
-  },
+  }
   lists: {
-    categories: ExtendedCategory[]
-    subcategories: ExtendedSubcategory[][]
-    groups: ExtendedGroup[][]
-    accounts: ExtendedAccount[]
+    original: {
+      categories: ExtendedCategory[]
+      subcategories: ExtendedSubcategory[][]
+      groups: ExtendedGroup[][]
+      accounts: ExtendedAccount[]
+    }
+    filtered: {
+      categories: Item[]
+      subcategories: Item[][]
+      groups: Item[][]
+      accounts: Item[]
+    }
   }
   functions: {
     categories: {
       getNames: (ids: unknown) => string
-    },
+    }
     subcategories: {
       getNames: (ids: unknown) => string
       getParentName: (parentId: number) => string
@@ -109,16 +119,10 @@ type State = {
     groups: {
       getNames: (ids: unknown) => string
       getParentName: (parentId: number) => string
-    },
+    }
     accounts: {
       getNames: (ids: unknown) => string
     }
-  }
-  filtered: {
-    categories: Item[]
-    subcategories: Item[][]
-    groups: Item[][]
-    accounts: Item[]
   }
   selection: {
     category: {
@@ -142,7 +146,7 @@ type Item = {
   id: number
   name: string
   checked: boolean
-  visible: boolean,
+  visible: boolean
   parentId?: number
 }
 
@@ -162,13 +166,11 @@ function useSpendsFilters() {
   const apiLists = useLoaderData<Api.FixedLists>()
 
   const reducer = (prevState: State, action: Action): State => {
-
     switch (action.type) {
-
       case 'INITIALIZE': {
         const categories: ExtendedCategory[] = sortItemsByName(action.data.categories).map(
           (category) => ({ ...category, checked: false, visible: true })
-        )        
+        )
 
         const subcategoriesAux: ExtendedSubcategory[] = sortItemsByName(
           action.data.subcategories
@@ -205,21 +207,33 @@ function useSpendsFilters() {
         return {
           ...prevState,
           lists: {
-            categories,
-            subcategories,
-            groups,
-            accounts
+            original: {
+              categories,
+              subcategories,
+              groups,
+              accounts
+            },
+            filtered: {
+              categories,
+              accounts,
+              subcategories,
+              groups
+            }
           },
           functions: {
             categories: {
               getNames: (ids: unknown) => {
-                const strings = (ids as number[]).map((id) => categories.find((category) => category.id == id)!.name)
+                const strings = (ids as number[]).map(
+                  (id) => categories.find((category) => category.id == id)!.name
+                )
                 return strings.join(', ')
               }
             },
             subcategories: {
               getNames: (ids: unknown) => {
-                const strings = (ids as number[]).map((id) => subcategoriesAux.find((subcategory) => subcategory.id == id)!.name)
+                const strings = (ids as number[]).map(
+                  (id) => subcategoriesAux.find((subcategory) => subcategory.id == id)!.name
+                )
                 return strings.join(', ')
               },
               getParentName: (parentId: number) =>
@@ -227,7 +241,9 @@ function useSpendsFilters() {
             },
             groups: {
               getNames: (ids: unknown) => {
-                const strings = (ids as number[]).map((id) => groupsAux.find((group) => group.id == id)!.name)
+                const strings = (ids as number[]).map(
+                  (id) => groupsAux.find((group) => group.id == id)!.name
+                )
                 return strings.join(', ')
               },
               getParentName: (parentId: number) =>
@@ -235,64 +251,63 @@ function useSpendsFilters() {
             },
             accounts: {
               getNames: (ids: unknown) => {
-                const strings = (ids as number[]).map((id) => accounts.find((account) => account.id == id)!.name)
+                const strings = (ids as number[]).map(
+                  (id) => accounts.find((account) => account.id == id)!.name
+                )
                 return strings.join(', ')
               }
             }
-          },
-          filtered: {
-            categories,
-            accounts,
-            subcategories,
-            groups
           }
         }
       }
 
       case 'SELECT_CATEGORIES': {
         const selectedCategories = action.data.ids
-        prevState.lists.categories.forEach(
+        prevState.lists.original.categories.forEach(
           (category) => (category.checked = selectedCategories.includes(category.id))
         )
-        prevState.filtered.categories.forEach(
+        prevState.lists.filtered.categories.forEach(
           (category) => (category.checked = selectedCategories.includes(category.id))
         )
 
         // Keeps previous selected subcategories
         const selectedSubcategories = prevState.selection.subcategory.ids
-        prevState.lists.subcategories.forEach((list) =>
-          list.forEach(
+        prevState.lists.original.subcategories.forEach((subList) =>
+          subList.forEach(
             (subcategory) =>
               (subcategory.visible =
                 selectedSubcategories.includes(subcategory.id) ||
                 selectedCategories.includes(subcategory.categoryId))
           )
         )
-        const filteredSubcategories = prevState.lists.subcategories
-          .map((list) => list.filter((subcategory) => subcategory.visible))
-          .filter((list) => list.length > 0)
+        const filteredSubcategories = prevState.lists.original.subcategories
+          .map((subList) => subList.filter((subcategory) => subcategory.visible))
+          .filter((subList) => subList.length > 0)
 
         // Keeps previous selected groups
         const selectedGroups = prevState.selection.group.ids
-        prevState.lists.groups.forEach((list) =>
-          list.forEach(
+        prevState.lists.original.groups.forEach((subList) =>
+          subList.forEach(
             (group) =>
               (group.visible =
                 selectedGroups.includes(group.id) ||
                 selectedSubcategories.includes(group.subcategoryId))
           )
         )
-        const filteredGroups = prevState.lists.groups
-          .map((list) => list.filter((group) => group.visible))
-          .filter((list) => list.length > 0)
+        const filteredGroups = prevState.lists.original.groups
+          .map((subList) => subList.filter((group) => group.visible))
+          .filter((subList) => subList.length > 0)
 
         return {
           ...prevState,
-          filtered: {
-            categories: prevState.filtered.categories,
-            subcategories: filteredSubcategories,
-            groups: filteredGroups,
-            accounts: prevState.filtered.accounts
+          lists: {
+            original: prevState.lists.original,
+            filtered: {
+              categories: prevState.lists.filtered.categories,
+              subcategories: filteredSubcategories,
+              groups: filteredGroups,
+              accounts: prevState.lists.filtered.accounts
+            }
           },
           selection: {
             category: {
@@ -313,39 +328,41 @@ function useSpendsFilters() {
 
       case 'SELECT_SUBCATEGORIES': {
         const selectedSubcategories = action.data.ids
-        console.log(selectedSubcategories)
-        prevState.lists.subcategories.forEach((list) =>
-          list.forEach(
+        prevState.lists.original.subcategories.forEach((subList) =>
+          subList.forEach(
             (subcategory) => (subcategory.checked = selectedSubcategories.includes(subcategory.id))
           )
         )
-        prevState.filtered.subcategories.forEach((list) =>
-          list.forEach(
+        prevState.lists.filtered.subcategories.forEach((subList) =>
+          subList.forEach(
             (subcategory) => (subcategory.checked = selectedSubcategories.includes(subcategory.id))
           )
         )
 
         // Keeps previous selected groups
         const selectedGroups = prevState.selection.group.ids
-        prevState.lists.groups.forEach((list) =>
-          list.forEach(
+        prevState.lists.original.groups.forEach((subList) =>
+          subList.forEach(
             (group) =>
               (group.visible =
                 selectedGroups.includes(group.id) ||
                 selectedSubcategories.includes(group.subcategoryId))
           )
         )
-        const filteredGroups = prevState.lists.groups
-          .map((list) => list.filter((group) => group.visible))
-          .filter((list) => list.length > 0)
+        const filteredGroups = prevState.lists.original.groups
+          .map((subList) => subList.filter((group) => group.visible))
+          .filter((subList) => subList.length > 0)
 
         return {
           ...prevState,
-          filtered: {
-            categories: prevState.filtered.categories,
-            subcategories: prevState.filtered.subcategories,
-            groups: filteredGroups,
-            accounts: prevState.filtered.accounts
+          lists: {
+            original: prevState.lists.original,
+            filtered: {
+              categories: prevState.lists.filtered.categories,
+              subcategories: prevState.lists.filtered.subcategories,
+              groups: filteredGroups,
+              accounts: prevState.lists.filtered.accounts
+            }
           },
           selection: {
             category: {
@@ -366,11 +383,11 @@ function useSpendsFilters() {
 
       case 'SELECT_GROUPS': {
         const selectedGroups = action.data.ids
-        prevState.lists.groups.forEach((list) =>
-          list.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
+        prevState.lists.original.groups.forEach((subList) =>
+          subList.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
         )
-        prevState.filtered.groups.forEach((list) =>
-          list.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
+        prevState.lists.filtered.groups.forEach((subList) =>
+          subList.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
         )
 
         return {
@@ -394,10 +411,10 @@ function useSpendsFilters() {
 
       case 'SELECT_ACCOUNTS': {
         const selectedAccounts = action.data.ids
-        prevState.lists.accounts.forEach(
+        prevState.lists.original.accounts.forEach(
           (account) => (account.checked = selectedAccounts.includes(account.id))
         )
-        prevState.filtered.accounts.forEach(
+        prevState.lists.filtered.accounts.forEach(
           (account) => (account.checked = selectedAccounts.includes(account.id))
         )
 
@@ -467,7 +484,6 @@ function useSpendsFilters() {
           }
         }
       }
-
     }
   }
 
@@ -493,25 +509,16 @@ function useSpendsFilters() {
     [dispatch]
   )
 
-  const toggleCategories = useCallback(
-    () => dispatch({ type: 'TOGGLE_CATEGORIES' }),
-    [dispatch]
-  )
+  const toggleCategories = useCallback(() => dispatch({ type: 'TOGGLE_CATEGORIES' }), [dispatch])
 
   const toggleSubcategories = useCallback(
     () => dispatch({ type: 'TOGGLE_SUBCATEGORIES' }),
     [dispatch]
   )
 
-  const toggleGroups = useCallback(
-    () => dispatch({ type: 'TOGGLE_GROUPS' }),
-    [dispatch]
-  )
+  const toggleGroups = useCallback(() => dispatch({ type: 'TOGGLE_GROUPS' }), [dispatch])
 
-  const toggleAccounts = useCallback(
-    () => dispatch({ type: 'TOGGLE_ACCOUNTS' }),
-    [dispatch]
-  )
+  const toggleAccounts = useCallback(() => dispatch({ type: 'TOGGLE_ACCOUNTS' }), [dispatch])
 
   useEffect(() => {
     dispatch({
@@ -521,9 +528,9 @@ function useSpendsFilters() {
   }, [apiLists])
 
   return {
-    isOpen: {...state.isOpen},
+    isOpen: { ...state.isOpen },
     selection: { ...state.selection },
-    lists: { ...state.filtered },
+    lists: { ...state.lists.filtered },
     functions: {
       categories: {
         select: selectCategories,
@@ -552,4 +559,3 @@ function useSpendsFilters() {
 }
 
 export default useSpendsFilters
-
