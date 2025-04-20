@@ -1,6 +1,8 @@
 import * as Mui from '@mui/material'
+import * as XDatePickers from '@mui/x-date-pickers'
 import { memo } from 'react'
-import {constants, useSpendCreation} from '../../../../../hooks/useSpendCreation'
+import { constants, useSpendCreation } from '../../../../../hooks/useSpendCreation'
+import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
@@ -8,10 +10,28 @@ const UNDEFINED_SUBCATEGORY = constants.UNDEFINED_SUBCATEGORY
 
 const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
 
+const PADDING_IN_REM = 1
+
+const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
+  display: 'flex',
+  flex: 1
+}))
+
 const Box = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
   flex: 0,
-  padding: '1rem'
+  padding: `${PADDING_IN_REM}rem`
+}))
+
+const LastBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
+  display: 'flex',
+  flex: 0,
+  flexDirection: 'row-reverse',
+  padding: `${PADDING_IN_REM}rem`,
+  [theme.breakpoints.down('sm')]: {
+    flex: 1,
+    flexDirection: 'column-reverse'
+  }
 }))
 
 const FormControl = Mui.styled(Mui.FormControl)<Mui.FormControlProps>(() => ({
@@ -27,6 +47,12 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
   flex: 1
 }))
 
+const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
+  [theme.breakpoints.up('sm')]: {
+    width: `${BUTTON_WIDTH_IN_REM}rem`
+  }
+}))
+
 // TODO: filter accounts based on category/subcategory/group
 
 // TODO: investigate how to validate form fields (maybe using tanstack)
@@ -35,7 +61,7 @@ const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
 
 // TODO: set maxHeight for selects lists
 
-// TODO: CONTINUE adding missing fields (description, etc)
+// TODO: CONTINUE set current date as default date
 
 function NewSpend() {
   const { lists, selection, functions } = useSpendCreation()
@@ -145,17 +171,27 @@ function NewSpend() {
     id: accountSelectLabelId
   }
 
+  const descriptionFieldProps: Mui.TextFieldProps = {
+    id: 'description-textfield',
+    label: 'Description',
+    variant: 'filled',
+    type: 'text'
+  }
+
   const valueFieldProps: Mui.TextFieldProps = {
-    id: 'timeout-textfield',
+    id: 'value-textfield',
     label: 'Value',
-    defaultValue: "0",
-    variant: "filled",
-    type: "number"
+    defaultValue: '0',
+    variant: 'filled',
+    type: 'number'
   }
 
   return (
     <Page mainMenu={<MainMenu />}>
       <FormControl>
+        <Box>
+          <DatePicker />
+        </Box>
         <Box>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
@@ -211,8 +247,14 @@ function NewSpend() {
           </Mui.FormControl>
         </Box>
         <Box>
-          <TextField {...valueFieldProps}/>
+          <TextField {...descriptionFieldProps} />
         </Box>
+        <Box>
+          <TextField {...valueFieldProps} />
+        </Box>
+        <LastBox>
+          <Button variant="contained">SEND</Button>
+        </LastBox>
       </FormControl>
     </Page>
   )

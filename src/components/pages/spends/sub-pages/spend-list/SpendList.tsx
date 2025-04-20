@@ -1,13 +1,14 @@
 import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { useLoaderData } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import useSnackBar from '../../../../../hooks/useSnackBar'
+import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 import ListControls from './ListControls'
-import { useLoaderData } from 'react-router-dom'
 
 // TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
 
@@ -16,6 +17,10 @@ import { useLoaderData } from 'react-router-dom'
 // TODO: remove TanStack as dependency (use just fetch)
 
 // TODO: filter data based on filters
+
+const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(() => ({
+  width: `${BUTTON_WIDTH_IN_REM}rem`
+}))
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
@@ -41,25 +46,22 @@ interface Column {
   format?: Formatter
 }
 
-type Formatter = (id: number | string | null ) => string
+type Formatter = (id: number | string | null) => string
 
 function buildDateFormatter(): Formatter {
   return (isoDate: string | number | null) => {
-  if (!isoDate)
-    throw new Error(`ISO date is null`)
+    if (!isoDate) throw new Error(`ISO date is null`)
 
-  if (typeof isoDate === "number") 
-    throw new Error(`Cannot format number ${isoDate} to string`)
+    if (typeof isoDate === 'number') throw new Error(`Cannot format number ${isoDate} to string`)
 
-  const date = new Date(isoDate)
-  return dateFormatter.format(date)
-}
+    const date = new Date(isoDate)
+    return dateFormatter.format(date)
+  }
 }
 
 function buildListItemFormatter(list: Api.ListItem[]): Formatter {
-  return (id: number | string | null ) => {
-    if (!id)
-      return "-"
+  return (id: number | string | null) => {
+    if (!id) return '-'
 
     const parsedId = typeof id === 'string' ? parseInt(id) : id
     const foundItem = list.find((item) => item.id == parsedId)
@@ -109,12 +111,12 @@ function buildColumnList(apiLists: Api.FixedLists): Column[] {
     {
       id: 'description',
       label: 'Description',
-      minWidth: 170,
+      minWidth: 170
     },
     {
       id: 'value',
       label: 'Value',
-      minWidth: 170,
+      minWidth: 170
     }
   ]
 }
@@ -169,27 +171,22 @@ function SpendList() {
     }
   }, [error, isError, pushSnackBarMessage])
 
-  const PrimaryActionButton = (
-    <Mui.Button
-      sx={{ width: '7rem' }}
-      onClick={() => alert('Not implemented')}
-      color="primary"
-      autoFocus
-    >
+  const primaryActionButton = (
+    <Button onClick={() => alert('Not implemented')} color="primary" autoFocus>
       APPLY
-    </Mui.Button>
+    </Button>
   )
 
-  const SecondaryActionButton = (
-    <Mui.Button sx={{ width: '7rem' }} onClick={handleModalCancel} color="primary">
+  const secondaryActionButton = (
+    <Button onClick={handleModalCancel} color="primary">
       Cancel
-    </Mui.Button>
+    </Button>
   )
 
   const modalBaseProps: Omit<ModalBaseProps, 'children'> = {
     title: '',
-    primaryActionButton: PrimaryActionButton,
-    secondaryActionButton: SecondaryActionButton,
+    primaryActionButton,
+    secondaryActionButton,
     open: isModalOpen,
     onClose: () => alert('Not implemented')
   }
@@ -204,7 +201,7 @@ function SpendList() {
     rowsPerPage,
     page,
     rowsPerPageOptions: [10, 25, 100],
-    component: "div",
+    component: 'div',
     count: data?.length ? data?.length : 0,
     onPageChange: handleChangePage,
     onRowsPerPageChange: handleChangeRowsPerPage
@@ -225,7 +222,9 @@ function SpendList() {
                 <Mui.TableHead>
                   <Mui.TableRow>
                     {columns.map((column) => (
-                      <Mui.TableCell {...buildColumnProps(column)} key={column.id}>{column.label}</Mui.TableCell>
+                      <Mui.TableCell {...buildColumnProps(column)} key={column.id}>
+                        {column.label}
+                      </Mui.TableCell>
                     ))}
                   </Mui.TableRow>
                 </Mui.TableHead>
@@ -255,7 +254,7 @@ function SpendList() {
                 </Mui.TableBody>
               </Mui.Table>
             </TableContainer>
-            <Mui.TablePagination {...tablePaginationProps}/>
+            <Mui.TablePagination {...tablePaginationProps} />
           </Paper>
         </>
       )}
