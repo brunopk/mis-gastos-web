@@ -63,9 +63,7 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
 
   const handleSpendsClick = () => navigate(paths.spends.new)
 
-  const handleIncomeClick = () => {
-    throw new Error(`Not implemented`)
-  }
+  const handleIncomeClick = () => navigate(paths.income.new)
 
   const handleDrawerClose = () => setOpen(false)
 
@@ -87,8 +85,8 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
             </ListItemButton>
           </ListItem>
           <ListItem key={1} onClick={() => handleIncomeClick()} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
+            <ListItemButton selected={location.pathname.startsWith(paths.income.index)}>
+              <ListItemIcon selected={location.pathname.startsWith(paths.income.index)}>
                 <PaidIcon />
               </ListItemIcon>
               <ListItemText primary="Income" />
