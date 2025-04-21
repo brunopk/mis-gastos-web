@@ -174,16 +174,16 @@ function NewSpend() {
   const descriptionFieldProps: Mui.TextFieldProps = {
     id: 'description-textfield',
     label: 'Description',
-    variant: 'filled',
-    type: 'text'
+    type: 'text',
+    variant,
   }
 
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
     defaultValue: '0',
-    variant: 'filled',
-    type: 'number'
+    type: 'number',
+    variant,
   }
 
   return (
