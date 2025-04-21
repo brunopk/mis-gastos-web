@@ -162,7 +162,7 @@ function sortItemsByName(list: Api.ListItem[]): Api.Category[] {
   return list.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
 }
 
-function useSpendsFilters() {
+function useSpendFilters() {
   const apiLists = useLoaderData<Api.FixedLists>()
 
   const reducer = (prevState: State, action: Action): State => {
@@ -558,4 +558,4 @@ function useSpendsFilters() {
   }
 }
 
-export default useSpendsFilters
+export default useSpendFilters

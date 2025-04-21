@@ -1,6 +1,6 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
-import useSpendsFilters from '../../../../../hooks/useSpendsFilters'
+import useSpendFilters from '../../../../../hooks/useSpendFilters'
 
 // TODO: implement column selection
 
@@ -31,7 +31,7 @@ const Select = Mui.styled(Mui.Select)<Mui.SelectProps>(() => ({
 }))
 
 function ListFilters() {
-  const { lists, selection, functions, isOpen } = useSpendsFilters()
+  const { lists, selection, functions, isOpen } = useSpendFilters()
 
   const handleCategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const {
