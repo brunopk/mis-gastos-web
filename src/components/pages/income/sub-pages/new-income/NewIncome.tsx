@@ -122,15 +122,24 @@ function NewIncome() {
     id: 'description-textfield',
     label: 'Description',
     type: 'text',
-    variant
+    variant,
+    slotProps: {
+      inputLabel: {
+        shrink: true
+      }
+    }
   }
 
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
-    defaultValue: '0',
     type: 'number',
-    variant
+    variant,
+    slotProps: {
+      inputLabel: {
+        shrink: true
+      }
+    }
   }
 
   return (

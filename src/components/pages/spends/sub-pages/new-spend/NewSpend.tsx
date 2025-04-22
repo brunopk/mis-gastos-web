@@ -176,14 +176,23 @@ function NewSpend() {
     label: 'Description',
     type: 'text',
     variant,
+    slotProps: {
+      inputLabel: {
+        shrink: true
+      }
+    }
   }
 
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
-    defaultValue: '0',
     type: 'number',
     variant,
+    slotProps: {
+      inputLabel: {
+        shrink: true
+      }
+    }
   }
 
   return (
