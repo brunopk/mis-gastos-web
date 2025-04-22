@@ -1,9 +1,10 @@
 import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
-import { useLoaderData } from 'react-router-dom'
+import { MouseEventHandler, useCallback, useEffect, useState } from 'react'
+import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import useSnackBar from '../../../../../hooks/useSnackBar'
+import { paths } from '../../../../../Routes'
 import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
@@ -12,9 +13,9 @@ import ListControls from './ListControls'
 
 // TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
 
-// TODO: implement button to redirect to "reimbursement"
-
 // TODO: remove TanStack as dependency (use just fetch)
+
+// TODO: add button to list reimbursements (spend should come with a sub-list of associated reimbursements)
 
 // TODO: filter data based on filters
 
@@ -40,7 +41,7 @@ const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
 }))
 
 interface Column {
-  id: keyof Api.Spend | 'button'
+  id: keyof Api.Spend | 'newReimbursementBtn'
   label: string
   minWidth?: number
   format?: Formatter
@@ -75,7 +76,7 @@ function buildListItemFormatter(list: Api.ListItem[]): Formatter {
   }
 }
 
-function buildColumnList(apiLists: {[name: string]: Api.ListItem[]}): Column[] {
+function buildColumnList(apiLists: { [name: string]: Api.ListItem[] }): Column[] {
   return [
     { id: 'id', label: 'ID', minWidth: 80 },
     {
@@ -117,6 +118,11 @@ function buildColumnList(apiLists: {[name: string]: Api.ListItem[]}): Column[] {
       id: 'value',
       label: 'Value',
       minWidth: 170
+    },
+    {
+      id: 'newReimbursementBtn',
+      label: 'Reimbursement',
+      minWidth: 300
     }
   ]
 }
@@ -127,6 +133,13 @@ function buildColumnProps(column: Column): Mui.TableCellProps {
   }
 }
 
+function buildNewReimbursementButtonHandler(
+  navigate: NavigateFunction,
+  spend: Api.Spend
+): MouseEventHandler<HTMLButtonElement> {
+  return () => navigate(paths.income.new, { state: { spend } })
+}
+
 function SpendList() {
   const [page, setPage] = useState(0)
 
@@ -135,6 +148,8 @@ function SpendList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const apiLists = useLoaderData()
+
+  const navigate = useNavigate()
 
   // TODO: create a "buildKey" to optimize queries with tanstack query keys
 
@@ -233,19 +248,28 @@ function SpendList() {
                     return (
                       <Mui.TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                         {columns.map((column) => {
-                          if (column.id !== 'button') {
-                            const value = row[column.id]
-                            return (
-                              <Mui.TableCell key={column.id}>
-                                {column.format ? column.format(value) : value}
-                              </Mui.TableCell>
-                            )
-                          } else {
-                            return (
-                              <Mui.TableCell key={column.id}>
-                                <Mui.Button>{`Button ${row.id}`}</Mui.Button>
-                              </Mui.TableCell>
-                            )
+                          switch (column.id) {
+                            case 'newReimbursementBtn': {
+                              const handleButtonClick = buildNewReimbursementButtonHandler(
+                                navigate,
+                                row
+                              )
+                              return (
+                                <Mui.TableCell key={column.id}>
+                                  <Mui.Button onClick={handleButtonClick}>
+                                    ADD REIMBURSEMENT
+                                  </Mui.Button>
+                                </Mui.TableCell>
+                              )
+                            }
+                            default: {
+                              const value = row[column.id as keyof Api.Spend]
+                              return (
+                                <Mui.TableCell key={column.id}>
+                                  {column.format ? column.format(value) : value}
+                                </Mui.TableCell>
+                              )
+                            }
                           }
                         })}
                       </Mui.TableRow>
