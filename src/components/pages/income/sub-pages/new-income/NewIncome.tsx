@@ -1,6 +1,7 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import { memo } from 'react'
+import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { BUTTON_WIDTH_IN_REM, FIELD_BOX_PADDING_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
@@ -56,19 +57,18 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 
 // TODO: use FIELD_BOX_PADDING_IN_REM in src/components/pages/spends/sub-pages/new-spend/NewSpend.tsx
 
-// TODO: CONTINUE (use useIncomeCreation hook)
 
 function NewIncome() {
+  const { lists, functions, selection } = useIncomeCreation()
+
   const handleIncomeSourceChange = (event: Mui.SelectChangeEvent<unknown>) => {
-    // const incomeSourceId = parseInt(event.target.value as string)
-    console.log(event)
-    throw new Error(`Not implemented`)
+    const incomeSourceId = parseInt(event.target.value as string)
+    functions.selectIncomeSource(incomeSourceId)
   }
 
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
-    // const incomeSourceId = parseInt(event.target.value as string)
-    console.log(event)
-    throw new Error(`Not implemented`)
+    const accountId = parseInt(event.target.value as string)
+    functions.selectAccount(accountId)
   }
 
   const variant = 'standard'
@@ -80,21 +80,16 @@ function NewIncome() {
     fullWidth
   }
 
-  const incomeSourceSelectId = 'income-source-select'
-
-  const incomeSourceSelectLabel = 'Source'
+  const incomeSourceSelectLabel = 'Account'
 
   const incomeSourceSelectLabelId = 'income-source-select-label'
 
-  const accountSelectLabel = 'Account'
-
-  const accountSelectLabelId = 'account-select-label'
-
   const incomeSourceSelectProps: Mui.SelectProps = {
-    id: incomeSourceSelectId,
+    id: 'income-source-select',
     label: incomeSourceSelectLabel,
     labelId: incomeSourceSelectLabelId,
-    value: 0,
+    value: selection.incomeSource.id ? selection.incomeSource.id : '',
+    disabled: lists.incomeSources.length == 1,
     variant,
     fullWidth,
     onChange: handleIncomeSourceChange
@@ -104,11 +99,16 @@ function NewIncome() {
     id: incomeSourceSelectLabelId
   }
 
+  const accountSelectLabelId = 'account-select-label'
+
+  const accountSelectLabel = 'Account'
+
   const accountSelectProps: Mui.SelectProps = {
-    id: 'group-select',
+    id: 'account-select',
     label: accountSelectLabel,
     labelId: accountSelectLabelId,
-    value: 0,
+    value: selection.account.id ? selection.account.id : '',
+    disabled: lists.accounts.length == 1,
     variant,
     fullWidth,
     onChange: handleAccountChange
@@ -154,9 +154,9 @@ function NewIncome() {
               {incomeSourceSelectLabel}
             </Mui.InputLabel>
             <Select {...incomeSourceSelectProps}>
-              {[].map((category) => (
-                <Mui.MenuItem value={0} key={0}>
-                  {category}
+              {lists.incomeSources.map((incomeSource) => (
+                <Mui.MenuItem value={incomeSource.id} key={incomeSource.id}>
+                  {incomeSource.name}
                 </Mui.MenuItem>
               ))}
             </Select>
@@ -166,9 +166,9 @@ function NewIncome() {
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
             <Select {...accountSelectProps}>
-              {[].map((account) => (
-                <Mui.MenuItem value={0} key={0}>
-                  {account}
+              {lists.accounts.map((account) => (
+                <Mui.MenuItem value={account.id} key={account.id}>
+                  {account.name}
                 </Mui.MenuItem>
               ))}
             </Select>

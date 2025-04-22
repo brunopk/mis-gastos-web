@@ -15,7 +15,7 @@ declare namespace Api {
   interface ListItem {
     id: number
     name: string
-    accountIds: number[]
+    accountIds?: number[]
   }
 
   type Account = ListItem

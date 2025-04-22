@@ -71,8 +71,10 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
           )
         const selectedIncomeSource = initialIncomeSources[0]
 
-        let filteredAccounts = action.data.accounts.filter((account) =>
-          selectedIncomeSource.accountIds.includes(account.id)
+        let filteredAccounts = action.data.accounts.filter(
+          (account) =>
+            typeof selectedIncomeSource.accountIds != 'undefined' &&
+            selectedIncomeSource.accountIds.includes(account.id)
         )
         if (filteredAccounts.length == 0) filteredAccounts = action.data.accounts.slice(0)
         const selectedAccount = filteredAccounts[0]
@@ -105,8 +107,10 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
           (incomeSource) => incomeSource.id == selectedIncomeSourceId
         )
 
-        let filteredAccounts = prevState.lists.original.accounts.filter((account) =>
-          selectedIncomeSource!.accountIds.includes(account.id)
+        let filteredAccounts = prevState.lists.original.accounts.filter(
+          (account) =>
+            typeof selectedIncomeSource!.accountIds != 'undefined' &&
+            selectedIncomeSource!.accountIds.includes(account.id)
         )
         if (filteredAccounts.length == 0)
           filteredAccounts = prevState.lists.original.accounts.slice(0)
@@ -174,7 +178,10 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
 
   return {
     selection: { ...state.selection },
-    lists: { ...state.lists.filtered, accounts: state.lists.original.accounts },
+    lists: {
+      incomeSources: state.lists.original.incomeSources,
+      accounts: state.lists.filtered.accounts
+    },
     functions: {
       selectIncomeSource,
       selectAccount
