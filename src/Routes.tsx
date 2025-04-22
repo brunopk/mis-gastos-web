@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createBrowserRouter, createRoutesFromElements, Route, RouteProps } from 'react-router-dom'
-import { apiFixedListLoader } from './api/utils'
+import { apiListLoader } from './api/utils'
 import ErrorBoundary from './components/ErrorBoundary'
 import NotFound from './components/NotFound'
 import NewSpend from './components/pages/spends/sub-pages/new-spend/NewSpend'
@@ -21,7 +21,7 @@ export const paths = {
 
 export const router = (queryClient: QueryClient) => {
   const commonRouteProps: RouteProps = {
-    loader: apiFixedListLoader(queryClient),
+    loader: apiListLoader(queryClient),
     errorElement: <ErrorBoundary />
   }
 

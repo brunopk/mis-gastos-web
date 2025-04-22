@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
+// TODO: filter accounts by category/subcategory/group
+
+// TODO: use interfaces instead of type (when possible)
+
 const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
   id: -1,
   name: 'Sin definir',
-  categoryId: -1
+  categoryId: -1,
+  accountIds: []
 }
 
 const UNDEFINED_GROUP: Api.Group = {
   id: -1,
   name: 'Sin definir',
-  subcategoryId: -1
+  subcategoryId: -1,
+  accountIds: []
 }
 
 const INITIAL_STATE: State = {
@@ -98,7 +104,7 @@ export const constants = {
 }
 
 export function useSpendCreation() {
-  const apiLists = useLoaderData<Api.FixedLists>()
+  const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {

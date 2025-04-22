@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { LoaderFunction } from 'react-router-dom'
 import * as ApiQuery from './mis-gastos'
 
-export const apiFixedListLoader: (queryClient: QueryClient) => LoaderFunction =
+export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
   (queryClient) => async () => {
     const queryCommonAttributes = {
       staleTime: Infinity,
@@ -14,20 +14,29 @@ export const apiFixedListLoader: (queryClient: QueryClient) => LoaderFunction =
       queryKey: ['categories'],
       queryFn: ApiQuery.getCategories
     })
+
     const subcategoriesPromise = queryClient.fetchQuery({
       ...queryCommonAttributes,
       queryKey: ['subcategories'],
       queryFn: ApiQuery.getSubcategories
     })
+
     const groupsPromise = queryClient.fetchQuery({
       ...queryCommonAttributes,
       queryKey: ['groups'],
       queryFn: ApiQuery.getGroups
     })
+
     const accountsPromise = queryClient.fetchQuery({
       ...queryCommonAttributes,
       queryKey: ['accounts'],
       queryFn: ApiQuery.getAccounts
+    })
+
+    const incomeSourcesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['income-sources'],
+      queryFn: ApiQuery.getIncomeSources
     })
 
 
@@ -36,14 +45,16 @@ export const apiFixedListLoader: (queryClient: QueryClient) => LoaderFunction =
       categoriesPromise,
       subcategoriesPromise,
       groupsPromise,
-      accountsPromise
+      accountsPromise,
+      incomeSourcesPromise
     ])
 
-    const result: Api.FixedLists = {
+    const result = {
       categories: lists[0],
       subcategories: lists[1],
       groups: lists[2],
-      accounts: lists[3]
+      accounts: lists[3],
+      incomeSources: lists[4]
     }
 
     return result

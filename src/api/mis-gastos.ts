@@ -9,6 +9,21 @@ export class ApiError extends Error {
   }
 }
 
+// TODO: use the real endpoint
+
+export async function getIncomeSources(): Promise<Api.ListItem[]> {
+  const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
+
+  const body = await response.json()
+
+  if (!response.ok) {
+    const stringifiedBody = JSON.stringify(body)
+    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
+  }
+
+  return [{id: 1, name: 'Devolución'}, {id: 2, name: 'Salario'}]
+}
+
 export async function getCategories(): Promise<Api.Category[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
 

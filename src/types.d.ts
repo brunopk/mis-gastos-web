@@ -12,9 +12,10 @@ type ModalBaseProps = {
 // TODO: convert types to (interfaces if possible)
 
 declare namespace Api {
-  type ListItem = {
+  interface ListItem {
     id: number
     name: string
+    accountIds: number[]
   }
 
   type Account = ListItem
@@ -27,15 +28,6 @@ declare namespace Api {
 
   type Group = ListItem & {
     subcategoryId: number
-  }
-
-  // TODO: remove this type (if possible)
-  
-  type FixedLists = {
-    categories: Category[]
-    subcategories: Subcategory[]
-    groups: Group[]
-    accounts: Account[]
   }
 
   interface Spend {

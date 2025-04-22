@@ -75,7 +75,7 @@ function buildListItemFormatter(list: Api.ListItem[]): Formatter {
   }
 }
 
-function buildColumnList(apiLists: Api.FixedLists): Column[] {
+function buildColumnList(apiLists: {[name: string]: Api.ListItem[]}): Column[] {
   return [
     { id: 'id', label: 'ID', minWidth: 80 },
     {
@@ -134,7 +134,7 @@ function SpendList() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const apiLists = useLoaderData<Api.FixedLists>()
+  const apiLists = useLoaderData()
 
   // TODO: create a "buildKey" to optimize queries with tanstack query keys
 

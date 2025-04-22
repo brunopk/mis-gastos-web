@@ -56,21 +56,20 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 
 // TODO: use FIELD_BOX_PADDING_IN_REM in src/components/pages/spends/sub-pages/new-spend/NewSpend.tsx
 
-// TODO: CONTINUE
+// TODO: CONTINUE (use useIncomeCreation hook)
 
 function NewIncome() {
-  const handleIncomeTypeChange = (event: Mui.SelectChangeEvent<unknown>) => {
-    // const incomeTypeId = parseInt(event.target.value as string)
+  const handleIncomeSourceChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    // const incomeSourceId = parseInt(event.target.value as string)
     console.log(event)
     throw new Error(`Not implemented`)
   }
 
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
-    // const incomeTypeId = parseInt(event.target.value as string)
+    // const incomeSourceId = parseInt(event.target.value as string)
     console.log(event)
     throw new Error(`Not implemented`)
   }
-
 
   const variant = 'standard'
 
@@ -81,28 +80,28 @@ function NewIncome() {
     fullWidth
   }
 
-  const incomeTypeSelectId = 'income-type-select'
+  const incomeSourceSelectId = 'income-source-select'
 
-  const incomeTypeSelectLabel = 'Income type'
+  const incomeSourceSelectLabel = 'Source'
 
-  const incomeTypeSelectLabelId = 'income-type-select-label'
+  const incomeSourceSelectLabelId = 'income-source-select-label'
 
   const accountSelectLabel = 'Account'
 
   const accountSelectLabelId = 'account-select-label'
 
-  const incomeTypeSelectProps: Mui.SelectProps = {
-    id: incomeTypeSelectId,
-    label: incomeTypeSelectLabel,
-    labelId: incomeTypeSelectLabelId,
+  const incomeSourceSelectProps: Mui.SelectProps = {
+    id: incomeSourceSelectId,
+    label: incomeSourceSelectLabel,
+    labelId: incomeSourceSelectLabelId,
     value: 0,
     variant,
     fullWidth,
-    onChange: handleIncomeTypeChange
+    onChange: handleIncomeSourceChange
   }
 
-  const incomeTypeInputLabelProps: Mui.InputLabelProps = {
-    id: incomeTypeSelectLabelId
+  const incomeSourceInputLabelProps: Mui.InputLabelProps = {
+    id: incomeSourceSelectLabelId
   }
 
   const accountSelectProps: Mui.SelectProps = {
@@ -123,7 +122,7 @@ function NewIncome() {
     id: 'description-textfield',
     label: 'Description',
     type: 'text',
-    variant,
+    variant
   }
 
   const valueFieldProps: Mui.TextFieldProps = {
@@ -131,7 +130,7 @@ function NewIncome() {
     label: 'Value',
     defaultValue: '0',
     type: 'number',
-    variant,
+    variant
   }
 
   return (
@@ -142,41 +141,13 @@ function NewIncome() {
         </Box>
         <Box>
           <Mui.FormControl {...formControlProps}>
-            <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
-            <Select {...categorySelectProps}>
-              {lists.categories.map((category) => (
-                <Mui.MenuItem value={category.id} key={category.id}>
-                  {category.name}
-                </Mui.MenuItem>
-              ))}
-            </Select>
-          </Mui.FormControl>
-        </Box>
-        <Box>
-          <Mui.FormControl {...formControlProps}>
-            <Mui.InputLabel {...subcategoryInputLabelProps}>
-              {subcategorySelectLabel}
+            <Mui.InputLabel {...incomeSourceInputLabelProps}>
+              {incomeSourceSelectLabel}
             </Mui.InputLabel>
-            <Select {...subcategorySelectProps}>
-              {lists.subcategories.map((subcategory) => (
-                <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
-                  {subcategory.id == UNDEFINED_SUBCATEGORY.id ? (
-                    <em>{subcategory.name}</em>
-                  ) : (
-                    subcategory.name
-                  )}
-                </Mui.MenuItem>
-              ))}
-            </Select>
-          </Mui.FormControl>
-        </Box>
-        <Box>
-          <Mui.FormControl {...formControlProps}>
-            <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
-            <Select {...groupSelectProps}>
-              {lists.groups.map((group) => (
-                <Mui.MenuItem value={group.id} key={group.id}>
-                  {group.id == UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
+            <Select {...incomeSourceSelectProps}>
+              {[].map((category) => (
+                <Mui.MenuItem value={0} key={0}>
+                  {category}
                 </Mui.MenuItem>
               ))}
             </Select>
@@ -186,9 +157,9 @@ function NewIncome() {
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
             <Select {...accountSelectProps}>
-              {lists.accounts.map((account) => (
-                <Mui.MenuItem value={account.id} key={account.id}>
-                  {account.name}
+              {[].map((account) => (
+                <Mui.MenuItem value={0} key={0}>
+                  {account}
                 </Mui.MenuItem>
               ))}
             </Select>

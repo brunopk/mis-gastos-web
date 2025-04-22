@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
+// TODO: filter accounts by category/subcategory/group
+
+// TODO: use interfaces instead of type (when possible)
+
+
 const INITIAL_STATE: State = {
   isOpen: {
     categories: false,
@@ -163,7 +168,7 @@ function sortItemsByName(list: Api.ListItem[]): Api.Category[] {
 }
 
 function useSpendFilters() {
-  const apiLists = useLoaderData<Api.FixedLists>()
+  const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
