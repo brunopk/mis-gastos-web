@@ -9,6 +9,21 @@ import MainMenu from '../../MainMenu'
 
 const REIMBURSEMENT_SOURCE_ID = 1
 
+const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
+  width: '100%'
+}))
+
+const Label = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
+  paddingLeft: `${FIELD_BOX_PADDING_IN_REM}rem`,
+  flex: 1,
+  textAlign: 'start'
+}))
+
+const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
+  flex: 1,
+  textAlign: 'end'
+}))
+
 const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
   display: 'flex',
   flex: 1
@@ -157,6 +172,18 @@ function NewIncome() {
   return (
     <Page mainMenu={<MainMenu />}>
       <FormControl>
+        <Box>
+          <Paper>
+            <Box>
+              <Label>Date</Label>
+              <Value>1/1/2025</Value>
+            </Box>
+            <Box>
+              <Label>Category</Label>
+              <Value>Services</Value>
+            </Box>
+          </Paper>
+        </Box>
         <Box>
           <DatePicker />
         </Box>
