@@ -1,14 +1,13 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
-import { memo, MouseEventHandler, useState } from 'react'
+import { memo } from 'react'
 import { useLocation } from 'react-router-dom'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { BUTTON_WIDTH_IN_REM, FIELD_BOX_PADDING_IN_REM } from '../../../../../style'
-import ConfirmationModal from '../../../../modal/ConfirmationModal'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
-const DEFAULT_INCOME_SOURCE_ID = 1
+const REIMBURSEMENT_SOURCE_ID = 1
 
 const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
   display: 'flex',
@@ -61,21 +60,17 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 
 // TODO: use FIELD_BOX_PADDING_IN_REM in src/components/pages/spends/sub-pages/new-spend/NewSpend.tsx
 
-// TODO: CONTINUE change modal text to show spend (reimbursement for spend)
+// TODO: CONTINUE implement modal to confirm reimbursement indicating the spend attributes
 
 // TODO: implement reimbursement list
 
 function NewIncome() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
   const { state } = useLocation()
 
   const { spend } = state || { spend: null }
 
-  const isReimbursement = spend != null
-
   const { lists, functions, selection } = useIncomeCreation(
-    isReimbursement ? DEFAULT_INCOME_SOURCE_ID : undefined
+    spend ? REIMBURSEMENT_SOURCE_ID : undefined
   )
 
   const handleIncomeSourceChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -86,22 +81,6 @@ function NewIncome() {
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const accountId = parseInt(event.target.value as string)
     functions.selectAccount(accountId)
-  }
-
-  const handleSendClick: MouseEventHandler<HTMLButtonElement> = () => {
-    if (isReimbursement) setIsModalOpen(true)
-    else sendIncome()
-  }
-
-  const handleModalCancellation = () => setIsModalOpen(false)
-
-  const handleModalAccept = () => {
-    setIsModalOpen(false)
-    sendIncome()
-  }
-
-  const sendIncome = () => {
-    throw new Error('Not implemented')
   }
 
   const variant = 'standard'
@@ -175,13 +154,6 @@ function NewIncome() {
     }
   }
 
-  const confirmationModalProps: UI.ConfirmationModalProps = {
-    open: isModalOpen,
-    text: 'Are you sure you want to add an income associated to this spend ?',
-    onCancel: handleModalCancellation,
-    onAccept: handleModalAccept
-  }
-
   return (
     <Page mainMenu={<MainMenu />}>
       <FormControl>
@@ -221,12 +193,9 @@ function NewIncome() {
           <TextField {...valueFieldProps} />
         </Box>
         <LastBox>
-          <Button variant="contained" onClick={handleSendClick}>
-            SEND
-          </Button>
+          <Button variant="contained">SEND</Button>
         </LastBox>
       </FormControl>
-      <ConfirmationModal {...confirmationModalProps} />
     </Page>
   )
 }

@@ -39,7 +39,7 @@ function ModalBase({
   primaryActionButton,
   secondaryActionButton,
   onClose
-}: UI.ModalBaseProps) {
+}: ModalBaseProps) {
   const handleModalClose = () => {
     onClose()
   }
@@ -48,17 +48,15 @@ function ModalBase({
 
   const isSmallScreen = Mui.useMediaQuery(theme.breakpoints.down("sm"));
 
-  const dialogProps: Mui.DialogProps = {
-    open,
-    'aria-labelledby': "alert-dialog-title",
-    'aria-describedby': "alert-dialog-description",
-    fullWidth: isSmallScreen,
-    onClose: handleModalClose,
-  }
-
   return (
     <Fragment>
-      <Mui.Dialog {...dialogProps}>
+      <Mui.Dialog
+        open={open}
+        onClose={handleModalClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth={isSmallScreen}
+      >
           <DialogTitle id="alert-dialog-title" variant="h5">
             {title}
           </DialogTitle>

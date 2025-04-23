@@ -1,3 +1,13 @@
+// TODO: Move ModalBaseProps to UI.Components (and other components too)
+
+type ModalBaseProps = {
+  children: ReactNode
+  title: string
+  open: boolean
+  primaryActionButton: ReactElement
+  secondaryActionButton: ReactElement
+  onClose: () => void
+}
 
 // TODO: convert types to (interfaces if possible)
 
@@ -34,22 +44,6 @@ declare namespace Api {
 
 declare namespace UI {
 
-  type ModalBaseProps = {
-    children: ReactNode
-    open: boolean
-    primaryActionButton: ReactElement
-    secondaryActionButton: ReactElement
-    title?: string
-    onClose: () => void
-  }
-
-  type ConfirmationModalProps = {
-    open: boolean
-    text: string
-    onAccept: () => void
-    onCancel: () => void
-  }
-  
   type PageProps = {
     mainMenu?: ReactNode
     children: ReactNode
