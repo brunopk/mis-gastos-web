@@ -44,6 +44,35 @@ declare namespace Api {
 
 declare namespace UI {
 
+  namespace Table {
+
+    interface TableProps<R, B> {
+      rows: BaseRow<R, B>[],
+      columns: Column<D>[]
+    }
+
+    interface BaseRow<R, B> {
+      id: number,
+      data: R
+      buttons: Button<B>[]
+    }
+    
+    interface Column<R, B> {
+      id: keyof R | keyof B
+      label: string
+      isButton?: boolean
+      minWidth?: number
+      format?: Formatter
+    }
+
+    interface Button<B> {
+      id: keyof B,
+      label: string,
+      clickHandler: MouseEventHandler<HTMLButtonElement>
+    }
+
+  }
+
   type PageProps = {
     mainMenu?: ReactNode
     children: ReactNode

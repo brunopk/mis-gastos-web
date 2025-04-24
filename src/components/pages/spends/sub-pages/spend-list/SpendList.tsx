@@ -1,21 +1,21 @@
 import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { MouseEventHandler, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import useSnackBar from '../../../../../hooks/useSnackBar'
 import { paths } from '../../../../../Routes'
 import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
+import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
+import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import ListControls from './ListControls'
 
 // TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
 
 // TODO: remove TanStack as dependency (use just fetch)
-
-// TODO: add button to list reimbursements (spend should come with a sub-list of associated reimbursements)
 
 // TODO: filter data based on filters
 
@@ -25,62 +25,32 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(() => ({
   width: `${BUTTON_WIDTH_IN_REM}rem`
 }))
 
-const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-})
-
-const TableContainer = Mui.styled(Mui.TableContainer)(() => ({
-  maxHeight: '90%'
-}))
-
-const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
-  marginTop: '1rem',
-  overflow: 'hidden',
-  flex: 1
-}))
-
-interface Column {
-  id: keyof Api.Spend | 'newReimbursementBtn'
-  label: string
-  minWidth?: number
-  format?: Formatter
+interface SpendButtons {
+  newReimbursementBtn: unknown
 }
 
-type Formatter = (id: number | string | null) => string
-
-function buildDateFormatter(): Formatter {
-  return (isoDate: string | number | null) => {
-    if (!isoDate) throw new Error(`ISO date is null`)
-
-    if (typeof isoDate === 'number') throw new Error(`Cannot format number ${isoDate} to string`)
-
-    const date = new Date(isoDate)
-    return dateFormatter.format(date)
-  }
+function buildTableRows(
+  spends: Api.Spend[] | undefined,
+  navigate: NavigateFunction
+): UI.Table.BaseRow<Api.Spend, SpendButtons>[] {
+  return typeof spends == 'undefined' ? [] : spends.map((spend) => ({
+    id: spend.id,
+    data: spend,
+    buttons: [
+      {
+        id: 'newReimbursementBtn',
+        label: 'ADD REIMBURSEMENT',
+        clickHandler: () => navigate(paths.income.new, { state: { spend } })
+      }
+    ]
+  }))
 }
 
-function buildListItemFormatter(list: Api.ListItem[]): Formatter {
-  return (id: number | string | null) => {
-    if (!id) return '-'
-
-    const parsedId = typeof id === 'string' ? parseInt(id) : id
-    const foundItem = list.find((item) => item.id == parsedId)
-
-    if (typeof foundItem === 'undefined') {
-      const stringifiedList = JSON.stringify(list)
-      throw new Error(`Element ${id} not found in list ${stringifiedList}`)
-    }
-
-    return foundItem.name
-  }
-}
-
-function buildColumnList(apiLists: { [name: string]: Api.ListItem[] }): Column[] {
+function buildColumnList(apiLists: {
+  [name: string]: Api.ListItem[]
+}): UI.Table.Column<Api.Spend, SpendButtons>[] {
   return [
-    { id: 'id', label: 'ID', minWidth: 80 },
+    { id: 'id', label: 'ID', minWidth: 100 },
     {
       id: 'date',
       label: 'Date',
@@ -123,33 +93,17 @@ function buildColumnList(apiLists: { [name: string]: Api.ListItem[] }): Column[]
     },
     {
       id: 'newReimbursementBtn',
-      label: 'Reimbursement',
-      minWidth: 300
+      label: 'Reimbursements',
+      minWidth: 300,
+      isButton: true
     }
   ]
 }
 
-function buildColumnProps(column: Column): Mui.TableCellProps {
-  return {
-    style: { minWidth: column.minWidth }
-  }
-}
-
-function buildNewReimbursementButtonHandler(
-  navigate: NavigateFunction,
-  spend: Api.Spend
-): MouseEventHandler<HTMLButtonElement> {
-  return () => navigate(paths.income.new, { state: { spend } })
-}
-
 function SpendList() {
-  const [page, setPage] = useState(0)
-
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const apiLists = useLoaderData()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const apiLists = useLoaderData()
 
   const navigate = useNavigate()
 
@@ -163,16 +117,9 @@ function SpendList() {
 
   const { pushSnackBarMessage } = useSnackBar()
 
-  const columns: readonly Column[] = buildColumnList(apiLists)
+  const columns = buildColumnList(apiLists)
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value)
-    setPage(0)
-  }
+  const rows = buildTableRows(data, navigate)
 
   const handleThreeDotsIconClick = useCallback(() => {
     setIsModalOpen(true)
@@ -214,16 +161,6 @@ function SpendList() {
     onThreeDotsIconClick: handleThreeDotsIconClick
   }
 
-  const tablePaginationProps: Mui.TablePaginationProps = {
-    rowsPerPage,
-    page,
-    rowsPerPageOptions: [10, 25, 100],
-    component: 'div',
-    count: data?.length ? data?.length : 0,
-    onPageChange: handleChangePage,
-    onRowsPerPageChange: handleChangeRowsPerPage
-  }
-
   return (
     <Page {...pageProps}>
       {isError ? (
@@ -233,55 +170,7 @@ function SpendList() {
           <ModalBase {...modalBaseProps}>
             <ListControls />
           </ModalBase>
-          <Paper variant="outlined">
-            <TableContainer>
-              <Mui.Table stickyHeader aria-label="sticky table">
-                <Mui.TableHead>
-                  <Mui.TableRow>
-                    {columns.map((column) => (
-                      <Mui.TableCell {...buildColumnProps(column)} key={column.id}>
-                        {column.label}
-                      </Mui.TableCell>
-                    ))}
-                  </Mui.TableRow>
-                </Mui.TableHead>
-                <Mui.TableBody>
-                  {data?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    return (
-                      <Mui.TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                        {columns.map((column) => {
-                          switch (column.id) {
-                            case 'newReimbursementBtn': {
-                              const handleButtonClick = buildNewReimbursementButtonHandler(
-                                navigate,
-                                row
-                              )
-                              return (
-                                <Mui.TableCell key={column.id}>
-                                  <Mui.Button onClick={handleButtonClick}>
-                                    ADD REIMBURSEMENT
-                                  </Mui.Button>
-                                </Mui.TableCell>
-                              )
-                            }
-                            default: {
-                              const value = row[column.id as keyof Api.Spend]
-                              return (
-                                <Mui.TableCell key={column.id}>
-                                  {column.format ? column.format(value) : value}
-                                </Mui.TableCell>
-                              )
-                            }
-                          }
-                        })}
-                      </Mui.TableRow>
-                    )
-                  })}
-                </Mui.TableBody>
-              </Mui.Table>
-            </TableContainer>
-            <Mui.TablePagination {...tablePaginationProps} />
-          </Paper>
+          <Table<Api.Spend, SpendButtons> rows={rows} columns={columns} />
         </>
       )}
     </Page>
