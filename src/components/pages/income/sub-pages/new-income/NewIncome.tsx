@@ -92,8 +92,6 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 
 // TODO: set current date as default date
 
-// TODO: CONTINUE implement reimbursement list
-
 function NewIncome() {
   const apiLists = useLoaderData()
 
