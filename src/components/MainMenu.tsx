@@ -13,6 +13,8 @@ import {paths} from '../Routes'
 import { MENU_WIDTH_IN_REM } from '../style'
 import DrawerHeader from './DrawerHeader'
 
+// TODO: change icons for spends ("-" icon) and income ("+" icon) 
+
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
   width: `${MENU_WIDTH_IN_REM}rem`
 }))
@@ -61,9 +63,9 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
 
   const navigate = useNavigate()
 
-  const handleSpendsClick = () => navigate(paths.spends.new)
+  const handleSpendsClick = () => navigate(paths.spends.list)
 
-  const handleIncomeClick = () => navigate(paths.income.new)
+  const handleIncomeClick = () => navigate(paths.income.list)
 
   const handleDrawerClose = () => setOpen(false)
 

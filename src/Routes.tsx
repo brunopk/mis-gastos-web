@@ -6,6 +6,7 @@ import NotFound from './components/NotFound'
 import NewSpend from './components/pages/spends/sub-pages/new-spend/NewSpend'
 import NewIncome from './components/pages/income/sub-pages/new-income/NewIncome'
 import SpendList from './components/pages/spends/sub-pages/spend-list/SpendList'
+import IncomeList from './components/pages/income/sub-pages/income-list/IncomeList'
 
 export const paths = {
   spends: {
@@ -15,7 +16,8 @@ export const paths = {
   },
   income: {
     index: '/income',
-    new: '/income/new'
+    new: '/income/new',
+    list: '/income/list',
   }
 }
 
@@ -31,6 +33,7 @@ export const router = (queryClient: QueryClient) => {
         <Route {...commonRouteProps} path={paths.spends.list} element={<SpendList />} />
         <Route {...commonRouteProps} path={paths.spends.new} element={<NewSpend />} />
         <Route {...commonRouteProps} path={paths.income.new} element={<NewIncome />} />
+        <Route {...commonRouteProps} path={paths.income.list} element={<IncomeList />} />
         <Route {...commonRouteProps} path="*" element={<NotFound />} />
       </Route>
     )

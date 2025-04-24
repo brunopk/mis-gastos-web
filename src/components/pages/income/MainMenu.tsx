@@ -9,23 +9,23 @@ function MainMenu() {
 
   const location = useLocation()
 
-  const handleNewSpendClick = () => navigate(paths.spends.new)
+  const handleNewIncomeClick = () => navigate(paths.spends.new)
 
-  const handleSpendListClick = () => navigate(paths.spends.list)
+  const handleIncomeListClick = () => navigate(paths.spends.list)
 
   return (
     <>
       <MainMenuItem
-        text="New"
-        onClick={handleNewSpendClick}
-        icon={<AddIcon />}
-        selected={location.pathname.startsWith(paths.spends.new)}
+        text="List"
+        onClick={handleIncomeListClick}
+        icon={<ListIcon />}
+        selected={location.pathname.startsWith(paths.income.list)}
       />
       <MainMenuItem
-        text="List"
-        onClick={handleSpendListClick}
-        icon={<ListIcon />}
-        selected={location.pathname.startsWith(paths.spends.list)}
+        text="New"
+        onClick={handleNewIncomeClick}
+        icon={<AddIcon />}
+        selected={location.pathname.startsWith(paths.income.new)}
       />
     </>
   )
