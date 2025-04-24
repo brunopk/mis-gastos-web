@@ -21,7 +21,10 @@ export async function getIncomeSources(): Promise<Api.ListItem[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return [{id: 1, name: 'Devolución'}, {id: 2, name: 'Salario'}]
+  return [
+    { id: 1, name: 'Devolución' },
+    { id: 2, name: 'Salario' }
+  ]
 }
 
 export async function getCategories(): Promise<Api.Category[]> {
@@ -93,6 +96,29 @@ export async function getSpends(): Promise<Api.Spend[]> {
     const stringifiedBody = JSON.stringify(body)
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
+
+  return (
+    body as {
+      id: number
+      date: string
+      name: string
+      category_id: number
+      subcategory_id: number
+      group_id: number
+      account_id: number
+      description: string
+      value: number
+    }[]
+  ).map((spend) => ({
+    id: spend.id,
+    date: spend.date,
+    categoryId: spend.category_id,
+    subcategoryId: spend.subcategory_id,
+    groupId: spend.group_id,
+    accountId: spend.account_id,
+    description: spend.description,
+    value: spend.value
+  }))
 
   return body
 }

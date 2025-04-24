@@ -1,27 +1,23 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import { memo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLoaderData, useLocation } from 'react-router-dom'
+import * as apiUtils from '../../../../../api/utils'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { BUTTON_WIDTH_IN_REM, FIELD_BOX_PADDING_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
 import MainMenu from '../../MainMenu'
 
-const REIMBURSEMENT_SOURCE_ID = 1
+const REIMBURSEMENT = 1
+
+const DEFAULT_CATEGORY = '-'
+
+const DEFAULT_SUBCATEGORY = '-'
+
+const DEFAULT_GROUP = '-'
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   width: '100%'
-}))
-
-const Label = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
-  paddingLeft: `${FIELD_BOX_PADDING_IN_REM}rem`,
-  flex: 1,
-  textAlign: 'start'
-}))
-
-const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
-  flex: 1,
-  textAlign: 'end'
 }))
 
 const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
@@ -29,13 +25,25 @@ const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
   flex: 1
 }))
 
-const Box = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
+const AttributeBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
+  display: 'flex',
+  flex: 0,
+  padding: `${FIELD_BOX_PADDING_IN_REM / 8}rem ${FIELD_BOX_PADDING_IN_REM}rem`,
+  ':first-child': {
+    paddingTop: `${FIELD_BOX_PADDING_IN_REM}rem`
+  },
+  ':last-child': {
+    paddingBottom: `${FIELD_BOX_PADDING_IN_REM}rem`
+  }
+}))
+
+const FieldBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
   flex: 0,
   padding: `${FIELD_BOX_PADDING_IN_REM}rem`
 }))
 
-const LastBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
+const ButtonBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
   display: 'flex',
   flex: 0,
   flexDirection: 'row-reverse',
@@ -65,6 +73,17 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
   }
 }))
 
+const Attribute = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
+  flexGrow: 0,
+  textAlign: 'end',
+  paddingLeft: `${FIELD_BOX_PADDING_IN_REM}rem`
+}))
+
+const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
+  flex: 1,
+  textAlign: 'end'
+}))
+
 // TODO: investigate how to validate form fields (maybe using tanstack)
 
 // TODO: avoid unnecessary re-renders if possible
@@ -73,20 +92,42 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 
 // TODO: set current date as default date
 
-// TODO: use FIELD_BOX_PADDING_IN_REM in src/components/pages/spends/sub-pages/new-spend/NewSpend.tsx
-
-// TODO: CONTINUE implement modal to confirm reimbursement indicating the spend attributes
-
-// TODO: implement reimbursement list
+// TODO: CONTINUE implement reimbursement list
 
 function NewIncome() {
+  const apiLists = useLoaderData()
+
   const { state } = useLocation()
 
-  const { spend } = state || { spend: null }
+  const { spend }: { spend: Api.Spend } = state || { spend: null }
 
-  const { lists, functions, selection } = useIncomeCreation(
-    spend ? REIMBURSEMENT_SOURCE_ID : undefined
-  )
+  const { lists, functions, selection } = useIncomeCreation(spend ? REIMBURSEMENT : undefined)
+
+  let spendCategoryName
+  try {
+    const categoryName = apiUtils.findCategoryName(spend.categoryId!, apiLists.categories)
+    spendCategoryName = categoryName
+  } catch {
+    spendCategoryName = DEFAULT_CATEGORY
+  }
+
+  let spendSubcategoryName
+  try {
+    const subcategoryName = apiUtils.findSubcategoryName(spend.subcategoryId!, apiLists.subcategories)
+    spendSubcategoryName = subcategoryName
+  } catch {
+    spendSubcategoryName = DEFAULT_SUBCATEGORY
+  }
+
+  let spendGroupName
+  try {
+    const groupName = apiUtils.findGroupName(spend.groupId!, apiLists.groups)
+    spendGroupName = groupName
+  } catch {
+    spendGroupName = DEFAULT_GROUP
+  }
+
+  const spendAccountName = apiUtils.findAccountName(spend.accountId, apiLists.accounts)
 
   const handleIncomeSourceChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const incomeSourceId = parseInt(event.target.value as string)
@@ -107,7 +148,7 @@ function NewIncome() {
     fullWidth
   }
 
-  const incomeSourceSelectLabel = 'Account'
+  const incomeSourceSelectLabel = 'Source'
 
   const incomeSourceSelectLabelId = 'income-source-select-label'
 
@@ -172,22 +213,10 @@ function NewIncome() {
   return (
     <Page mainMenu={<MainMenu />}>
       <FormControl>
-        <Box>
-          <Paper>
-            <Box>
-              <Label>Date</Label>
-              <Value>1/1/2025</Value>
-            </Box>
-            <Box>
-              <Label>Category</Label>
-              <Value>Services</Value>
-            </Box>
-          </Paper>
-        </Box>
-        <Box>
+        <FieldBox>
           <DatePicker />
-        </Box>
-        <Box>
+        </FieldBox>
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...incomeSourceInputLabelProps}>
               {incomeSourceSelectLabel}
@@ -200,8 +229,46 @@ function NewIncome() {
               ))}
             </Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
+        </FieldBox>
+        {spend && (
+          <FieldBox>
+            <Paper variant="outlined">
+              <AttributeBox>
+                <Attribute>ID</Attribute>
+                <Value>{spend.id}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Date</Attribute>
+                <Value>{spend.date}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Category</Attribute>
+                <Value>{spendCategoryName}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Subcategory</Attribute>
+                <Value>{spendSubcategoryName}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Group</Attribute>
+                <Value>{spendGroupName}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Account</Attribute>
+                <Value>{spendAccountName}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Description</Attribute>
+                <Value>{spend.description}</Value>
+              </AttributeBox>
+              <AttributeBox>
+                <Attribute>Value</Attribute>
+                <Value>{spend.value}</Value>
+              </AttributeBox>
+            </Paper>
+          </FieldBox>
+        )}
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
             <Select {...accountSelectProps}>
@@ -212,16 +279,16 @@ function NewIncome() {
               ))}
             </Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
+        </FieldBox>
+        <FieldBox>
           <TextField {...descriptionFieldProps} />
-        </Box>
-        <Box>
+        </FieldBox>
+        <FieldBox>
           <TextField {...valueFieldProps} />
-        </Box>
-        <LastBox>
+        </FieldBox>
+        <ButtonBox>
           <Button variant="contained">SEND</Button>
-        </LastBox>
+        </ButtonBox>
       </FormControl>
     </Page>
   )
