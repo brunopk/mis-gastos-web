@@ -19,6 +19,8 @@ import ListControls from './ListControls'
 
 // TODO: filter data based on filters
 
+// TODO: remove date formatter (if it's really not necessary)
+
 const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(() => ({
   width: `${BUTTON_WIDTH_IN_REM}rem`
 }))
