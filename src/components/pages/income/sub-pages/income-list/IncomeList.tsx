@@ -1,19 +1,16 @@
-import Page from '../../../../Page'
-import MainMenu from '../../MainMenu'
-import Table from '../../../../Table'
 import { useQuery } from '@tanstack/react-query'
-import { getIncomes } from '../../../../../api/mis-gastos'
-import { useLoaderData } from 'react-router-dom'
-import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
+import { useNotifications } from '@toolpad/core/useNotifications'
 import { useEffect } from 'react'
-import useSnackBar from '../../../../../hooks/useSnackBar'
-
-
-// TODO: CONTINUE use useNotification from MUI instead of custom hook
+import { useLoaderData } from 'react-router-dom'
+import { getIncomes } from '../../../../../api/mis-gastos'
+import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
+import Page from '../../../../Page'
+import Table from '../../../../Table'
+import MainMenu from '../../MainMenu'
 
 interface Income {
-  id: number,
-  date: string, 
+  id: number
+  date: string
   incomeTypeId: number
   accountId: number
   description?: string
@@ -28,27 +25,28 @@ interface Income {
   value: number
 }
 
-function buildTableRows(
-  incomes: Api.Income[] | undefined): UI.Table.BaseRow<Income, void>[] {
-  return typeof incomes == 'undefined' ? [] : incomes.map((income) => ({
-    id: income.id,
-    data: {
-      id: income.id,
-      date: income.date,
-      incomeTypeId: income.incomeTypeId,
-      accountId: income.accountId, 
-      description: income.description,
-      value: income.value,
-      spendId: income.spend?.id,
-      spendDate: income.spend?.date,
-      spendCategoryId: income.spend?.categoryId,
-      spendSubcategoryId: income.spend?.subcategoryId,
-      spendGroupId: income.spend?.groupId,
-      spendDescription: income.spend?.description,
-      spendAccountId: income.spend?.accountId,
-      spendValue: income.spend?.value,
-    }
-  }))
+function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Income, void>[] {
+  return typeof incomes == 'undefined'
+    ? []
+    : incomes.map((income) => ({
+        id: income.id,
+        data: {
+          id: income.id,
+          date: income.date,
+          incomeTypeId: income.incomeTypeId,
+          accountId: income.accountId,
+          description: income.description,
+          value: income.value,
+          spendId: income.spend?.id,
+          spendDate: income.spend?.date,
+          spendCategoryId: income.spend?.categoryId,
+          spendSubcategoryId: income.spend?.subcategoryId,
+          spendGroupId: income.spend?.groupId,
+          spendDescription: income.spend?.description,
+          spendAccountId: income.spend?.accountId,
+          spendValue: income.spend?.value
+        }
+      }))
 }
 
 function buildColumnList(apiLists: {
@@ -123,27 +121,29 @@ function buildColumnList(apiLists: {
 
 function IncomeList() {
   const apiLists = useLoaderData()
-  
+
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['incomes'],
     queryFn: getIncomes,
     retry: 2
   })
 
-  const { pushSnackBarMessage } = useSnackBar()
-  
+  const notifications = useNotifications()
+
   const rows = buildTableRows(data)
 
   const columns = buildColumnList(apiLists)
 
   useEffect(() => {
     if (isError) {
-      pushSnackBarMessage({ text: error.toString(), severity: 'error' })
+      notifications.show(error.toString(), {
+        severity: 'error'
+      })
     }
-  }, [error, isError, pushSnackBarMessage])
+  }, [error, isError, notifications])
 
   return (
-    <Page isFetching={isFetching} mainMenu={<MainMenu/>}>
+    <Page isFetching={isFetching} mainMenu={<MainMenu />}>
       <Table rows={rows} columns={columns} />
     </Page>
   )

@@ -1,9 +1,9 @@
 import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
+import { useNotifications } from '@toolpad/core/useNotifications'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
-import useSnackBar from '../../../../../hooks/useSnackBar'
 import { paths } from '../../../../../Routes'
 import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
@@ -14,8 +14,6 @@ import MainMenu from '../../MainMenu'
 import ListControls from './ListControls'
 
 // TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
-
-// TODO: remove TanStack as dependency (use just fetch)
 
 // TODO: filter data based on filters
 
@@ -33,17 +31,19 @@ function buildTableRows(
   spends: Api.Spend[] | undefined,
   navigate: NavigateFunction
 ): UI.Table.BaseRow<Api.Spend, SpendButtons>[] {
-  return typeof spends == 'undefined' ? [] : spends.map((spend) => ({
-    id: spend.id,
-    data: spend,
-    buttons: [
-      {
-        id: 'newReimbursementBtn',
-        label: 'ADD REIMBURSEMENT',
-        clickHandler: () => navigate(paths.income.new, { state: { spend } })
-      }
-    ]
-  }))
+  return typeof spends == 'undefined'
+    ? []
+    : spends.map((spend) => ({
+        id: spend.id,
+        data: spend,
+        buttons: [
+          {
+            id: 'newReimbursementBtn',
+            label: 'ADD REIMBURSEMENT',
+            clickHandler: () => navigate(paths.income.new, { state: { spend } })
+          }
+        ]
+      }))
 }
 
 function buildColumnList(apiLists: {
@@ -101,6 +101,8 @@ function buildColumnList(apiLists: {
 }
 
 function SpendList() {
+  const notifications = useNotifications()
+
   const apiLists = useLoaderData()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -114,8 +116,6 @@ function SpendList() {
     queryFn: getSpends,
     retry: 2
   })
-
-  const { pushSnackBarMessage } = useSnackBar()
 
   const columns = buildColumnList(apiLists)
 
@@ -131,9 +131,11 @@ function SpendList() {
 
   useEffect(() => {
     if (isError) {
-      pushSnackBarMessage({ text: error.toString(), severity: 'error' })
+      notifications.show(error.toString(), {
+        severity: 'error'
+      })
     }
-  }, [error, isError, pushSnackBarMessage])
+  }, [error, isError, notifications])
 
   const primaryActionButton = (
     <Button onClick={() => alert('Not implemented')} color="primary" autoFocus>

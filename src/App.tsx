@@ -3,10 +3,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { NotificationsProvider, NotificationsProviderSlotProps } from '@toolpad/core/useNotifications'
 import { RouterProvider } from 'react-router-dom'
 import './App.css'
-import SnackBar from './components/SnackBar'
-import { SnackBarProvider } from './context/SnackBarContext'
 import { router } from './Routes'
 
 const queryClient = new QueryClient()
@@ -44,17 +43,22 @@ function App() {
     }
   })
 
+  const slotsProps: NotificationsProviderSlotProps = {
+    snackbar: {
+      anchorOrigin: { vertical: 'top', horizontal: 'center' },
+    },
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <SnackBarProvider>
-          <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <NotificationsProvider slotProps={slotsProps}>
             <CssBaseline />
-            <SnackBar />
             <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
             <RouterProvider router={router(queryClient)} />
-          </QueryClientProvider>
-        </SnackBarProvider>
+          </NotificationsProvider>
+        </QueryClientProvider>
       </LocalizationProvider>
     </ThemeProvider>
   )
