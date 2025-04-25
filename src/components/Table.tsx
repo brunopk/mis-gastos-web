@@ -66,7 +66,7 @@ function Table<R, B>({rows, columns }: UI.Table.TableProps<R, B>) {
                 <Mui.TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                   {columns.map((column) => {
                     if (typeof column.isButton !== 'undefined' && column.isButton) {
-                      const button = findButton(column.id.toString(), row.buttons)
+                      const button = findButton(column.id.toString(), row.buttons!)
                       return (
                         <Mui.TableCell key={column.id.toString()}>
                           <Mui.Button onClick={button.clickHandler}>

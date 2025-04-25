@@ -37,8 +37,18 @@ declare namespace Api {
     subcategoryId: number | null
     groupId: number | null
     accountId: number
-    description: string
+    description?: string
     value: number
+  }
+
+  interface Income {
+    id: number,
+    date: string, 
+    incomeTypeId: number
+    accountId: number
+    description?: string
+    value: number
+    spend?: Spend
   }
 }
 
@@ -54,7 +64,7 @@ declare namespace UI {
     interface BaseRow<R, B> {
       id: number,
       data: R
-      buttons: Button<B>[]
+      buttons?: Button<B>[]
     }
     
     interface Column<R, B> {

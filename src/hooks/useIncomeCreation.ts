@@ -4,7 +4,7 @@ import { useLoaderData } from 'react-router-dom'
 const INITIAL_STATE: State = {
   lists: {
     original: {
-      incomeSources: [],
+      incomeTypes: [],
       accounts: []
     },
     filtered: {
@@ -12,7 +12,7 @@ const INITIAL_STATE: State = {
     }
   },
   selection: {
-    incomeSource: {
+    incomeType: {
       id: null
     },
     account: {
@@ -22,7 +22,7 @@ const INITIAL_STATE: State = {
 }
 
 type SelectAction = {
-  type: 'SELECT_INCOME_SOURCE' | 'SELECT_ACCOUNT'
+  type: 'SELECT_INCOME_TYPE' | 'SELECT_ACCOUNT'
   data: {
     id: number
   }
@@ -31,7 +31,7 @@ type SelectAction = {
 type InitializeAction = {
   type: 'INITIALIZE'
   data: {
-    incomeSources: Api.ListItem[]
+    incomeTypes: Api.ListItem[]
     accounts: Api.Account[]
   }
 }
@@ -39,7 +39,7 @@ type InitializeAction = {
 interface State {
   lists: {
     original: {
-      incomeSources: Api.ListItem[]
+      incomeTypes: Api.ListItem[]
       accounts: Api.Account[]
     }
     filtered: {
@@ -47,7 +47,7 @@ interface State {
     }
   }
   selection: {
-    incomeSource: {
+    incomeType: {
       id: number | null
     }
     account: {
@@ -58,23 +58,23 @@ interface State {
 
 type Action = SelectAction | InitializeAction
 
-export default function useIncomeCreation(defaultIncomeSourceId?: number) {
+export default function useIncomeCreation(defaultIncomeTypeId?: number) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
-        let initialIncomeSources = action.data.incomeSources
-        if (typeof defaultIncomeSourceId != 'undefined')
-          initialIncomeSources = action.data.incomeSources.filter(
-            (incomeSource) => incomeSource.id == defaultIncomeSourceId
+        let initialIncomeTypes = action.data.incomeTypes
+        if (typeof defaultIncomeTypeId != 'undefined')
+          initialIncomeTypes = action.data.incomeTypes.filter(
+            (incomeType) => incomeType.id == defaultIncomeTypeId
           )
-        const selectedIncomeSource = initialIncomeSources[0]
+        const selectedIncomeType = initialIncomeTypes[0]
 
         let filteredAccounts = action.data.accounts.filter(
           (account) =>
-            typeof selectedIncomeSource.accountIds != 'undefined' &&
-            selectedIncomeSource.accountIds.includes(account.id)
+            typeof selectedIncomeType.accountIds != 'undefined' &&
+            selectedIncomeType.accountIds.includes(account.id)
         )
         if (filteredAccounts.length == 0) filteredAccounts = action.data.accounts.slice(0)
         const selectedAccount = filteredAccounts[0]
@@ -82,7 +82,7 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
         return {
           lists: {
             original: {
-              incomeSources: initialIncomeSources,
+              incomeTypes: initialIncomeTypes,
               accounts: action.data.accounts
             },
             filtered: {
@@ -90,8 +90,8 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
             }
           },
           selection: {
-            incomeSource: {
-              id: selectedIncomeSource.id
+            incomeType: {
+              id: selectedIncomeType.id
             },
             account: {
               id: selectedAccount.id
@@ -100,17 +100,17 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
         }
       }
 
-      // Income source selection is not allowed when typeof defaultIncomeSourceId == 'undefined'
-      case 'SELECT_INCOME_SOURCE': {
-        const selectedIncomeSourceId = action.data.id
-        const selectedIncomeSource = prevState.lists.original.incomeSources.find(
-          (incomeSource) => incomeSource.id == selectedIncomeSourceId
+      // Income source selection is not allowed when typeof defaultIncomeTypeId == 'undefined'
+      case 'SELECT_INCOME_TYPE': {
+        const selectedIncomeTypeId = action.data.id
+        const selectedIncomeType = prevState.lists.original.incomeTypes.find(
+          (incomeType) => incomeType.id == selectedIncomeTypeId
         )
 
         let filteredAccounts = prevState.lists.original.accounts.filter(
           (account) =>
-            typeof selectedIncomeSource!.accountIds != 'undefined' &&
-            selectedIncomeSource!.accountIds.includes(account.id)
+            typeof selectedIncomeType!.accountIds != 'undefined' &&
+            selectedIncomeType!.accountIds.includes(account.id)
         )
         if (filteredAccounts.length == 0)
           filteredAccounts = prevState.lists.original.accounts.slice(0)
@@ -124,8 +124,8 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
             }
           },
           selection: {
-            incomeSource: {
-              id: selectedIncomeSource!.id
+            incomeType: {
+              id: selectedIncomeType!.id
             },
             account: {
               id: selectedAccount.id
@@ -152,16 +152,16 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
-  const selectIncomeSource = useCallback(
+  const selectIncomeType = useCallback(
     (id: number) => {
-      if (typeof defaultIncomeSourceId != 'undefined')
+      if (typeof defaultIncomeTypeId != 'undefined')
         throw new Error(
-          `Income source selection is not allowed when typeof defaultIncomeSourceId != 'undefined', 
+          `Income source selection is not allowed when typeof defaultIncomeTypeId != 'undefined', 
             invoke useIncomeCreation without arguments to enable income source selection`
         )
-      dispatch({ type: 'SELECT_INCOME_SOURCE', data: { id } })
+      dispatch({ type: 'SELECT_INCOME_TYPE', data: { id } })
     },
-    [dispatch, defaultIncomeSourceId]
+    [dispatch, defaultIncomeTypeId]
   )
 
   const selectAccount = useCallback(
@@ -179,11 +179,11 @@ export default function useIncomeCreation(defaultIncomeSourceId?: number) {
   return {
     selection: { ...state.selection },
     lists: {
-      incomeSources: state.lists.original.incomeSources,
+      incomeTypes: state.lists.original.incomeTypes,
       accounts: state.lists.filtered.accounts
     },
     functions: {
-      selectIncomeSource,
+      selectIncomeType,
       selectAccount
     }
   }

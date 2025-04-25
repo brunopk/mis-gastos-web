@@ -33,10 +33,10 @@ export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
       queryFn: ApiQuery.getAccounts
     })
 
-    const incomeSourcesPromise = queryClient.fetchQuery({
+    const incomeTypesPromise = queryClient.fetchQuery({
       ...queryCommonAttributes,
-      queryKey: ['income-sources'],
-      queryFn: ApiQuery.getIncomeSources
+      queryKey: ['income-types'],
+      queryFn: ApiQuery.getIncomeTypes
     })
 
 
@@ -46,7 +46,7 @@ export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
       subcategoriesPromise,
       groupsPromise,
       accountsPromise,
-      incomeSourcesPromise
+      incomeTypesPromise
     ])
 
     const result = {
@@ -54,7 +54,7 @@ export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
       subcategories: lists[1],
       groups: lists[2],
       accounts: lists[3],
-      incomeSources: lists[4]
+      incomeTypes: lists[4]
     }
 
     return result

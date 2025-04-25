@@ -16,6 +16,8 @@ const DEFAULT_SUBCATEGORY = '-'
 
 const DEFAULT_GROUP = '-'
 
+const DEFAULT_ACCOUNT = '-'
+
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   width: '100%'
 }))
@@ -92,6 +94,8 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 
 // TODO: set current date as default date
 
+// TODO: remove reimbursement as option if spend is not present in useLocation state
+
 function NewIncome() {
   const apiLists = useLoaderData()
 
@@ -111,7 +115,10 @@ function NewIncome() {
 
   let spendSubcategoryName
   try {
-    const subcategoryName = apiUtils.findSubcategoryName(spend.subcategoryId!, apiLists.subcategories)
+    const subcategoryName = apiUtils.findSubcategoryName(
+      spend.subcategoryId!,
+      apiLists.subcategories
+    )
     spendSubcategoryName = subcategoryName
   } catch {
     spendSubcategoryName = DEFAULT_SUBCATEGORY
@@ -125,11 +132,17 @@ function NewIncome() {
     spendGroupName = DEFAULT_GROUP
   }
 
-  const spendAccountName = apiUtils.findAccountName(spend.accountId, apiLists.accounts)
+  let spendAccountName
+  try {
+    const accountName = apiUtils.findAccountName(spend.accountId, apiLists.accounts)
+    spendGroupName = accountName
+  } catch {
+    spendGroupName = DEFAULT_ACCOUNT
+  }
 
-  const handleIncomeSourceChange = (event: Mui.SelectChangeEvent<unknown>) => {
-    const incomeSourceId = parseInt(event.target.value as string)
-    functions.selectIncomeSource(incomeSourceId)
+  const handleIncomeTypeChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const incomeTypeId = parseInt(event.target.value as string)
+    functions.selectIncomeType(incomeTypeId)
   }
 
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -146,23 +159,23 @@ function NewIncome() {
     fullWidth
   }
 
-  const incomeSourceSelectLabel = 'Source'
+  const incomeTypeSelectLabel = 'Type'
 
-  const incomeSourceSelectLabelId = 'income-source-select-label'
+  const incomeTypeSelectLabelId = 'income-type-select-label'
 
-  const incomeSourceSelectProps: Mui.SelectProps = {
-    id: 'income-source-select',
-    label: incomeSourceSelectLabel,
-    labelId: incomeSourceSelectLabelId,
-    value: selection.incomeSource.id ? selection.incomeSource.id : '',
-    disabled: lists.incomeSources.length == 1,
+  const incomeTypeSelectProps: Mui.SelectProps = {
+    id: 'income-type-select',
+    label: incomeTypeSelectLabel,
+    labelId: incomeTypeSelectLabelId,
+    value: selection.incomeType.id ? selection.incomeType.id : '',
+    disabled: lists.incomeTypes.length == 1,
     variant,
     fullWidth,
-    onChange: handleIncomeSourceChange
+    onChange: handleIncomeTypeChange
   }
 
-  const incomeSourceInputLabelProps: Mui.InputLabelProps = {
-    id: incomeSourceSelectLabelId
+  const incomeTypeInputLabelProps: Mui.InputLabelProps = {
+    id: incomeTypeSelectLabelId
   }
 
   const accountSelectLabelId = 'account-select-label'
@@ -216,13 +229,11 @@ function NewIncome() {
         </FieldBox>
         <FieldBox>
           <Mui.FormControl {...formControlProps}>
-            <Mui.InputLabel {...incomeSourceInputLabelProps}>
-              {incomeSourceSelectLabel}
-            </Mui.InputLabel>
-            <Select {...incomeSourceSelectProps}>
-              {lists.incomeSources.map((incomeSource) => (
-                <Mui.MenuItem value={incomeSource.id} key={incomeSource.id}>
-                  {incomeSource.name}
+            <Mui.InputLabel {...incomeTypeInputLabelProps}>{incomeTypeSelectLabel}</Mui.InputLabel>
+            <Select {...incomeTypeSelectProps}>
+              {lists.incomeTypes.map((incomeType) => (
+                <Mui.MenuItem value={incomeType.id} key={incomeType.id}>
+                  {incomeType.name}
                 </Mui.MenuItem>
               ))}
             </Select>

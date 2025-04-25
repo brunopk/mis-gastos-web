@@ -9,9 +9,9 @@ export class ApiError extends Error {
   }
 }
 
-// TODO: use the real endpoint
+export async function getIncomeTypes(): Promise<Api.ListItem[]> {
+  // TODO: use the real endpoint
 
-export async function getIncomeSources(): Promise<Api.ListItem[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
 
   const body = await response.json()
@@ -101,12 +101,11 @@ export async function getSpends(): Promise<Api.Spend[]> {
     body as {
       id: number
       date: string
-      name: string
       category_id: number
       subcategory_id: number
       group_id: number
       account_id: number
-      description: string
+      description?: string
       value: number
     }[]
   ).map((spend) => ({
@@ -121,4 +120,77 @@ export async function getSpends(): Promise<Api.Spend[]> {
   }))
 
   return body
+}
+
+export async function getIncomes(): Promise<Api.Income[]> {
+  // TODO: uncomment this (its just for testing)
+
+  /*const response = await fetch(`${API_MIS_GASTOS_HOST}/incomes`)
+
+  const body = await response.json()
+
+  if (!response.ok) {
+    const stringifiedBody = JSON.stringify(body)
+    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
+  }
+
+  return (
+    body as {
+      id: number
+      date: string
+      income_type_id: number
+      account_id: number
+      description?: string
+      value: number
+      spend?: {
+        id: number
+        date: string
+        category_id: number
+        subcategory_id: number
+        group_id: number
+        account_id: number
+        description: string
+        value: number
+      }
+    }[]
+  ).map((income) => ({
+    id: income.id,
+    date: income.date,
+    incomeTypeId: income.income_type_id,
+    accountId: income.account_id,
+    description: income.description,
+    value: income.value,
+    spend: typeof income.spend === 'undefined' ? undefined : {
+      id: income.spend.id,
+      date: income.spend.date,
+      categoryId: income.spend.category_id,
+      subcategoryId: income.spend.subcategory_id,
+      groupId: income.spend.group_id,
+      accountId: income.spend.account_id,
+      description: income.spend.description, 
+      value: income.spend.value
+    }
+  }))*/
+
+  // TODO: remove this (its just for testing)
+
+  return [
+    {
+      id: 1,
+      date: '2025-01-02',
+      incomeTypeId: 1,
+      accountId: 1,
+      value: 10,
+      spend: {
+        id: 2,
+        categoryId: 1,
+        subcategoryId: 1,
+        groupId: 1,
+        accountId: 2,
+        date: '2025-01-01',
+        value: 1
+      }
+    },
+    { id: 2, date: '2025-01-03', incomeTypeId: 2, accountId: 1, value: 10, description: 'Test' }
+  ]
 }
