@@ -9,9 +9,9 @@ function MainMenu() {
 
   const location = useLocation()
 
-  const handleNewIncomeClick = () => navigate(paths.spends.new)
+  const handleNewIncomeClick = () => navigate(paths.income.new)
 
-  const handleIncomeListClick = () => navigate(paths.spends.list)
+  const handleIncomeListClick = () => navigate(paths.income.list)
 
   return (
     <>
