@@ -1,6 +1,6 @@
 import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import useSnackBar from '../../../../../hooks/useSnackBar'
