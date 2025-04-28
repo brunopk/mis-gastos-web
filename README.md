@@ -1,5 +1,6 @@
 # Mis gastos web
 
+TODO: improve documentation explaining how to set nginx in Home Assistant
 
 Part of the Mis gastos project, intended to be served as static content from Home Assistant OS.
 
