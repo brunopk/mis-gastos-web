@@ -2,6 +2,8 @@ import { QueryClient } from '@tanstack/react-query'
 import { LoaderFunction } from 'react-router-dom'
 import * as ApiQuery from './mis-gastos'
 
+// TODO: move all this functions to mis-gastos
+
 export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
   (queryClient) => async () => {
     const queryCommonAttributes = {
