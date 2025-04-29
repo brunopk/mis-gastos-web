@@ -1,7 +1,7 @@
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import PaidIcon from '@mui/icons-material/Paid'
-import ReceiptIcon from '@mui/icons-material/Receipt'
+import AddCircle from '@mui/icons-material/AddCircle'
+import RemoveCircle from '@mui/icons-material/RemoveCircle'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
@@ -12,8 +12,6 @@ import { useNavigate } from 'react-router-dom'
 import {paths} from '../Routes'
 import { MENU_WIDTH_IN_REM } from '../style'
 import DrawerHeader from './DrawerHeader'
-
-// TODO: change icons for spends ("-" icon) and income ("+" icon) 
 
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
   width: `${MENU_WIDTH_IN_REM}rem`
@@ -81,7 +79,7 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
           <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
             <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
               <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)} >
-                <ReceiptIcon />
+                <RemoveCircle />
               </ListItemIcon>
               <ListItemText primary="Spends" />
             </ListItemButton>
@@ -89,7 +87,7 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
           <ListItem key={1} onClick={() => handleIncomeClick()} disablePadding>
             <ListItemButton selected={location.pathname.startsWith(paths.income.index)}>
               <ListItemIcon selected={location.pathname.startsWith(paths.income.index)}>
-                <PaidIcon />
+                <AddCircle />
               </ListItemIcon>
               <ListItemText primary="Income" />
             </ListItemButton>
