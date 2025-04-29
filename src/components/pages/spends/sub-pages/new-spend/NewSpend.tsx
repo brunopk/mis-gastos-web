@@ -61,7 +61,7 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 
 // TODO: set maxHeight for selects lists
 
-// TODO: CONTINUE set current date as default date
+// TODO: set current date as default date
 
 function NewSpend() {
   const { lists, selection, functions } = useSpendCreation()
