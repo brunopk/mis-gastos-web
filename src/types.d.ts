@@ -31,7 +31,7 @@ declare namespace Api {
   }
 
   interface Spend {
-    id: number
+    id?: number
     date: string
     categoryId: number | null
     subcategoryId: number | null

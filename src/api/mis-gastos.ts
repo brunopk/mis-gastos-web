@@ -122,6 +122,39 @@ export async function getSpends(): Promise<Api.Spend[]> {
   return body
 }
 
+export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
+  const body = await post(`${API_MIS_GASTOS_HOST}/spends`, 
+    {
+      date: newSpend.date,
+      category_id: newSpend.categoryId,
+      subcategory_id: newSpend.subcategoryId,
+      group_id: newSpend.groupId,
+      account_id: newSpend.accountId,
+      description: newSpend.description,
+      value: newSpend.value
+    }) as {
+      id: number,
+      date: string,
+      category_id: number
+      subcategory_id: number | null 
+      group_id: number | null
+      account_id: number 
+      description?: string 
+      value: number 
+    }
+
+  return {
+    id: body.id,
+    date: body.date,
+    categoryId: body.category_id,
+    subcategoryId: body.subcategory_id,
+    groupId: body.group_id,
+    accountId: body.account_id,
+    description: body.description,
+    value: body.value
+  }
+}
+
 export async function getIncomes(): Promise<Api.Income[]> {
   // TODO: uncomment this (its just for testing)
 
@@ -193,4 +226,31 @@ export async function getIncomes(): Promise<Api.Income[]> {
     },
     { id: 2, date: '2025-01-03', incomeTypeId: 2, accountId: 1, value: 10, description: 'Test' }
   ]
+}
+
+async function post(url: string, json: object): Promise<object> {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(json),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  return handleApiErrors(response)
+}
+
+async function handleApiErrors(response: Response): Promise<object> {
+  const body = await response.json()
+
+  // TODO: handle errors the same way in all requests 
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      typeof body.message == 'string' ? body.message : JSON.stringify(body)
+    )
+  }
+
+  return body
 }

@@ -1,6 +1,9 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
-import { memo } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNotifications } from '@toolpad/core/useNotifications'
+import { FormEvent, memo } from 'react'
+import { ApiError, createSpend } from '../../../../../api/mis-gastos'
 import { constants, useSpendCreation } from '../../../../../hooks/useSpendCreation'
 import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
@@ -66,6 +69,31 @@ const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
 function NewSpend() {
   const { lists, selection, functions } = useSpendCreation()
 
+  const notifications = useNotifications()
+
+  const queryClient = useQueryClient()
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createSpend,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spends'] })
+      notifications.show('Spend added correctly', {
+        severity: 'success'
+      })
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.statusCode < 500) {
+        notifications.show(error.message, {
+          severity: 'warning'
+        })
+      } else {
+        notifications.show(error.message, {
+          severity: 'error'
+        })
+      }
+    }
+  })
+
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const categoryId = parseInt(event.target.value as string)
     functions.selectCategory(categoryId)
@@ -84,6 +112,24 @@ function NewSpend() {
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const accountId = parseInt(event.target.value as string)
     functions.selectAccount(accountId)
+  }
+
+  // TODO: set the correct date
+
+  // TODO: set the correct description
+
+  // TODO: set the correct value (field value)
+
+  const handleSpendCreation = (event: FormEvent) => {
+    event.preventDefault()
+    mutate({
+      date: new Date().toISOString(),
+      categoryId: selection.category.id,
+      subcategoryId: selection.subcategory.id,
+      groupId: selection.group.id,
+      accountId: selection.account.id!,
+      value: 10
+    })
   }
 
   const variant = 'standard'
@@ -197,7 +243,7 @@ function NewSpend() {
 
   return (
     <Page mainMenu={<MainMenu />}>
-      <FormControl>
+      <FormControl component="form" onSubmit={handleSpendCreation}>
         <Box>
           <DatePicker />
         </Box>
@@ -262,7 +308,9 @@ function NewSpend() {
           <TextField {...valueFieldProps} />
         </Box>
         <LastBox>
-          <Button variant="contained">SEND</Button>
+          <Button variant="contained" type="submit" loading={isPending}>
+            SEND
+          </Button>
         </LastBox>
       </FormControl>
     </Page>
