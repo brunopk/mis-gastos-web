@@ -45,8 +45,6 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   textAlign: 'end'
 }))
 
-// TODO: investigate how to validate form fields (maybe using tanstack)
-
 // TODO: avoid unnecessary re-renders if possible
 
 // TODO: set maxHeight for selects lists

@@ -104,8 +104,6 @@ function SpendList() {
 
   const navigate = useNavigate()
 
-  // TODO: create a "buildKey" to optimize queries with tanstack query keys
-
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['spends'],
     queryFn: getSpends,

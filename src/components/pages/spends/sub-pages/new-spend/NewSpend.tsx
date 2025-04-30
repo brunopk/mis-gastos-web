@@ -14,8 +14,6 @@ const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
 
 // TODO: filter accounts based on category/subcategory/group
 
-// TODO: investigate how to validate form fields (maybe using tanstack)
-
 // TODO: avoid unnecessary re-renders if possible
 
 // TODO: set maxHeight for selects lists
