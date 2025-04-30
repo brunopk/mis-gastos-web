@@ -61,31 +61,3 @@ export const apiListLoader: (queryClient: QueryClient) => LoaderFunction =
 
     return result
   }
-
-export function findCategoryName(categoryId: number, categories: Api.Category[]): string {
-  const category = categories.find((category) => category.id == categoryId)
-  if (typeof category == 'undefined')
-    throw new Error(`Category ${categoryId} not found`)
-  return category.name
-}
-
-export function findSubcategoryName(subcategoryId: number, subcategories: Api.Subcategory[]): string {
-  const subcategory = subcategories.find((subcategory) => subcategory.id == subcategoryId)
-  if (typeof subcategory == 'undefined')
-    throw new Error(`Subcategory ${subcategoryId} not found`)
-  return subcategory.name
-}
-
-export function findGroupName(groupId: number, groups: Api.Group[]): string {
-  const group = groups.find((group) => group.id == groupId)
-  if (typeof group == 'undefined')
-    throw new Error(`Group ${groupId} not found`)
-  return group.name
-}
-
-export function findAccountName(accountId: number, accounts: Api.Account[]): string {
-  const account = accounts.find((account) => account.id == accountId)
-  if (typeof account == 'undefined')
-    throw new Error(`Account ${accountId} not found`)
-  return account.name
-}

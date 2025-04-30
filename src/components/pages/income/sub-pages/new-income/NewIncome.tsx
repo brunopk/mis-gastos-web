@@ -1,7 +1,7 @@
 import * as Mui from '@mui/material'
 import { memo } from 'react'
 import { useLoaderData, useLocation } from 'react-router-dom'
-import * as apiUtils from '../../../../../api/utils'
+import * as api from '../../../../../api/mis-gastos'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
 import Page from '../../../../Page'
@@ -64,35 +64,35 @@ function NewIncome() {
 
   let spendCategoryName
   try {
-    const categoryName = apiUtils.findCategoryName(spend.categoryId!, apiLists.categories)
-    spendCategoryName = categoryName
+    const category = api.utils.findCategory(spend.categoryId!, apiLists.categories)
+    spendCategoryName = category.name
   } catch {
     spendCategoryName = DEFAULT_CATEGORY
   }
 
   let spendSubcategoryName
   try {
-    const subcategoryName = apiUtils.findSubcategoryName(
+    const subcategory = api.utils.findSubcategory(
       spend.subcategoryId!,
       apiLists.subcategories
     )
-    spendSubcategoryName = subcategoryName
+    spendSubcategoryName = subcategory.name
   } catch {
     spendSubcategoryName = DEFAULT_SUBCATEGORY
   }
 
   let spendGroupName
   try {
-    const groupName = apiUtils.findGroupName(spend.groupId!, apiLists.groups)
-    spendGroupName = groupName
+    const group = api.utils.findGroup(spend.groupId!, apiLists.groups)
+    spendGroupName = group.name
   } catch {
     spendGroupName = DEFAULT_GROUP
   }
 
   let spendAccountName
   try {
-    const accountName = apiUtils.findAccountName(spend.accountId, apiLists.accounts)
-    spendGroupName = accountName
+    const account = api.utils.findAccount(spend.accountId, apiLists.accounts)
+    spendGroupName = account.name
   } catch {
     spendGroupName = DEFAULT_ACCOUNT
   }

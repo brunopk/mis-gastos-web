@@ -1,5 +1,12 @@
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
+export const utils = {
+  findCategory,
+  findSubcategory,
+  findGroup,
+  findAccount
+}
+
 export class ApiError extends Error {
   statusCode: number
 
@@ -253,4 +260,32 @@ async function handleApiErrors(response: Response): Promise<object> {
   }
 
   return body
+}
+
+function findCategory(categoryId: number, categories: Api.Category[]): Api.Category {
+  const category = categories.find((category) => category.id == categoryId)
+  if (typeof category == 'undefined')
+    throw new Error(`Category ${categoryId} not found`)
+  return category
+}
+
+function findSubcategory(subcategoryId: number, subcategories: Api.Subcategory[]): Api.Subcategory {
+  const subcategory = subcategories.find((subcategory) => subcategory.id == subcategoryId)
+  if (typeof subcategory == 'undefined')
+    throw new Error(`Subcategory ${subcategoryId} not found`)
+  return subcategory
+}
+
+function findGroup(groupId: number, groups: Api.Group[]): Api.Group {
+  const group = groups.find((group) => group.id == groupId)
+  if (typeof group == 'undefined')
+    throw new Error(`Group ${groupId} not found`)
+  return group
+}
+
+function findAccount(accountId: number, accounts: Api.Account[]): Api.Account {
+  const account = accounts.find((account) => account.id == accountId)
+  if (typeof account == 'undefined')
+    throw new Error(`Account ${accountId} not found`)
+  return account
 }
