@@ -22,6 +22,8 @@ const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
 
 // TODO: set current date as default date
 
+// TODO: CONTINUE implement autocomplete for description 
+
 function NewSpend() {
   const { lists, selection, functions } = useSpendCreation()
 
