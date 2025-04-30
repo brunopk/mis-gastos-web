@@ -1,60 +1,16 @@
 import * as Mui from '@mui/material'
-import * as XDatePickers from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { FormEvent, memo } from 'react'
 import { ApiError, createSpend } from '../../../../../api/mis-gastos'
 import { constants, useSpendCreation } from '../../../../../hooks/useSpendCreation'
-import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
+import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
 const UNDEFINED_SUBCATEGORY = constants.UNDEFINED_SUBCATEGORY
 
 const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
-
-const PADDING_IN_REM = 1
-
-const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
-  display: 'flex',
-  flex: 1
-}))
-
-const Box = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
-  display: 'flex',
-  flex: 0,
-  padding: `${PADDING_IN_REM}rem`
-}))
-
-const LastBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
-  display: 'flex',
-  flex: 0,
-  flexDirection: 'row-reverse',
-  padding: `${PADDING_IN_REM}rem`,
-  [theme.breakpoints.down('sm')]: {
-    flex: 1,
-    flexDirection: 'column-reverse'
-  }
-}))
-
-const FormControl = Mui.styled(Mui.FormControl)<Mui.FormControlProps>(() => ({
-  flex: 1,
-  width: '100%'
-}))
-
-const Select = Mui.styled(Mui.Select)<Mui.SelectProps>(() => ({
-  textAlign: 'justify'
-}))
-
-const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
-  flex: 1
-}))
-
-const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
-    width: `${BUTTON_WIDTH_IN_REM}rem`
-  }
-}))
 
 // TODO: filter accounts based on category/subcategory/group
 
@@ -243,28 +199,28 @@ function NewSpend() {
 
   return (
     <Page mainMenu={<MainMenu />}>
-      <FormControl component="form" onSubmit={handleSpendCreation}>
-        <Box>
-          <DatePicker />
-        </Box>
-        <Box>
+      <Styled.FormControl component="form" onSubmit={handleSpendCreation}>
+        <Styled.FieldBox>
+          <Styled.DatePicker />
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
-            <Select {...categorySelectProps}>
+            <Styled.Select {...categorySelectProps}>
               {lists.categories.map((category) => (
                 <Mui.MenuItem value={category.id} key={category.id}>
                   {category.name}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...subcategoryInputLabelProps}>
               {subcategorySelectLabel}
             </Mui.InputLabel>
-            <Select {...subcategorySelectProps}>
+            <Styled.Select {...subcategorySelectProps}>
               {lists.subcategories.map((subcategory) => (
                 <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
                   {subcategory.id == UNDEFINED_SUBCATEGORY.id ? (
@@ -274,45 +230,45 @@ function NewSpend() {
                   )}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
-            <Select {...groupSelectProps}>
+            <Styled.Select {...groupSelectProps}>
               {lists.groups.map((group) => (
                 <Mui.MenuItem value={group.id} key={group.id}>
                   {group.id == UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
-            <Select {...accountSelectProps}>
+            <Styled.Select {...accountSelectProps}>
               {lists.accounts.map((account) => (
                 <Mui.MenuItem value={account.id} key={account.id}>
                   {account.name}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </Box>
-        <Box>
-          <TextField {...descriptionFieldProps} />
-        </Box>
-        <Box>
-          <TextField {...valueFieldProps} />
-        </Box>
-        <LastBox>
-          <Button variant="contained" type="submit" loading={isPending}>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
+          <Styled.TextField {...descriptionFieldProps} />
+        </Styled.FieldBox>
+        <Styled.FieldBox>
+          <Styled.TextField {...valueFieldProps} />
+        </Styled.FieldBox>
+        <Styled.ButtonBox>
+          <Styled.Button variant="contained" type="submit" loading={isPending}>
             SEND
-          </Button>
-        </LastBox>
-      </FormControl>
+          </Styled.Button>
+        </Styled.ButtonBox>
+      </Styled.FormControl>
     </Page>
   )
 }

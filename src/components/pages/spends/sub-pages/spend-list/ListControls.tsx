@@ -1,6 +1,7 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
+import { Select } from '../../../../styled'
 
 // TODO: implement column selection
 
@@ -24,10 +25,6 @@ const Paper = Mui.styled(Mui.Paper)(() => ({
   padding: '0.4rem',
   flex: 0,
   backgroundColor: 'inherit'
-}))
-
-const Select = Mui.styled(Mui.Select)<Mui.SelectProps>(() => ({
-  textAlign: 'justify'
 }))
 
 function ListFilters() {

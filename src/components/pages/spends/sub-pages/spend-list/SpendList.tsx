@@ -1,14 +1,13 @@
-import * as Mui from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import { paths } from '../../../../../Routes'
-import { BUTTON_WIDTH_IN_REM } from '../../../../../style'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
+import { Button } from '../../../../styled'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import ListControls from './ListControls'
@@ -18,10 +17,6 @@ import ListControls from './ListControls'
 // TODO: filter data based on filters
 
 // TODO: remove date formatter (if it's really not necessary)
-
-const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(() => ({
-  width: `${BUTTON_WIDTH_IN_REM}rem`
-}))
 
 interface SpendButtons {
   newReimbursementBtn: unknown

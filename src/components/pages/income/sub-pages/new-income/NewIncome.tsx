@@ -1,11 +1,11 @@
 import * as Mui from '@mui/material'
-import * as XDatePickers from '@mui/x-date-pickers'
 import { memo } from 'react'
 import { useLoaderData, useLocation } from 'react-router-dom'
 import * as apiUtils from '../../../../../api/utils'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
-import { BUTTON_WIDTH_IN_REM, FIELD_BOX_PADDING_IN_REM } from '../../../../../style'
+import { BOX_SMALL_PADDING_IN_REM } from '../../../../../style'
 import Page from '../../../../Page'
+import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
 const REIMBURSEMENT = 1
@@ -22,63 +22,22 @@ const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   width: '100%'
 }))
 
-const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
-  display: 'flex',
-  flex: 1
-}))
-
 const AttributeBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
   flex: 0,
-  padding: `${FIELD_BOX_PADDING_IN_REM / 8}rem ${FIELD_BOX_PADDING_IN_REM}rem`,
+  padding: `${BOX_SMALL_PADDING_IN_REM / 8}rem ${BOX_SMALL_PADDING_IN_REM}rem`,
   ':first-child': {
-    paddingTop: `${FIELD_BOX_PADDING_IN_REM}rem`
+    paddingTop: `${BOX_SMALL_PADDING_IN_REM}rem`
   },
   ':last-child': {
-    paddingBottom: `${FIELD_BOX_PADDING_IN_REM}rem`
-  }
-}))
-
-const FieldBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
-  display: 'flex',
-  flex: 0,
-  padding: `${FIELD_BOX_PADDING_IN_REM}rem`
-}))
-
-const ButtonBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
-  display: 'flex',
-  flex: 0,
-  flexDirection: 'row-reverse',
-  padding: `${FIELD_BOX_PADDING_IN_REM}rem`,
-  [theme.breakpoints.down('sm')]: {
-    flex: 1,
-    flexDirection: 'column-reverse'
-  }
-}))
-
-const FormControl = Mui.styled(Mui.FormControl)<Mui.FormControlProps>(() => ({
-  flex: 1,
-  width: '100%'
-}))
-
-const Select = Mui.styled(Mui.Select)<Mui.SelectProps>(() => ({
-  textAlign: 'justify'
-}))
-
-const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
-  flex: 1
-}))
-
-const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: {
-    width: `${BUTTON_WIDTH_IN_REM}rem`
+    paddingBottom: `${BOX_SMALL_PADDING_IN_REM}rem`
   }
 }))
 
 const Attribute = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 0,
   textAlign: 'end',
-  paddingLeft: `${FIELD_BOX_PADDING_IN_REM}rem`
+  paddingLeft: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
@@ -223,24 +182,24 @@ function NewIncome() {
 
   return (
     <Page mainMenu={<MainMenu />}>
-      <FormControl>
-        <FieldBox>
-          <DatePicker />
-        </FieldBox>
-        <FieldBox>
+      <Styled.FormControl>
+        <Styled.SmallFieldBox>
+          <Styled.DatePicker />
+        </Styled.SmallFieldBox>
+        <Styled.SmallFieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...incomeTypeInputLabelProps}>{incomeTypeSelectLabel}</Mui.InputLabel>
-            <Select {...incomeTypeSelectProps}>
+            <Styled.Select {...incomeTypeSelectProps}>
               {lists.incomeTypes.map((incomeType) => (
                 <Mui.MenuItem value={incomeType.id} key={incomeType.id}>
                   {incomeType.name}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </FieldBox>
+        </Styled.SmallFieldBox>
         {spend && (
-          <FieldBox>
+          <Styled.SmallFieldBox>
             <Paper variant="outlined">
               <AttributeBox>
                 <Attribute>ID</Attribute>
@@ -275,30 +234,30 @@ function NewIncome() {
                 <Value>{spend.value}</Value>
               </AttributeBox>
             </Paper>
-          </FieldBox>
+          </Styled.SmallFieldBox>
         )}
-        <FieldBox>
+        <Styled.SmallFieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
-            <Select {...accountSelectProps}>
+            <Styled.Select {...accountSelectProps}>
               {lists.accounts.map((account) => (
                 <Mui.MenuItem value={account.id} key={account.id}>
                   {account.name}
                 </Mui.MenuItem>
               ))}
-            </Select>
+            </Styled.Select>
           </Mui.FormControl>
-        </FieldBox>
-        <FieldBox>
-          <TextField {...descriptionFieldProps} />
-        </FieldBox>
-        <FieldBox>
-          <TextField {...valueFieldProps} />
-        </FieldBox>
-        <ButtonBox>
-          <Button variant="contained">SEND</Button>
-        </ButtonBox>
-      </FormControl>
+        </Styled.SmallFieldBox>
+        <Styled.SmallFieldBox>
+          <Styled.TextField {...descriptionFieldProps} />
+        </Styled.SmallFieldBox>
+        <Styled.SmallFieldBox>
+          <Styled.TextField {...valueFieldProps} />
+        </Styled.SmallFieldBox>
+        <Styled.ButtonBox>
+          <Styled.Button variant="contained">SEND</Styled.Button>
+        </Styled.ButtonBox>
+      </Styled.FormControl>
     </Page>
   )
 }
