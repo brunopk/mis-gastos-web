@@ -3,15 +3,13 @@ import * as XDatePickers from '@mui/x-date-pickers'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
 import { Select } from '../../../../styled'
 
-// TODO: implement column selection
-
 // TODO: continue the same idea as in categories and subcategories for groups etc
 
 // TODO: Fix to set names (strings) for subcategories  instead of numbers
 
-// TODO: use styled components
+const PADDING_IN_REM = 0.4
 
-const Stack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
+const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
 }))
 
@@ -19,12 +17,27 @@ const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
   display: 'flex'
 }))
 
-const Paper = Mui.styled(Mui.Paper)(() => ({
+const FieldGroupPaper = Mui.styled(Mui.Paper)(() => ({
   width: '100%',
-  marginTop: '0.4rem',
-  padding: '0.4rem',
+  marginTop: `${PADDING_IN_REM}rem`,
+  padding: `${PADDING_IN_REM}rem`,
   flex: 0,
   backgroundColor: 'inherit'
+}))
+
+const FieldBox = Mui.styled(Mui.Box)(() => ({
+  flexGrow: 1, 
+  padding: `${PADDING_IN_REM}rem`
+}))
+
+const FieldGroupTitle = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
+  flexGrow: 1, 
+  marginLeft: `${PADDING_IN_REM}rem`
+}))
+
+const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
+  textAlign: 'start',
+  marginTop: `${PADDING_IN_REM}rem`
 }))
 
 function ListFilters() {
@@ -148,36 +161,33 @@ function ListFilters() {
 
   return (
     <Mui.Box>
-      <Paper elevation={0} variant="outlined">
-        <Stack>
-          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
-            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
+      <FieldGroupPaper elevation={0} variant="outlined">
+        <FieldGroupStack>
+          <FieldGroupBoxTitle>
+            <FieldGroupTitle component="span">
               Dates
-            </Mui.Typography>
-          </Mui.Box>
-        </Stack>
-
-        <Stack direction="row" spacing={1} sx={{ marginTop: '0.4rem' }}>
-          <Mui.Box sx={{ flexGrow: 1 }}>
+            </FieldGroupTitle>
+          </FieldGroupBoxTitle>
+        </FieldGroupStack>
+        <FieldGroupStack direction="row" spacing={1}>
+          <FieldBox>
             <DatePicker />
-          </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1 }}>
+          </FieldBox>
+          <FieldBox>
             <DatePicker />
-          </Mui.Box>
-        </Stack>
-      </Paper>
-
-      <Paper elevation={0} variant="outlined">
-        <Stack>
-          <Mui.Box sx={{ textAlign: 'start', marginTop: '0.4rem' }}>
-            <Mui.Typography component="span" sx={{ flexGrow: 1, marginLeft: '0.4rem' }}>
+          </FieldBox>
+        </FieldGroupStack>
+      </FieldGroupPaper>
+      <FieldGroupPaper elevation={0} variant="outlined">
+        <FieldGroupStack>
+          <FieldGroupBoxTitle>
+            <FieldGroupTitle component="span">
               Filters
-            </Mui.Typography>
-          </Mui.Box>
-        </Stack>
-
-        <Stack direction="column" spacing={1} sx={{ marginTop: '0.4rem' }}>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+            </FieldGroupTitle>
+          </FieldGroupBoxTitle>
+        </FieldGroupStack>
+        <FieldGroupStack direction="column" spacing={1}>
+          <FieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
               <Select {...categorySelectProps}>
@@ -189,8 +199,8 @@ function ListFilters() {
                 ))}
               </Select>
             </Mui.FormControl>
-          </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}>
+          </FieldBox>
+          <FieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...subcategoryInputLabelProps}>
                 {subcategorySelectLabel}
@@ -209,11 +219,9 @@ function ListFilters() {
                 ])}
               </Select>
             </Mui.FormControl>
-          </Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
-          <Mui.Box sx={{ flexGrow: 1, padding: '0.4rem' }}></Mui.Box>
-        </Stack>
-      </Paper>
+          </FieldBox>
+        </FieldGroupStack>
+      </FieldGroupPaper>
     </Mui.Box>
   )
 }
