@@ -1,6 +1,6 @@
 import * as XDatePickers from '@mui/x-date-pickers'
 import * as Mui from '@mui/material'
-import { BUTTON_WIDTH_IN_REM, BOX_PADDING_IN_REM, BOX_SMALL_PADDING_IN_REM } from '../style'
+import { BUTTON_WIDTH_IN_REM, BOX_PADDING_IN_REM, BOX_SMALL_PADDING_IN_REM } from '../constants'
 
 export const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
   display: 'flex',

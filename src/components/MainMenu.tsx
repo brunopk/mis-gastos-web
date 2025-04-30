@@ -10,7 +10,7 @@ import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {paths} from '../Routes'
-import { MENU_WIDTH_IN_REM } from '../style'
+import { MENU_WIDTH_IN_REM } from '../constants'
 import DrawerHeader from './DrawerHeader'
 
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
