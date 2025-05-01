@@ -8,3 +8,5 @@ export const BUTTON_WIDTH_IN_REM = 7
 export const BOX_SMALL_PADDING_IN_REM = 0.5
 
 export const BOX_PADDING_IN_REM = 1
+
+export const MODAL_WIDTH = 500

@@ -1,7 +1,6 @@
 import * as Mui from '@mui/material'
-import { Fragment, memo} from 'react'
-
-const WIDTH = 500
+import { Fragment, memo } from 'react'
+import { MODAL_WIDTH } from '../../constants'
 
 const PADDING_IN_REM = 0.25
 
@@ -15,11 +14,11 @@ const DialogTitle = Mui.styled(
 const DialogContent = Mui.styled(
   Mui.DialogContent,
   {}
-)<Mui.DialogContentProps>(({theme}) => ({
+)<Mui.DialogContentProps>(({ theme }) => ({
   padding: `inherit ${PADDING_IN_REM * 6}rem`,
   [theme.breakpoints.up('sm')]: {
-    width: `${WIDTH}px`
-  },
+    width: `${MODAL_WIDTH}px`
+  }
 }))
 
 const DialogActions = Mui.styled(
@@ -30,7 +29,6 @@ const DialogActions = Mui.styled(
   flexGrow: 1,
   padding: `${PADDING_IN_REM * 4}rem ${PADDING_IN_REM * 6}rem`
 }))
-
 
 function ModalBase({
   children,
@@ -46,25 +44,27 @@ function ModalBase({
 
   const theme = Mui.useTheme()
 
-  const isSmallScreen = Mui.useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmallScreen = Mui.useMediaQuery(theme.breakpoints.down('sm'))
+
+  const modalDialogProps: Mui.DialogProps = {
+    open,
+    fullWidth: isSmallScreen,
+    'aria-labelledby': 'alert-dialog-title',
+    'aria-describedby': 'alert-dialog-description',
+    onClose: handleModalClose
+  }
 
   return (
     <Fragment>
-      <Mui.Dialog
-        open={open}
-        onClose={handleModalClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        fullWidth={isSmallScreen}
-      >
-          <DialogTitle id="alert-dialog-title" variant="h5">
-            {title}
-          </DialogTitle>
-          <DialogContent>{children}</DialogContent>
-          <DialogActions>
-            {secondaryActionButton}
-            {primaryActionButton}
-          </DialogActions>
+      <Mui.Dialog {...modalDialogProps}>
+        <DialogTitle id="alert-dialog-title" variant="h5">
+          {title}
+        </DialogTitle>
+        <DialogContent>{children}</DialogContent>
+        <DialogActions>
+          {secondaryActionButton}
+          {primaryActionButton}
+        </DialogActions>
       </Mui.Dialog>
     </Fragment>
   )

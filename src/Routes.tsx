@@ -3,12 +3,14 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouteProps } from
 import { apiListLoader } from './api/utils'
 import ErrorBoundary from './components/ErrorBoundary'
 import NotFound from './components/NotFound'
+import Login from './components/pages/login/Login'
 import NewSpend from './components/pages/spends/sub-pages/new-spend/NewSpend'
 import NewIncome from './components/pages/income/sub-pages/new-income/NewIncome'
 import SpendList from './components/pages/spends/sub-pages/spend-list/SpendList'
 import IncomeList from './components/pages/income/sub-pages/income-list/IncomeList'
 
 export const paths = {
+  login: '/login',
   spends: {
     index: '/spends',
     list: '/spends/list',
@@ -30,6 +32,7 @@ export const router = (queryClient: QueryClient) => {
   return createBrowserRouter(
     createRoutesFromElements(
       <Route hydrateFallbackElement={<ErrorBoundary />}>
+        <Route path={paths.login} element={<Login/>}/>
         <Route {...commonRouteProps} path={paths.spends.list} element={<SpendList />} />
         <Route {...commonRouteProps} path={paths.spends.new} element={<NewSpend />} />
         <Route {...commonRouteProps} path={paths.income.new} element={<NewIncome />} />
