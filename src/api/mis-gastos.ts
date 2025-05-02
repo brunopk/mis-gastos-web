@@ -235,6 +235,20 @@ export async function getIncomes(): Promise<Api.Income[]> {
   ]
 }
 
+// TODO: invoke the real endpoint
+
+export async function getDescriptionAutocompleteOptions(text: string): Promise<Api.DescriptionAutocompleteOptions> {
+  const descriptions = ['Padel', 'Supermercado', 'Comida', 'Comida restaurant']
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`Returning results from getDescriptions for ${text}`)
+      const result = descriptions.filter((description) => description.includes(text))
+      resolve({search: text, options: result})
+    }, Math.floor(Math.random()*100))
+  })
+}
+
+
 async function post(url: string, json: object): Promise<object> {
   const response = await fetch(url, {
     method: 'POST',

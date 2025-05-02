@@ -4,6 +4,7 @@ import { useNotifications } from '@toolpad/core/useNotifications'
 import { FormEvent, memo } from 'react'
 import { ApiError, createSpend } from '../../../../../api/mis-gastos'
 import { constants, useSpendCreation } from '../../../../../hooks/useSpendCreation'
+import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
@@ -20,7 +21,7 @@ const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
 
 // TODO: set current date as default date
 
-// TODO: CONTINUE implement autocomplete for description 
+// TODO: CONTINUE implement autocomplete for description
 
 function NewSpend() {
   const { lists, selection, functions } = useSpendCreation()
@@ -173,18 +174,6 @@ function NewSpend() {
     id: accountSelectLabelId
   }
 
-  const descriptionFieldProps: Mui.TextFieldProps = {
-    id: 'description-textfield',
-    label: 'Description',
-    type: 'text',
-    variant,
-    slotProps: {
-      inputLabel: {
-        shrink: true
-      }
-    }
-  }
-
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
@@ -258,7 +247,7 @@ function NewSpend() {
           </Mui.FormControl>
         </Styled.FieldBox>
         <Styled.FieldBox>
-          <Styled.TextField {...descriptionFieldProps} />
+          <Autocomplete />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Styled.TextField {...valueFieldProps} />

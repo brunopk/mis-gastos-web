@@ -20,6 +20,10 @@ export const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
   flex: 1
 }))
 
+export const Autocomplete = Mui.styled(Mui.Autocomplete)<Mui.AutocompleteProps>(() => ({
+  flex: 1
+}))
+
 export const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
     width: `${BUTTON_WIDTH_IN_REM}rem`

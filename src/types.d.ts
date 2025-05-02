@@ -30,6 +30,11 @@ declare namespace Api {
     subcategoryId: number
   }
 
+  interface DescriptionAutocompleteOptions {
+    search: string,
+    options: string[]
+  }
+
   interface Spend {
     id?: number
     date: string
