@@ -2,12 +2,12 @@ import * as Mui from '@mui/material'
 import { BOX_PADDING_IN_REM, MODAL_WIDTH } from '../../../constants'
 import { TextField } from '../../styled'
 
-// TODO: continue login implementation 
+// TODO: continue login implementation
 
 const Container = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
   backgroundColor: 'inherit',
   [theme.breakpoints.up('sm')]: {
-    width: `${MODAL_WIDTH}px`
+    width: `${MODAL_WIDTH/1.25}px`
   },
   [theme.breakpoints.down('sm')]: {
     flex: 1
@@ -15,8 +15,8 @@ const Container = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
 }))
 
 const FieldPaper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
-  padding: `${BOX_PADDING_IN_REM*2}rem 0 ${BOX_PADDING_IN_REM*2}rem 0`,
-  marginTop: `${BOX_PADDING_IN_REM*2}rem`
+  padding: `${BOX_PADDING_IN_REM * 2}rem 0 ${BOX_PADDING_IN_REM * 2}rem 0`,
+  marginTop: `${BOX_PADDING_IN_REM}rem`
 }))
 
 const LogoBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
@@ -64,21 +64,23 @@ function Login() {
 
   return (
     <Container>
-      <LogoBox>
-        <img src="icon.png" width={100} height={100}/>
-      </LogoBox>
-      <FieldPaper elevation={0} variant="outlined">
-          <FieldBox>
-            <TextField {...usernameFieldProps} />
-          </FieldBox>
-          <FieldBox>
-            <TextField {...passwordFieldProps} />
-          </FieldBox>
-          <FieldBox>
-            <Button variant="contained" type="submit">
-              LOGIN
-            </Button>
-          </FieldBox>
+      <FieldPaper>
+        <LogoBox>
+          <img src="icon.png" width={100} height={100} />
+        </LogoBox>
+      </FieldPaper>
+      <FieldPaper>
+        <FieldBox>
+          <TextField {...usernameFieldProps} />
+        </FieldBox>
+        <FieldBox>
+          <TextField {...passwordFieldProps} />
+        </FieldBox>
+        <FieldBox>
+          <Button variant="contained" type="submit">
+            LOGIN
+          </Button>
+        </FieldBox>
       </FieldPaper>
     </Container>
   )
