@@ -53,6 +53,8 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 
 // TODO: remove reimbursement as option if spend is not present in useLocation state
 
+// TODO: use new autocomplete component
+
 function NewIncome() {
   const apiLists = useLoaderData()
 
