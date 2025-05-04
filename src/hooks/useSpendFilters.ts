@@ -5,7 +5,6 @@ import { useLoaderData } from 'react-router-dom'
 
 // TODO: use interfaces instead of type (when possible)
 
-
 const INITIAL_STATE: State = {
   isOpen: {
     categories: false,
@@ -185,9 +184,11 @@ function useSpendFilters() {
           visible: true,
           parentId: (subcategory as Api.Subcategory).categoryId
         }))
-        const subcategories: ExtendedSubcategory[][] = categories.map((category) =>
-          subcategoriesAux.filter((subcategory) => subcategory.categoryId == category.id)
-        )
+        const subcategories: ExtendedSubcategory[][] = categories
+          .map((category) =>
+            subcategoriesAux.filter((subcategory) => subcategory.categoryId == category.id)
+          )
+          .filter((subList) => subList.length > 0)
 
         const groupsAux: ExtendedGroup[] = sortItemsByName(action.data.groups).map((group) => ({
           ...(group as Api.Group),
@@ -195,9 +196,9 @@ function useSpendFilters() {
           visible: true,
           parentId: (group as Api.Group).subcategoryId
         }))
-        const groups: ExtendedGroup[][] = subcategoriesAux.map((subcategory) =>
-          groupsAux.filter((group) => group.subcategoryId == subcategory.id)
-        )
+        const groups: ExtendedGroup[][] = subcategoriesAux
+          .map((subcategory) => groupsAux.filter((group) => group.subcategoryId == subcategory.id))
+          .filter((subList) => subList.length > 0)
 
         const accounts: ExtendedAccount[] = sortItemsByName(action.data.accounts).map(
           (account, index) => ({
