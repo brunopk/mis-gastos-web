@@ -253,7 +253,7 @@ function useSpendFilters() {
                 return strings.join(', ')
               },
               getParentName: (parentId: number) =>
-                groupsAux.find((group) => group.id == parentId)!.name
+                subcategoriesAux.find((subcategory) => subcategory.id == parentId)!.name
             },
             accounts: {
               getNames: (ids: unknown) => {

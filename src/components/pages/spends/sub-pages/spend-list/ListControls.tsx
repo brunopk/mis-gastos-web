@@ -3,10 +3,6 @@ import * as XDatePickers from '@mui/x-date-pickers'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
 import { Select } from '../../../../styled'
 
-// TODO: continue the same idea as in categories and subcategories for groups etc
-
-// TODO: Fix to set names (strings) for subcategories  instead of numbers
-
 const PADDING_IN_REM = 0.4
 
 const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
@@ -26,12 +22,12 @@ const FieldGroupPaper = Mui.styled(Mui.Paper)(() => ({
 }))
 
 const FieldBox = Mui.styled(Mui.Box)(() => ({
-  flexGrow: 1, 
+  flexGrow: 1,
   padding: `${PADDING_IN_REM}rem`
 }))
 
 const FieldGroupTitle = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
-  flexGrow: 1, 
+  flexGrow: 1,
   marginLeft: `${PADDING_IN_REM}rem`
 }))
 
@@ -66,8 +62,6 @@ function ListFilters() {
     const {
       target: { value }
     } = event
-    console.log('handleSubcategoriesChange')
-    console.log(event)
     functions.subcategories.select(
       typeof value === 'string'
         ? value.split(',').map((value) => parseInt(value))
@@ -81,6 +75,44 @@ function ListFilters() {
 
   const handleSubcategoriesRenderValue = (selected: unknown) => {
     return <Mui.Typography>{functions.subcategories.getNames(selected)}</Mui.Typography>
+  }
+
+  const handleGroupsChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const {
+      target: { value }
+    } = event
+    functions.groups.select(
+      typeof value === 'string'
+        ? value.split(',').map((value) => parseInt(value))
+        : (value as number[])
+    )
+  }
+
+  const handleGroupsClick = () => {
+    functions.groups.toggle()
+  }
+
+  const handleGroupsRenderValue = (selected: unknown) => {
+    return <Mui.Typography>{functions.groups.getNames(selected)}</Mui.Typography>
+  }
+
+  const handleAccountsChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const {
+      target: { value }
+    } = event
+    functions.accounts.select(
+      typeof value === 'string'
+        ? value.split(',').map((value) => parseInt(value))
+        : (value as number[])
+    )
+  }
+
+  const handleAccountsClick = () => {
+    functions.accounts.toggle()
+  }
+
+  const handleAccountsRenderValue = (selected: unknown) => {
+    return <Mui.Typography>{functions.accounts.getNames(selected)}</Mui.Typography>
   }
 
   const commonMenuProps: Mui.MenuProps = {
@@ -100,18 +132,14 @@ function ListFilters() {
 
   const multiple = true
 
-  const categorySelectLabel = 'Category'
-
-  const categorySelectId = 'category-select'
-
-  const subcategorySelectLabel = 'Subcategory'
-
-  const subcategorySelectId = 'subcategory-select'
-
   const formControlProps: Mui.FormControlProps = {
     variant,
     fullWidth
   }
+
+  const categorySelectLabel = 'Category'
+
+  const categorySelectId = 'category-select'
 
   const categoryInputLabelProps: Mui.InputLabelProps = {
     htmlFor: categorySelectId
@@ -136,6 +164,10 @@ function ListFilters() {
     onClick: handleCategoriesClick
   }
 
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectId = 'subcategory-select'
+
   const subcategoryMenuProps: Mui.MenuProps = {
     ...commonMenuProps,
     open: isOpen.subcategories
@@ -159,14 +191,66 @@ function ListFilters() {
     htmlFor: subcategorySelectId
   }
 
+  const groupSelectLabel = 'Group'
+
+  const groupSelectId = 'group-select'
+
+  const groupMenuProps: Mui.MenuProps = {
+    ...commonMenuProps,
+    open: isOpen.groups
+  }
+
+  const groupSelectProps: Mui.SelectProps = {
+    id: groupSelectId,
+    label: groupSelectLabel,
+    value: selection.group.ids,
+    disabled: lists.groups.length == 0,
+    MenuProps: groupMenuProps,
+    variant,
+    fullWidth,
+    multiple,
+    renderValue: handleGroupsRenderValue,
+    onChange: handleGroupsChange,
+    onClick: handleGroupsClick
+  }
+
+  const groupInputLabelProps: Mui.InputLabelProps = {
+    htmlFor: groupSelectId
+  }
+
+  const accountSelectLabel = 'Account'
+
+  const accountSelectId = 'account-select'
+
+  const accountMenuProps: Mui.MenuProps = {
+    ...commonMenuProps,
+    open: isOpen.accounts
+  }
+
+  const accountSelectProps: Mui.SelectProps = {
+    id: accountSelectId,
+    label: accountSelectLabel,
+    value: selection.account.ids,
+    disabled: lists.accounts.length == 0,
+    MenuProps: accountMenuProps,
+    variant,
+    fullWidth,
+    multiple,
+    renderValue: handleAccountsRenderValue,
+    onChange: handleAccountsChange,
+    onClick: handleAccountsClick
+  }
+
+  const accountInputLabelProps: Mui.InputLabelProps = {
+    htmlFor: accountSelectId
+  }
+
   return (
     <Mui.Box>
       <FieldGroupPaper elevation={0} variant="outlined">
         <FieldGroupStack>
           <FieldGroupBoxTitle>
-            <FieldGroupTitle component="span">
-              Dates
-            </FieldGroupTitle>
+            <FieldGroupTitle component="span">Dates</FieldGroupTitle>
           </FieldGroupBoxTitle>
         </FieldGroupStack>
         <FieldGroupStack direction="row" spacing={1}>
@@ -181,9 +265,7 @@ function ListFilters() {
       <FieldGroupPaper elevation={0} variant="outlined">
         <FieldGroupStack>
           <FieldGroupBoxTitle>
-            <FieldGroupTitle component="span">
-              Filters
-            </FieldGroupTitle>
+            <FieldGroupTitle component="span">Filters</FieldGroupTitle>
           </FieldGroupBoxTitle>
         </FieldGroupStack>
         <FieldGroupStack direction="column" spacing={1}>
@@ -213,9 +295,40 @@ function ListFilters() {
                   ...list.map((subcategory) => (
                     <Mui.MenuItem key={subcategory.id} value={subcategory.id}>
                       <Mui.Checkbox checked={subcategory.checked} />
-                      <Mui.ListItemText primary={subcategory.id} />
+                      <Mui.ListItemText primary={subcategory.name} />
                     </Mui.MenuItem>
                   ))
+                ])}
+              </Select>
+            </Mui.FormControl>
+          </FieldBox>
+          <FieldBox>
+            <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
+              <Select {...groupSelectProps}>
+                {lists.groups.flatMap((subList, index) => [
+                  <Mui.ListSubheader key={`header-${index}`}>
+                    {functions.groups.getParentName(subList[0].parentId!)}
+                  </Mui.ListSubheader>,
+                  ...subList.map((group) => (
+                    <Mui.MenuItem key={group.id} value={group.id}>
+                      <Mui.Checkbox checked={group.checked} />
+                      <Mui.ListItemText primary={group.name} />
+                    </Mui.MenuItem>
+                  ))
+                ])}
+              </Select>
+            </Mui.FormControl>
+          </FieldBox>
+          <FieldBox>
+            <Mui.FormControl {...formControlProps}>
+              <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
+              <Select {...accountSelectProps}>
+                {lists.accounts.flatMap((account) => [
+                  <Mui.MenuItem key={account.id} value={account.id}>
+                    <Mui.Checkbox checked={account.checked} />
+                    <Mui.ListItemText primary={account.name} />
+                  </Mui.MenuItem>
                 ])}
               </Select>
             </Mui.FormControl>
