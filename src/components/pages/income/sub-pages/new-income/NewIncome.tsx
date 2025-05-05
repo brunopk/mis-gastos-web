@@ -183,10 +183,10 @@ function NewIncome() {
   return (
     <Page mainMenu={<MainMenu />}>
       <Styled.FormControl>
-        <Styled.SmallFieldBox>
+        <Styled.FieldBox>
           <Styled.DatePicker />
-        </Styled.SmallFieldBox>
-        <Styled.SmallFieldBox>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...incomeTypeInputLabelProps}>{incomeTypeSelectLabel}</Mui.InputLabel>
             <Styled.Select {...incomeTypeSelectProps}>
@@ -197,7 +197,7 @@ function NewIncome() {
               ))}
             </Styled.Select>
           </Mui.FormControl>
-        </Styled.SmallFieldBox>
+        </Styled.FieldBox>
         {spend && (
           <Styled.SmallFieldBox>
             <Paper variant="outlined">
@@ -236,7 +236,7 @@ function NewIncome() {
             </Paper>
           </Styled.SmallFieldBox>
         )}
-        <Styled.SmallFieldBox>
+        <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
             <Styled.Select {...accountSelectProps}>
@@ -247,13 +247,13 @@ function NewIncome() {
               ))}
             </Styled.Select>
           </Mui.FormControl>
-        </Styled.SmallFieldBox>
-        <Styled.SmallFieldBox>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Styled.TextField {...descriptionFieldProps} />
-        </Styled.SmallFieldBox>
-        <Styled.SmallFieldBox>
+        </Styled.FieldBox>
+        <Styled.FieldBox>
           <Styled.TextField {...valueFieldProps} />
-        </Styled.SmallFieldBox>
+        </Styled.FieldBox>
         <Styled.ButtonBox>
           <Styled.Button variant="contained">SEND</Styled.Button>
         </Styled.ButtonBox>
