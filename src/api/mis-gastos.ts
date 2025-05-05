@@ -1,30 +1,26 @@
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
-const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
-  id: -1,
-  name: 'Sin definir',
-  categoryId: -1,
-  accountIds: []
-}
-
-const UNDEFINED_GROUP: Api.Group = {
-  id: -1,
-  name: 'Sin definir',
-  subcategoryId: -1,
-  accountIds: []
-}
-
 export const utils = {
   findCategory,
   findSubcategory,
   findGroup,
-  findAccount,
+  findAccount
 }
 
 export const constants = {
-  UNDEFINED_SUBCATEGORY,
-  UNDEFINED_GROUP
-}
+  UNDEFINED_SUBCATEGORY: {
+    id: -1,
+    name: 'Sin definir',
+    categoryId: -1,
+    accountIds: []
+  },
+  UNDEFINED_GROUP: {
+    id: -1,
+    name: 'Sin definir',
+    subcategoryId: -1,
+    accountIds: []
+  }
+} as { UNDEFINED_SUBCATEGORY: Api.Subcategory; UNDEFINED_GROUP: Api.Group }
 
 export class ApiError extends Error {
   statusCode: number
@@ -36,21 +32,21 @@ export class ApiError extends Error {
 }
 
 export async function getIncomeTypes(): Promise<Api.ListItem[]> {
-  // TODO: use the real endpoint
+  const response = await fetch(`${API_MIS_GASTOS_HOST}/income-types`)
 
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
+  const body = await handleApiErrors(response)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
-
-  return [
-    { id: 1, name: 'Devolución' },
-    { id: 2, name: 'Salario' }
-  ]
+  return (
+    body as {
+      id: number
+      name: string
+      account_ids: number[]
+    }[]
+  ).map((category) => ({
+    id: category.id,
+    name: category.name,
+    accountIds: category.account_ids
+  }))
 }
 
 export async function getCategories(): Promise<Api.Category[]> {
