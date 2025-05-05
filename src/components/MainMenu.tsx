@@ -1,6 +1,6 @@
+import AddCircle from '@mui/icons-material/AddCircle'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import AddCircle from '@mui/icons-material/AddCircle'
 import RemoveCircle from '@mui/icons-material/RemoveCircle'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
@@ -9,7 +9,7 @@ import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {paths} from '../Routes'
+import { paths } from '../Routes'
 import { MENU_WIDTH_IN_REM } from '../constants'
 import DrawerHeader from './DrawerHeader'
 
@@ -20,7 +20,7 @@ const List = styled(Mui.List)<Mui.ListProps>(() => ({
 const ListItemButton = Mui.styled(
   Mui.ListItemButton,
   {}
-)<Mui.ListItemButtonProps & { selected: boolean }>(({theme}) => ({
+)<Mui.ListItemButtonProps & { selected: boolean }>(({ theme }) => ({
   variants: [
     {
       props: ({ selected }) => selected,
@@ -35,7 +35,7 @@ const ListItemButton = Mui.styled(
 const ListItemIcon = Mui.styled(
   Mui.ListItemIcon,
   {}
-)<Mui.ListItemIconProps & { selected: boolean }>(({theme}) => ({
+)<Mui.ListItemIconProps & { selected: boolean }>(({ theme }) => ({
   variants: [
     {
       props: ({ selected }) => selected,
@@ -76,20 +76,20 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
           </IconButton>
         </DrawerHeader>
         <List>
-          <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
-              <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)} >
-                <RemoveCircle />
-              </ListItemIcon>
-              <ListItemText primary="Spends" />
-            </ListItemButton>
-          </ListItem>
           <ListItem key={1} onClick={() => handleIncomeClick()} disablePadding>
             <ListItemButton selected={location.pathname.startsWith(paths.income.index)}>
               <ListItemIcon selected={location.pathname.startsWith(paths.income.index)}>
                 <AddCircle />
               </ListItemIcon>
               <ListItemText primary="Income" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
+            <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
+              <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)}>
+                <RemoveCircle />
+              </ListItemIcon>
+              <ListItemText primary="Spends" />
             </ListItemButton>
           </ListItem>
         </List>
