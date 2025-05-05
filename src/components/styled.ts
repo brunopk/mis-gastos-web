@@ -37,8 +37,6 @@ export const FieldBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
 }))
 
 export const SmallFieldBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
-  display: 'flex',
-  flex: 0,
   padding: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 

@@ -1,9 +1,8 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
-import { Select } from '../../../../styled'
-
-const PADDING_IN_REM = 0.4
+import { Select, SmallFieldBox } from '../../../../styled'
+import {BOX_SMALL_PADDING_IN_REM} from '../../../../../constants'
 
 const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -15,25 +14,20 @@ const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
 
 const FieldGroupPaper = Mui.styled(Mui.Paper)(() => ({
   width: '100%',
-  marginTop: `${PADDING_IN_REM}rem`,
-  padding: `${PADDING_IN_REM}rem`,
+  marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`,
+  padding: `${BOX_SMALL_PADDING_IN_REM}rem`,
   flex: 0,
   backgroundColor: 'inherit'
 }))
 
-const FieldBox = Mui.styled(Mui.Box)(() => ({
-  flexGrow: 1,
-  padding: `${PADDING_IN_REM}rem`
-}))
-
 const FieldGroupTitle = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 1,
-  marginLeft: `${PADDING_IN_REM}rem`
+  marginLeft: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   textAlign: 'start',
-  marginTop: `${PADDING_IN_REM}rem`
+  marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 function ListFilters() {
@@ -254,12 +248,12 @@ function ListFilters() {
           </FieldGroupBoxTitle>
         </FieldGroupStack>
         <FieldGroupStack direction="row" spacing={1}>
-          <FieldBox>
+          <SmallFieldBox>
             <DatePicker />
-          </FieldBox>
-          <FieldBox>
+          </SmallFieldBox>
+          <SmallFieldBox>
             <DatePicker />
-          </FieldBox>
+          </SmallFieldBox>
         </FieldGroupStack>
       </FieldGroupPaper>
       <FieldGroupPaper elevation={0} variant="outlined">
@@ -269,7 +263,7 @@ function ListFilters() {
           </FieldGroupBoxTitle>
         </FieldGroupStack>
         <FieldGroupStack direction="column" spacing={1}>
-          <FieldBox>
+          <SmallFieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
               <Select {...categorySelectProps}>
@@ -281,8 +275,8 @@ function ListFilters() {
                 ))}
               </Select>
             </Mui.FormControl>
-          </FieldBox>
-          <FieldBox>
+          </SmallFieldBox>
+          <SmallFieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...subcategoryInputLabelProps}>
                 {subcategorySelectLabel}
@@ -301,8 +295,8 @@ function ListFilters() {
                 ])}
               </Select>
             </Mui.FormControl>
-          </FieldBox>
-          <FieldBox>
+          </SmallFieldBox>
+          <SmallFieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
               <Select {...groupSelectProps}>
@@ -319,8 +313,8 @@ function ListFilters() {
                 ])}
               </Select>
             </Mui.FormControl>
-          </FieldBox>
-          <FieldBox>
+          </SmallFieldBox>
+          <SmallFieldBox>
             <Mui.FormControl {...formControlProps}>
               <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
               <Select {...accountSelectProps}>
@@ -332,7 +326,7 @@ function ListFilters() {
                 ])}
               </Select>
             </Mui.FormControl>
-          </FieldBox>
+          </SmallFieldBox>
         </FieldGroupStack>
       </FieldGroupPaper>
     </Mui.Box>
