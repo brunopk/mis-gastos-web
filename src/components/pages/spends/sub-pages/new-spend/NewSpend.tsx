@@ -13,8 +13,6 @@ const UNDEFINED_SUBCATEGORY = api.constants.UNDEFINED_SUBCATEGORY
 
 const UNDEFINED_GROUP = api.constants.UNDEFINED_GROUP
 
-// TODO: filter accounts based on category/subcategory/group
-
 // TODO: avoid unnecessary re-renders if possible
 
 // TODO: set maxHeight for selects lists
