@@ -1,10 +1,29 @@
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
+const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
+  id: -1,
+  name: 'Sin definir',
+  categoryId: -1,
+  accountIds: []
+}
+
+const UNDEFINED_GROUP: Api.Group = {
+  id: -1,
+  name: 'Sin definir',
+  subcategoryId: -1,
+  accountIds: []
+}
+
 export const utils = {
   findCategory,
   findSubcategory,
   findGroup,
-  findAccount
+  findAccount,
+}
+
+export const constants = {
+  UNDEFINED_SUBCATEGORY,
+  UNDEFINED_GROUP
 }
 
 export class ApiError extends Error {
@@ -44,7 +63,17 @@ export async function getCategories(): Promise<Api.Category[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return body
+  return (
+    body as {
+      id: number
+      name: string
+      account_ids: number[]
+    }[]
+  ).map((category) => ({
+    id: category.id,
+    name: category.name,
+    accountIds: category.account_ids
+  }))
 }
 
 export async function getSubcategories(): Promise<Api.Subcategory[]> {
@@ -57,11 +86,14 @@ export async function getSubcategories(): Promise<Api.Subcategory[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return (body as { id: number; name: string; category_id: number }[]).map((subcategory) => ({
-    id: subcategory.id,
-    name: subcategory.name,
-    categoryId: subcategory.category_id
-  }))
+  return (body as { id: number; name: string; category_id: number; account_ids: number[] }[]).map(
+    (subcategory) => ({
+      id: subcategory.id,
+      name: subcategory.name,
+      categoryId: subcategory.category_id,
+      accountIds: subcategory.account_ids
+    })
+  )
 }
 
 export async function getGroups(): Promise<Api.Group[]> {
@@ -74,10 +106,13 @@ export async function getGroups(): Promise<Api.Group[]> {
     throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
   }
 
-  return (body as { id: number; name: string; subcategory_id: number }[]).map((group) => ({
+  return (
+    body as { id: number; name: string; subcategory_id: number; account_ids: number[] }[]
+  ).map((group) => ({
     id: group.id,
     name: group.name,
-    subcategoryId: group.subcategory_id
+    subcategoryId: group.subcategory_id,
+    accountIds: group.account_ids
   }))
 }
 
@@ -130,25 +165,24 @@ export async function getSpends(): Promise<Api.Spend[]> {
 }
 
 export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
-  const body = await post(`${API_MIS_GASTOS_HOST}/spends`, 
-    {
-      date: newSpend.date,
-      category_id: newSpend.categoryId,
-      subcategory_id: newSpend.subcategoryId,
-      group_id: newSpend.groupId,
-      account_id: newSpend.accountId,
-      description: newSpend.description,
-      value: newSpend.value
-    }) as {
-      id: number,
-      date: string,
-      category_id: number
-      subcategory_id: number | null 
-      group_id: number | null
-      account_id: number 
-      description?: string 
-      value: number 
-    }
+  const body = (await post(`${API_MIS_GASTOS_HOST}/spends`, {
+    date: newSpend.date,
+    category_id: newSpend.categoryId,
+    subcategory_id: newSpend.subcategoryId,
+    group_id: newSpend.groupId,
+    account_id: newSpend.accountId,
+    description: newSpend.description,
+    value: newSpend.value
+  })) as {
+    id: number
+    date: string
+    category_id: number
+    subcategory_id: number | null
+    group_id: number | null
+    account_id: number
+    description?: string
+    value: number
+  }
 
   return {
     id: body.id,
@@ -237,17 +271,21 @@ export async function getIncomes(): Promise<Api.Income[]> {
 
 // TODO: invoke the real endpoint
 
-export async function getDescriptionAutocompleteOptions(text: string): Promise<Api.DescriptionAutocompleteOptions> {
+export async function getDescriptionAutocompleteOptions(
+  text: string
+): Promise<Api.DescriptionAutocompleteOptions> {
   const descriptions = ['Padel', 'Supermercado', 'Comida', 'Comida restaurant']
   return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(`Returning results from getDescriptions for ${text}`)
-      const result = descriptions.filter((description) => description.includes(text))
-      resolve({search: text, options: result})
-    }, Math.floor(Math.random()*100))
+    setTimeout(
+      () => {
+        console.log(`Returning results from getDescriptions for ${text}`)
+        const result = descriptions.filter((description) => description.includes(text))
+        resolve({ search: text, options: result })
+      },
+      Math.floor(Math.random() * 100)
+    )
   })
 }
-
 
 async function post(url: string, json: object): Promise<object> {
   const response = await fetch(url, {
@@ -264,7 +302,7 @@ async function post(url: string, json: object): Promise<object> {
 async function handleApiErrors(response: Response): Promise<object> {
   const body = await response.json()
 
-  // TODO: handle errors the same way in all requests 
+  // TODO: handle errors the same way in all requests
 
   if (!response.ok) {
     throw new ApiError(
@@ -278,28 +316,24 @@ async function handleApiErrors(response: Response): Promise<object> {
 
 function findCategory(categoryId: number, categories: Api.Category[]): Api.Category {
   const category = categories.find((category) => category.id == categoryId)
-  if (typeof category == 'undefined')
-    throw new Error(`Category ${categoryId} not found`)
+  if (typeof category == 'undefined') throw new Error(`Category ${categoryId} not found`)
   return category
 }
 
 function findSubcategory(subcategoryId: number, subcategories: Api.Subcategory[]): Api.Subcategory {
   const subcategory = subcategories.find((subcategory) => subcategory.id == subcategoryId)
-  if (typeof subcategory == 'undefined')
-    throw new Error(`Subcategory ${subcategoryId} not found`)
+  if (typeof subcategory == 'undefined') throw new Error(`Subcategory ${subcategoryId} not found`)
   return subcategory
 }
 
 function findGroup(groupId: number, groups: Api.Group[]): Api.Group {
   const group = groups.find((group) => group.id == groupId)
-  if (typeof group == 'undefined')
-    throw new Error(`Group ${groupId} not found`)
+  if (typeof group == 'undefined') throw new Error(`Group ${groupId} not found`)
   return group
 }
 
 function findAccount(accountId: number, accounts: Api.Account[]): Api.Account {
   const account = accounts.find((account) => account.id == accountId)
-  if (typeof account == 'undefined')
-    throw new Error(`Account ${accountId} not found`)
+  if (typeof account == 'undefined') throw new Error(`Account ${accountId} not found`)
   return account
 }

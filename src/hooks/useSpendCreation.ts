@@ -4,20 +4,6 @@ import * as api from '../api/mis-gastos'
 
 // TODO: use interfaces instead of type (when possible)
 
-const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
-  id: -1,
-  name: 'Sin definir',
-  categoryId: -1,
-  accountIds: []
-}
-
-const UNDEFINED_GROUP: Api.Group = {
-  id: -1,
-  name: 'Sin definir',
-  subcategoryId: -1,
-  accountIds: []
-}
-
 const INITIAL_STATE: State = {
   lists: {
     original: {
@@ -34,18 +20,10 @@ const INITIAL_STATE: State = {
     }
   },
   selection: {
-    category: {
-      id: null
-    },
-    subcategory: {
-      id: null
-    },
-    group: {
-      id: null
-    },
-    account: {
-      id: null
-    }
+    category: null,
+    subcategory: null,
+    group: null,
+    account: null
   }
 }
 
@@ -82,22 +60,16 @@ type State = {
     }
   }
   selection: {
-    category: {
-      id: number | null
-    }
-    subcategory: {
-      id: number | null
-    }
-    group: {
-      id: number | null
-    }
-    account: {
-      id: number | null
-    }
+    category: Api.Category | null
+    subcategory: Api.Subcategory | null
+    group: Api.Group | null
+    account: Api.Account | null
   }
 }
 
 type Action = SelectAction | InitializeAction
+
+// TODO: generalize to a list of categories, subcategories, etc (to allow this function to be used in ListControls )
 
 function filterAccounts(
   accounts: Api.ListItem[],
@@ -106,34 +78,39 @@ function filterAccounts(
   selectedGroup?: Api.Group
 ): Api.ListItem[] {
   const originalList = accounts.slice(0)
-  
-  let filteredAccounts = originalList.filter(
-    (account) =>
-      typeof selectedCategory?.accountIds != 'undefined' &&
-    selectedCategory.accountIds.includes(account.id)
-  )
-  
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
-  filteredAccounts = filteredAccounts.filter(
-    (account) =>
-      typeof selectedSubcategory?.accountIds != 'undefined' &&
-    selectedSubcategory.accountIds.includes(account.id)
-  )
+
+  let filteredAccounts =
+    typeof selectedCategory == 'undefined'
+      ? originalList
+      : originalList.filter(
+          (account) =>
+            typeof selectedCategory?.accountIds != 'undefined' &&
+            selectedCategory.accountIds.includes(account.id)
+        )
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
-  filteredAccounts = filteredAccounts.filter(
-    (account) =>
-      typeof selectedGroup?.accountIds != 'undefined' &&
-    selectedGroup.accountIds.includes(account.id)
-  )
+  filteredAccounts =
+    typeof selectedSubcategory == 'undefined' ||
+    selectedSubcategory.id == api.constants.UNDEFINED_SUBCATEGORY.id
+      ? filteredAccounts
+      : filteredAccounts.filter(
+          (account) =>
+            typeof selectedSubcategory?.accountIds != 'undefined' &&
+            selectedSubcategory.accountIds.includes(account.id)
+        )
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
+  filteredAccounts =
+    typeof selectedGroup == 'undefined' || selectedGroup.id == api.constants.UNDEFINED_GROUP.id
+      ? filteredAccounts
+      : filteredAccounts.filter(
+          (account) =>
+            typeof selectedGroup?.accountIds != 'undefined' &&
+            selectedGroup.accountIds.includes(account.id)
+        )
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
   return filteredAccounts.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-}
-
-export const constants = {
-  UNDEFINED_SUBCATEGORY,
-  UNDEFINED_GROUP
 }
 
 export function useSpendCreation() {
@@ -147,13 +124,13 @@ export function useSpendCreation() {
         const filteredSubcategories = action.data.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_SUBCATEGORY])
+          .concat([api.constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = filteredSubcategories[0]
 
         const filteredGroups = action.data.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([api.constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
@@ -175,39 +152,34 @@ export function useSpendCreation() {
             }
           },
           selection: {
-            category: {
-              id: selectedCategory.id
-            },
-            subcategory: {
-              id: selectedSubcategory.id
-            },
-            group: {
-              id: selectedGroup.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            category: selectedCategory,
+            subcategory: selectedSubcategory,
+            group: selectedGroup,
+            account: selectedAccount
           }
         }
       }
 
       case 'SELECT_CATEGORY': {
-        const selectedCategory = api.utils.findCategory(action.data.id, prevState.lists.filtered.categories)
+        const selectedCategory = api.utils.findCategory(
+          action.data.id,
+          prevState.lists.filtered.categories
+        )
 
         const filteredSubcategories = prevState.lists.original.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_SUBCATEGORY])
+          .concat([api.constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = filteredSubcategories[0]
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([api.constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
-          prevState.lists.filtered.accounts,
+          prevState.lists.original.accounts,
           selectedCategory,
           selectedSubcategory,
           selectedGroup
@@ -225,34 +197,29 @@ export function useSpendCreation() {
             }
           },
           selection: {
-            category: {
-              id: selectedCategory.id
-            },
-            subcategory: {
-              id: selectedSubcategory.id
-            },
-            group: {
-              id: selectedGroup.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            category: selectedCategory,
+            subcategory: selectedSubcategory,
+            group: selectedGroup,
+            account: selectedAccount
           }
         }
       }
 
       case 'SELECT_SUBCATEGORY': {
-        const selectedSubcategory = api.utils.findSubcategory(action.data.id, prevState.lists.filtered.subcategories)
+        const selectedSubcategory = api.utils.findSubcategory(
+          action.data.id,
+          prevState.lists.filtered.subcategories
+        )
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([api.constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
-          prevState.lists.filtered.accounts,
-          undefined,
+          prevState.lists.original.accounts,
+          prevState.selection.category!,
           selectedSubcategory,
           selectedGroup
         )
@@ -269,15 +236,9 @@ export function useSpendCreation() {
           },
           selection: {
             ...prevState.selection,
-            subcategory: {
-              id: selectedSubcategory.id
-            },
-            group: {
-              id: selectedGroup.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            subcategory: selectedSubcategory,
+            group: selectedGroup,
+            account: selectedAccount
           }
         }
       }
@@ -286,9 +247,9 @@ export function useSpendCreation() {
         const selectedGroup = api.utils.findGroup(action.data.id, prevState.lists.filtered.groups)
 
         const filteredAccounts = filterAccounts(
-          prevState.lists.filtered.accounts,
-          undefined,
-          undefined,
+          prevState.lists.original.accounts,
+          prevState.selection.category!,
+          prevState.selection.subcategory!,
           selectedGroup
         )
         const selectedAccount = filteredAccounts[0]
@@ -303,26 +264,23 @@ export function useSpendCreation() {
           },
           selection: {
             ...prevState.selection,
-            group: {
-              id: selectedGroup.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            group: selectedGroup,
+            account: selectedAccount
           }
         }
       }
 
       case 'SELECT_ACCOUNT': {
-        const selectedAccount = api.utils.findAccount(action.data.id, prevState.lists.filtered.accounts)
+        const selectedAccount = api.utils.findAccount(
+          action.data.id,
+          prevState.lists.filtered.accounts
+        )
 
         return {
           ...prevState,
           selection: {
             ...prevState.selection,
-            account: {
-              id: selectedAccount.id
-            }
+            account: selectedAccount
           }
         }
       }
@@ -359,8 +317,8 @@ export function useSpendCreation() {
   }, [apiLists])
 
   return {
+    lists: { ...state.lists.filtered },
     selection: { ...state.selection },
-    lists: { ...state.lists.filtered, accounts: state.lists.original.accounts },
     functions: {
       selectCategory,
       selectSubcategory,

@@ -2,16 +2,16 @@ import * as Mui from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { FormEvent, memo } from 'react'
-import { ApiError, createSpend } from '../../../../../api/mis-gastos'
-import { constants, useSpendCreation } from '../../../../../hooks/useSpendCreation'
+import * as api from '../../../../../api/mis-gastos'
+import { useSpendCreation } from '../../../../../hooks/useSpendCreation'
 import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
-const UNDEFINED_SUBCATEGORY = constants.UNDEFINED_SUBCATEGORY
+const UNDEFINED_SUBCATEGORY = api.constants.UNDEFINED_SUBCATEGORY
 
-const UNDEFINED_GROUP = constants.UNDEFINED_GROUP
+const UNDEFINED_GROUP = api.constants.UNDEFINED_GROUP
 
 // TODO: filter accounts based on category/subcategory/group
 
@@ -29,7 +29,7 @@ function NewSpend() {
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createSpend,
+    mutationFn: api.createSpend,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spends'] })
       notifications.show('Spend added correctly', {
@@ -37,7 +37,7 @@ function NewSpend() {
       })
     },
     onError: (error) => {
-      if (error instanceof ApiError && error.statusCode < 500) {
+      if (error instanceof api.ApiError && error.statusCode < 500) {
         notifications.show(error.message, {
           severity: 'warning'
         })
@@ -79,10 +79,10 @@ function NewSpend() {
     event.preventDefault()
     mutate({
       date: new Date().toISOString(),
-      categoryId: selection.category.id,
-      subcategoryId: selection.subcategory.id,
-      groupId: selection.group.id,
-      accountId: selection.account.id!,
+      categoryId: selection.category!.id,
+      subcategoryId: selection.subcategory!.id,
+      groupId: selection.group!.id,
+      accountId: selection.account!.id,
       value: 10
     })
   }
@@ -116,7 +116,7 @@ function NewSpend() {
     id: 'category-select',
     label: categorySelectLabel,
     labelId: categorySelectLabelId,
-    value: selection.category.id ? selection.category.id : '',
+    value: selection.category ? selection.category.id : '',
     disabled: lists.categories.length == 0,
     variant,
     fullWidth,
@@ -131,7 +131,7 @@ function NewSpend() {
     id: 'subcategory-select',
     label: subcategorySelectLabel,
     labelId: subcategorySelectLabelId,
-    value: selection.subcategory.id ? selection.subcategory.id : '',
+    value: selection.subcategory ? selection.subcategory.id : '',
     disabled: lists.subcategories.length == 0,
     variant,
     fullWidth,
@@ -146,7 +146,7 @@ function NewSpend() {
     id: 'group-select',
     label: groupSelectLabel,
     labelId: groupSelectLabelId,
-    value: selection.group.id ? selection.group.id : '',
+    value: selection.group ? selection.group.id : '',
     disabled: lists.groups.length == 0,
     variant,
     fullWidth,
@@ -161,7 +161,7 @@ function NewSpend() {
     id: 'group-select',
     label: accountSelectLabel,
     labelId: accountSelectLabelId,
-    value: selection.account.id ? selection.account.id : '',
+    value: selection.account ? selection.account.id : '',
     disabled: lists.accounts.length == 0,
     variant,
     fullWidth,
