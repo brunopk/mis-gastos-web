@@ -16,16 +16,16 @@ function MainMenu() {
   return (
     <>
       <MainMenuItem
-        text="List"
-        onClick={handleIncomeListClick}
-        icon={<ListIcon />}
-        selected={location.pathname.startsWith(paths.income.list)}
-      />
-      <MainMenuItem
         text="New"
         onClick={handleNewIncomeClick}
         icon={<AddIcon />}
         selected={location.pathname.startsWith(paths.income.new)}
+      />
+      <MainMenuItem
+        text="List"
+        onClick={handleIncomeListClick}
+        icon={<ListIcon />}
+        selected={location.pathname.startsWith(paths.income.list)}
       />
     </>
   )

@@ -4,8 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { paths } from '../../../Routes'
 import MainMenuItem from '../../MainMenuItem'
 
-// TODO: set spend list as first menu entry 
-
 function MainMenu() {
   const navigate = useNavigate()
 
