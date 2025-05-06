@@ -8,7 +8,7 @@ import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils
 import Page from '../../../../Page'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
-import ListControls from './ListControls'
+import SpendFilters from './SpendFilters'
 
 // TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
 
@@ -195,7 +195,7 @@ function SpendList() {
     <Page {...pageProps}>
       {!isError && (
         <>
-          <ListControls {...listControlsProps} />
+          <SpendFilters {...listControlsProps} />
           <Table<Api.Spend, SpendButtons> rows={rows} columns={columns} />
         </>
       )}

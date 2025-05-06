@@ -36,7 +36,7 @@ const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
-function ListFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.SpendFilterProps) {
+function SpendFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.SpendFilterProps) {
   const { lists, selection, functions, isOpen } = useSpendFilters({ filters })
 
   const handlePrimaryButtonClick = () => {
@@ -370,4 +370,4 @@ function ListFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.Spen
   )
 }
 
-export default ListFilters
+export default SpendFilters
