@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
 export const utils = {
@@ -49,7 +51,7 @@ export async function getIncomeTypes(): Promise<Api.ListItem[]> {
   }))
 }
 
-export async function getCategories(): Promise<Api.Category[]> {
+export async function getCategories(): Promise<Api.ListItem[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
 
   const body = await response.json()
@@ -112,7 +114,7 @@ export async function getGroups(): Promise<Api.Group[]> {
   }))
 }
 
-export async function getAccounts(): Promise<Api.Account[]> {
+export async function getAccounts(): Promise<Api.ListItem[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/accounts`)
 
   const body = await response.json()
@@ -148,7 +150,7 @@ export async function getSpends(): Promise<Api.Spend[]> {
     }[]
   ).map((spend) => ({
     id: spend.id,
-    date: spend.date,
+    date: dayjs(spend.date),
     categoryId: spend.category_id,
     subcategoryId: spend.subcategory_id,
     groupId: spend.group_id,
@@ -156,13 +158,11 @@ export async function getSpends(): Promise<Api.Spend[]> {
     description: spend.description,
     value: spend.value
   }))
-
-  return body
 }
 
 export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
   const body = (await post(`${API_MIS_GASTOS_HOST}/spends`, {
-    date: newSpend.date,
+    date: newSpend.date.toISOString(),
     category_id: newSpend.categoryId,
     subcategory_id: newSpend.subcategoryId,
     group_id: newSpend.groupId,
@@ -182,7 +182,7 @@ export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
 
   return {
     id: body.id,
-    date: body.date,
+    date: dayjs(body.date),
     categoryId: body.category_id,
     subcategoryId: body.subcategory_id,
     groupId: body.group_id,
@@ -247,7 +247,7 @@ export async function getIncomes(): Promise<Api.Income[]> {
   return [
     {
       id: 1,
-      date: '2025-01-02',
+      date: dayjs('2025-01-02'),
       incomeTypeId: 1,
       accountId: 1,
       value: 10,
@@ -257,11 +257,11 @@ export async function getIncomes(): Promise<Api.Income[]> {
         subcategoryId: 1,
         groupId: 1,
         accountId: 2,
-        date: '2025-01-01',
+        date: dayjs('2025-01-01'),
         value: 1
       }
     },
-    { id: 2, date: '2025-01-03', incomeTypeId: 2, accountId: 1, value: 10, description: 'Test' }
+    { id: 2, date: dayjs('2025-01-03'), incomeTypeId: 2, accountId: 1, value: 10, description: 'Test' }
   ]
 }
 
@@ -310,7 +310,7 @@ async function handleApiErrors(response: Response): Promise<object> {
   return body
 }
 
-function findCategory(categoryId: number, categories: Api.Category[]): Api.Category {
+function findCategory(categoryId: number, categories: Api.ListItem[]): Api.ListItem {
   const category = categories.find((category) => category.id == categoryId)
   if (typeof category == 'undefined') throw new Error(`Category ${categoryId} not found`)
   return category
@@ -328,7 +328,7 @@ function findGroup(groupId: number, groups: Api.Group[]): Api.Group {
   return group
 }
 
-function findAccount(accountId: number, accounts: Api.Account[]): Api.Account {
+function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem {
   const account = accounts.find((account) => account.id == accountId)
   if (typeof account == 'undefined') throw new Error(`Account ${accountId} not found`)
   return account

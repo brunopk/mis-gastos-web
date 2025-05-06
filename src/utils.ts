@@ -1,16 +1,7 @@
-import {paths} from './Routes'
+import dayjs, { Dayjs } from 'dayjs'
+import { paths } from './Routes'
 
-type Formatter = (id: number | string | null) => string
-
-// TODO: remove date formatter (if it's really not necessary)
-
-const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-})
-
+type Formatter = (id: number | string | Dayjs | null) => string
 
 export function getPageTitle(path: string) {
   if (path.startsWith(paths.spends.list)) {
@@ -18,23 +9,23 @@ export function getPageTitle(path: string) {
   } else if (path.startsWith(paths.spends.new)) {
     return 'New spend'
   } else {
-    return ""
+    return ''
   }
 }
 
 export function buildDateFormatter(): Formatter {
-  return (isoDate: string | number | null) => {
-    if (!isoDate) throw new Error(`ISO date is null`)
+  return (date: number | string | Dayjs | null) => {
+    if (!date) throw new Error(`ISO date is null`)
+    if (typeof date === 'number') throw new Error(`Cannot format number ${date} to string`)
 
-    if (typeof isoDate === 'number') throw new Error(`Cannot format number ${isoDate} to string`)
+    date = typeof date == 'string' ? dayjs(date) : date
 
-    const date = new Date(isoDate)
-    return dateFormatter.format(date)
+    return date.format('YYYY-MM-DD')
   }
 }
 
 export function buildListItemFormatter(list: Api.ListItem[]): Formatter {
-  return (id: number | string | null) => {
+  return (id: number | string | Dayjs | null) => {
     if (!id) return '-'
 
     const parsedId = typeof id === 'string' ? parseInt(id) : id

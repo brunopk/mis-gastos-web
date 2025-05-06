@@ -1,12 +1,12 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
+import { useNotifications } from '@toolpad/core/useNotifications'
+import { Dayjs } from 'dayjs'
+import { useEffect } from 'react'
 import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
-import { Select, SmallFieldBox } from '../../../../styled'
-import { Button } from '../../../../styled'
 import ModalBase from '../../../../modal/ModalBase'
-
-// TODO: implement date selection
+import { Button, Select, SmallFieldBox } from '../../../../styled'
 
 // TODO: set "Sin definir" when there is no option checked
 
@@ -36,15 +36,40 @@ const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
-function SpendFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.SpendFilterProps) {
-  const { lists, selection, functions, isOpen } = useSpendFilters({ filters })
+function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.SpendFilterProps) {
+  const notifications = useNotifications()
+
+  const { error, lists, selection, functions, isOpen, isError } = useSpendFilters({ filters })
 
   const handlePrimaryButtonClick = () => {
-    onFiltersSet(selection.categoryIds, selection.subcategoryIds, selection.groupIds, selection.accountIds)
+    onFiltersSet(
+      selection.startDate!,
+      selection.finalDate!,
+      selection.categoryIds,
+      selection.subcategoryIds,
+      selection.groupIds,
+      selection.accountIds
+    )
   }
 
   const handleSecondaryButtonClick = () => {
     onModalClose()
+  }
+
+  const handleStartDateChange = (date: Dayjs | null) => {
+    if (!date)
+      notifications.show('Start date is null', {
+        severity: 'warning'
+      })
+    else functions.startDate.select(date)
+  }
+
+  const handleFinalDateChange = (date: Dayjs | null) => {
+    if (!date)
+      notifications.show('Final date is null', {
+        severity: 'warning'
+      })
+    else functions.startDate.select(date)
   }
 
   const handleCategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -123,6 +148,13 @@ function SpendFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.Spe
     return <Mui.Typography>{functions.accounts.getNames(selected)}</Mui.Typography>
   }
 
+  useEffect(() => {
+    if (isError) {
+      notifications.show(error!, {
+        severity: 'warning'
+      })
+    }
+  }, [error, isError, notifications])
 
   const primaryActionButton = (
     <Button onClick={handlePrimaryButtonClick} color="primary" autoFocus>
@@ -142,6 +174,20 @@ function SpendFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.Spe
     secondaryActionButton,
     open: isModalOpen,
     onClose: () => alert('Not implemented')
+  }
+
+  const dateFormat = 'DD/MM/YYYY'
+
+  const startDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: selection.startDate,
+    format: dateFormat,
+    onChange: handleStartDateChange
+  }
+
+  const finalDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: selection.finalDate,
+    format: dateFormat,
+    onChange: handleFinalDateChange
   }
 
   const commonMenuProps: Mui.MenuProps = {
@@ -276,96 +322,96 @@ function SpendFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.Spe
 
   return (
     <ModalBase {...modalBaseProps}>
-    <Mui.Box>
-      <FieldGroupPaper elevation={0} variant="outlined">
-        <FieldGroupStack>
-          <FieldGroupBoxTitle>
-            <FieldGroupTitle component="span">Dates</FieldGroupTitle>
-          </FieldGroupBoxTitle>
-        </FieldGroupStack>
-        <FieldGroupStack direction="row" spacing={1}>
-          <SmallFieldBox>
-            <DatePicker />
-          </SmallFieldBox>
-          <SmallFieldBox>
-            <DatePicker />
-          </SmallFieldBox>
-        </FieldGroupStack>
-      </FieldGroupPaper>
-      <FieldGroupPaper elevation={0} variant="outlined">
-        <FieldGroupStack>
-          <FieldGroupBoxTitle>
-            <FieldGroupTitle component="span">Filters</FieldGroupTitle>
-          </FieldGroupBoxTitle>
-        </FieldGroupStack>
-        <FieldGroupStack direction="column" spacing={1}>
-          <SmallFieldBox>
-            <Mui.FormControl {...formControlProps}>
-              <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
-              <Select {...categorySelectProps}>
-                {lists.categories.map((category) => (
-                  <Mui.MenuItem key={category.id} value={category.id}>
-                    <Mui.Checkbox checked={category.checked} />
-                    <Mui.ListItemText primary={category.name} />
-                  </Mui.MenuItem>
-                ))}
-              </Select>
-            </Mui.FormControl>
-          </SmallFieldBox>
-          <SmallFieldBox>
-            <Mui.FormControl {...formControlProps}>
-              <Mui.InputLabel {...subcategoryInputLabelProps}>
-                {subcategorySelectLabel}
-              </Mui.InputLabel>
-              <Select {...subcategorySelectProps}>
-                {lists.subcategories.flatMap((list, index) => [
-                  <Mui.ListSubheader key={`header-${index}`}>
-                    {functions.subcategories.getParentName(list[0].parentId!)}
-                  </Mui.ListSubheader>,
-                  ...list.map((subcategory) => (
-                    <Mui.MenuItem key={subcategory.id} value={subcategory.id}>
-                      <Mui.Checkbox checked={subcategory.checked} />
-                      <Mui.ListItemText primary={subcategory.name} />
+      <Mui.Box>
+        <FieldGroupPaper elevation={0} variant="outlined">
+          <FieldGroupStack>
+            <FieldGroupBoxTitle>
+              <FieldGroupTitle component="span">Dates</FieldGroupTitle>
+            </FieldGroupBoxTitle>
+          </FieldGroupStack>
+          <FieldGroupStack direction="row" spacing={1}>
+            <SmallFieldBox>
+              <DatePicker {...startDateProps} />
+            </SmallFieldBox>
+            <SmallFieldBox>
+              <DatePicker {...finalDateProps} />
+            </SmallFieldBox>
+          </FieldGroupStack>
+        </FieldGroupPaper>
+        <FieldGroupPaper elevation={0} variant="outlined">
+          <FieldGroupStack>
+            <FieldGroupBoxTitle>
+              <FieldGroupTitle component="span">Filters</FieldGroupTitle>
+            </FieldGroupBoxTitle>
+          </FieldGroupStack>
+          <FieldGroupStack direction="column" spacing={1}>
+            <SmallFieldBox>
+              <Mui.FormControl {...formControlProps}>
+                <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
+                <Select {...categorySelectProps}>
+                  {lists.categories.map((category) => (
+                    <Mui.MenuItem key={category.id} value={category.id}>
+                      <Mui.Checkbox checked={category.checked} />
+                      <Mui.ListItemText primary={category.name} />
                     </Mui.MenuItem>
-                  ))
-                ])}
-              </Select>
-            </Mui.FormControl>
-          </SmallFieldBox>
-          <SmallFieldBox>
-            <Mui.FormControl {...formControlProps}>
-              <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
-              <Select {...groupSelectProps}>
-                {lists.groups.flatMap((subList, index) => [
-                  <Mui.ListSubheader key={`header-${index}`}>
-                    {functions.groups.getParentName(subList[0].parentId!)}
-                  </Mui.ListSubheader>,
-                  ...subList.map((group) => (
-                    <Mui.MenuItem key={group.id} value={group.id}>
-                      <Mui.Checkbox checked={group.checked} />
-                      <Mui.ListItemText primary={group.name} />
+                  ))}
+                </Select>
+              </Mui.FormControl>
+            </SmallFieldBox>
+            <SmallFieldBox>
+              <Mui.FormControl {...formControlProps}>
+                <Mui.InputLabel {...subcategoryInputLabelProps}>
+                  {subcategorySelectLabel}
+                </Mui.InputLabel>
+                <Select {...subcategorySelectProps}>
+                  {lists.subcategories.flatMap((list, index) => [
+                    <Mui.ListSubheader key={`header-${index}`}>
+                      {functions.subcategories.getParentName(list[0].parentId!)}
+                    </Mui.ListSubheader>,
+                    ...list.map((subcategory) => (
+                      <Mui.MenuItem key={subcategory.id} value={subcategory.id}>
+                        <Mui.Checkbox checked={subcategory.checked} />
+                        <Mui.ListItemText primary={subcategory.name} />
+                      </Mui.MenuItem>
+                    ))
+                  ])}
+                </Select>
+              </Mui.FormControl>
+            </SmallFieldBox>
+            <SmallFieldBox>
+              <Mui.FormControl {...formControlProps}>
+                <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
+                <Select {...groupSelectProps}>
+                  {lists.groups.flatMap((subList, index) => [
+                    <Mui.ListSubheader key={`header-${index}`}>
+                      {functions.groups.getParentName(subList[0].parentId!)}
+                    </Mui.ListSubheader>,
+                    ...subList.map((group) => (
+                      <Mui.MenuItem key={group.id} value={group.id}>
+                        <Mui.Checkbox checked={group.checked} />
+                        <Mui.ListItemText primary={group.name} />
+                      </Mui.MenuItem>
+                    ))
+                  ])}
+                </Select>
+              </Mui.FormControl>
+            </SmallFieldBox>
+            <SmallFieldBox>
+              <Mui.FormControl {...formControlProps}>
+                <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
+                <Select {...accountSelectProps}>
+                  {lists.accounts.flatMap((account) => [
+                    <Mui.MenuItem key={account.id} value={account.id}>
+                      <Mui.Checkbox checked={account.checked} />
+                      <Mui.ListItemText primary={account.name} />
                     </Mui.MenuItem>
-                  ))
-                ])}
-              </Select>
-            </Mui.FormControl>
-          </SmallFieldBox>
-          <SmallFieldBox>
-            <Mui.FormControl {...formControlProps}>
-              <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
-              <Select {...accountSelectProps}>
-                {lists.accounts.flatMap((account) => [
-                  <Mui.MenuItem key={account.id} value={account.id}>
-                    <Mui.Checkbox checked={account.checked} />
-                    <Mui.ListItemText primary={account.name} />
-                  </Mui.MenuItem>
-                ])}
-              </Select>
-            </Mui.FormControl>
-          </SmallFieldBox>
-        </FieldGroupStack>
-      </FieldGroupPaper>
-    </Mui.Box>
+                  ])}
+                </Select>
+              </Mui.FormControl>
+            </SmallFieldBox>
+          </FieldGroupStack>
+        </FieldGroupPaper>
+      </Mui.Box>
     </ModalBase>
   )
 }

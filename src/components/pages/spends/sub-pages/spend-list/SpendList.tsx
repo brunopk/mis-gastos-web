@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
+import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
@@ -10,15 +11,11 @@ import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import SpendFilters from './SpendFilters'
 
-// TODO: verify if timezone is ok (in DB, after retrieving dates in backend and after retrieving them in frontend)
-
-// TODO: filter data based on filters
-
-// TODO: remove date formatter (if it's really not necessary)
-
 // TODO: set new spend page as default page for spends (and new income page as default for incomes)
 
 const INITIAL_SPEND_FILTERS: SpendFilters = {
+  startDate: dayjs().add(-1, 'month'),
+  finalDate: dayjs(),
   categoryIds: null,
   subcategoryIds: null,
   groupIds: null,
@@ -26,6 +23,8 @@ const INITIAL_SPEND_FILTERS: SpendFilters = {
 }
 
 interface SpendFilters {
+  startDate: Dayjs
+  finalDate: Dayjs
   categoryIds: number[] | null
   subcategoryIds: number[] | null
   groupIds: number[] | null
@@ -46,6 +45,8 @@ function buildTableRows(
     : spends
         .filter(
           (spend) =>
+            filters.startDate.isBefore(spend.date) &&
+            filters.finalDate.isAfter(spend.date) &&
             (!filters.groupIds ||
               filters.groupIds.length == 0 ||
               !spend.groupId ||
@@ -158,9 +159,18 @@ function SpendList() {
   }, [setIsModalOpen])
 
   const handleSetFilters = useCallback(
-    (categoryIds: number[], subcategoryIds: number[], groupIds: number[], accountIds: number[]) => {
+    (
+      startDate: Dayjs,
+      finalDate: Dayjs,
+      categoryIds: number[],
+      subcategoryIds: number[],
+      groupIds: number[],
+      accountIds: number[]
+    ) => {
       setIsModalOpen(false)
       setFilters({
+        startDate,
+        finalDate,
         categoryIds,
         subcategoryIds,
         groupIds,

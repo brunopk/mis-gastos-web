@@ -1,5 +1,7 @@
 // TODO: Move ModalBaseProps to UI.Components (and other components too)
 
+type DayjsDate = ReturnType<typeof import('dayjs')>
+
 type ModalBaseProps = {
   children: ReactNode
   title: string
@@ -18,15 +20,11 @@ declare namespace Api {
     accountIds?: number[]
   }
 
-  type Account = ListItem
-
-  type Category = ListItem
-
-  type Subcategory = ListItem & {
+  interface Subcategory extends ListItem {
     categoryId: number
   }
 
-  type Group = ListItem & {
+  interface Group extends ListItem {
     subcategoryId: number
   }
 
@@ -37,7 +35,7 @@ declare namespace Api {
 
   interface Spend {
     id?: number
-    date: string
+    date: DayjsDate
     categoryId: number
     subcategoryId: number | null
     groupId: number | null
@@ -48,7 +46,7 @@ declare namespace Api {
 
   interface Income {
     id: number
-    date: string
+    date: DayjsDate
     incomeTypeId: number
     accountId: number
     description?: string
@@ -58,13 +56,12 @@ declare namespace Api {
 }
 
 declare namespace UI {
-
   namespace Hooks {
-
     namespace UseSpendFilters {
-
       interface Params {
         filters: {
+          startDate: DayjsDate
+          finalDate: DayjsDate
           categoryIds: number[] | null
           subcategoryIds: number[] | null
           groupIds: number[] | null
@@ -102,15 +99,19 @@ declare namespace UI {
   }
 
   interface SpendFilterProps {
+    isModalOpen: boolean
     filters: {
+      startDate: DayjsDate | null
+      finalDate: DayjsDate | null
       categoryIds: number[] | null
       subcategoryIds: number[] | null
       groupIds: number[] | null
       accountIds: number[] | null
     }
-    isModalOpen: boolean
     onModalClose: () => void
     onFiltersSet: (
+      startDate: DayjsDate,
+      finalDate: DayjsDate,
       categoryIds: number[],
       subcategoryIds: number[],
       groupIds: number[],

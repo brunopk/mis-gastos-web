@@ -1,19 +1,20 @@
+import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
 // TODO: filter accounts by category/subcategory/group
 
-// TODO: use interfaces instead of type (when possible)
-
 // TODO: disable toggle if list length is 0
 
 const INITIAL_STATE: State = {
+  isError: false,
   isOpen: {
     categories: false,
     subcategories: false,
     groups: false,
     accounts: false
   },
+  error: null,
   lists: {
     original: {
       categories: [],
@@ -57,6 +58,8 @@ const INITIAL_STATE: State = {
     }
   },
   selection: {
+    startDate: null,
+    finalDate: null,
     categoryIds: [],
     subcategoryIds: [],
     groupIds: [],
@@ -67,27 +70,36 @@ const INITIAL_STATE: State = {
 const sortFunction = (itemA: Api.ListItem, itemB: Api.ListItem) =>
   itemA.name.localeCompare(itemB.name)
 
-type SelectAction = {
+interface SelectItemAction {
   type: 'SELECT_CATEGORIES' | 'SELECT_SUBCATEGORIES' | 'SELECT_GROUPS' | 'SELECT_ACCOUNTS'
   data: {
     ids: number[]
   }
 }
 
-type ToggleAction = {
+interface SelectDateAction {
+  type: 'SELECT_START_DATE' | 'SELECT_FINAL_DATE'
+  data: {
+    date: Dayjs
+  }
+}
+
+interface ToggleAction {
   type: 'TOGGLE_CATEGORIES' | 'TOGGLE_SUBCATEGORIES' | 'TOGGLE_GROUPS' | 'TOGGLE_ACCOUNTS'
 }
 
-type InitializeAction = {
+interface InitializeAction {
   type: 'INITIALIZE'
   data: {
     lists: {
-      categories: Api.Category[]
+      categories: Api.ListItem[]
       subcategories: Api.Subcategory[]
       groups: Api.Group[]
-      accounts: Api.Account[]
+      accounts: Api.ListItem[]
     }
     filters: {
+      startDate: Dayjs
+      finalDate: Dayjs
       categoryIds: number[] | null
       subcategoryIds: number[] | null
       groupIds: number[] | null
@@ -96,13 +108,15 @@ type InitializeAction = {
   }
 }
 
-type State = {
+interface State {
+  error: string | null,
+  isError: boolean,
   isOpen: {
     categories: boolean
     subcategories: boolean
     groups: boolean
     accounts: boolean
-  }
+  },
   lists: {
     original: {
       categories: ExtendedCategory[]
@@ -134,6 +148,8 @@ type State = {
     }
   }
   selection: {
+    startDate: Dayjs | null
+    finalDate: Dayjs | null
     categoryIds: number[]
     subcategoryIds: number[]
     groupIds: number[]
@@ -141,9 +157,9 @@ type State = {
   }
 }
 
-type Action = ToggleAction | SelectAction | InitializeAction
+type Action = ToggleAction | SelectItemAction | SelectDateAction | InitializeAction
 
-type Item = {
+interface Item {
   id: number
   name: string
   checked: boolean
@@ -151,13 +167,13 @@ type Item = {
   parentId?: number
 }
 
-type ExtendedCategory = Api.Category & Item
+type ExtendedCategory = Api.ListItem & Item
 
 type ExtendedSubcategory = Api.Subcategory & Item
 
 type ExtendedGroup = Api.Group & Item
 
-type ExtendedAccount = Api.Account & Item
+type ExtendedAccount = Api.ListItem & Item
 
 function getNames(list: Item[], ids: unknown) {
   const strings = (ids as number[]).map((id) => list.find((item) => item.id == id)!.name)
@@ -174,6 +190,10 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
+        const selectedStartDate = action.data.filters.startDate
+
+        const selectedFinalDate = action.data.filters.finalDate
+
         const selectedCategories = action.data.filters.categoryIds
           ? action.data.filters.categoryIds
           : action.data.lists.categories.map((category) => category.id)
@@ -249,6 +269,8 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
             }
           },
           selection: {
+            startDate: selectedStartDate,
+            finalDate: selectedFinalDate,
             categoryIds: selectedCategories,
             subcategoryIds: selectedSubcategories,
             groupIds: selectedGroups,
@@ -269,6 +291,38 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
             accounts: {
               getNames: (ids: unknown) => getNames(accounts, ids)
             }
+          }
+        }
+      }
+
+      case 'SELECT_START_DATE': {
+        const isError = action.data.date.isAfter(prevState.selection.finalDate)
+        const error = isError ? 'Start date cannot be after final date' : null
+        const startDate = !isError ? action.data.date : prevState.selection.startDate
+        
+        return {
+          ...prevState,
+          isError,
+          error,
+          selection: {
+            ...prevState.selection,
+            startDate
+          }
+        }
+      }
+
+      case 'SELECT_FINAL_DATE': {
+        const isError = action.data.date.isBefore(prevState.selection.startDate)
+        const error = isError ? 'Final date cannot be before start date' : null
+        const finalDate = !isError ? action.data.date : prevState.selection.finalDate
+        
+        return {
+          ...prevState,
+          isError,
+          error,
+          selection: {
+            ...prevState.selection,
+            finalDate
           }
         }
       }
@@ -461,6 +515,16 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
+  const selectStartDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SELECT_START_DATE', data: { date } }),
+    [dispatch]
+  )
+
+  const selectFinalDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SELECT_FINAL_DATE', data: { date } }),
+    [dispatch]
+  )
+
   const selectCategories = useCallback(
     (ids: number[]) => dispatch({ type: 'SELECT_CATEGORIES', data: { ids } }),
     [dispatch]
@@ -501,9 +565,17 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
 
   return {
     isOpen: { ...state.isOpen },
+    isError: state.isError,
+    error: state.error,
     selection: { ...state.selection },
     lists: { ...state.lists.filtered },
     functions: {
+      startDate: {
+        select: selectStartDate
+      },
+      finalDate: {
+        select: selectFinalDate
+      },
       categories: {
         select: selectCategories,
         toggle: toggleCategories,
