@@ -1,8 +1,14 @@
 import * as Mui from '@mui/material'
 import * as XDatePickers from '@mui/x-date-pickers'
+import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
 import { Select, SmallFieldBox } from '../../../../styled'
-import {BOX_SMALL_PADDING_IN_REM} from '../../../../../constants'
+import { Button } from '../../../../styled'
+import ModalBase from '../../../../modal/ModalBase'
+
+// TODO: implement date selection
+
+// TODO: set "Sin definir" when there is no option checked
 
 const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -30,8 +36,16 @@ const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
-function ListFilters() {
-  const { lists, selection, functions, isOpen } = useSpendFilters()
+function ListFilters({isModalOpen, filters, onModalClose, onFiltersSet}: UI.SpendFilterProps) {
+  const { lists, selection, functions, isOpen } = useSpendFilters({ filters })
+
+  const handlePrimaryButtonClick = () => {
+    onFiltersSet(selection.categoryIds, selection.subcategoryIds, selection.groupIds, selection.accountIds)
+  }
+
+  const handleSecondaryButtonClick = () => {
+    onModalClose()
+  }
 
   const handleCategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const {
@@ -109,6 +123,27 @@ function ListFilters() {
     return <Mui.Typography>{functions.accounts.getNames(selected)}</Mui.Typography>
   }
 
+
+  const primaryActionButton = (
+    <Button onClick={handlePrimaryButtonClick} color="primary" autoFocus>
+      APPLY
+    </Button>
+  )
+
+  const secondaryActionButton = (
+    <Button onClick={handleSecondaryButtonClick} color="primary">
+      Cancel
+    </Button>
+  )
+
+  const modalBaseProps: Omit<ModalBaseProps, 'children'> = {
+    title: '',
+    primaryActionButton,
+    secondaryActionButton,
+    open: isModalOpen,
+    onClose: () => alert('Not implemented')
+  }
+
   const commonMenuProps: Mui.MenuProps = {
     open: false,
     slotProps: {
@@ -147,7 +182,7 @@ function ListFilters() {
   const categorySelectProps: Mui.SelectProps = {
     id: categorySelectId,
     label: categorySelectLabel,
-    value: selection.category.ids,
+    value: selection.categoryIds,
     disabled: lists.categories.length == 0,
     MenuProps: categoryMenuProps,
     variant,
@@ -170,7 +205,7 @@ function ListFilters() {
   const subcategorySelectProps: Mui.SelectProps = {
     id: subcategorySelectId,
     label: subcategorySelectLabel,
-    value: selection.subcategory.ids,
+    value: selection.subcategoryIds,
     disabled: lists.subcategories.length == 0,
     MenuProps: subcategoryMenuProps,
     variant,
@@ -197,7 +232,7 @@ function ListFilters() {
   const groupSelectProps: Mui.SelectProps = {
     id: groupSelectId,
     label: groupSelectLabel,
-    value: selection.group.ids,
+    value: selection.groupIds,
     disabled: lists.groups.length == 0,
     MenuProps: groupMenuProps,
     variant,
@@ -224,7 +259,7 @@ function ListFilters() {
   const accountSelectProps: Mui.SelectProps = {
     id: accountSelectId,
     label: accountSelectLabel,
-    value: selection.account.ids,
+    value: selection.accountIds,
     disabled: lists.accounts.length == 0,
     MenuProps: accountMenuProps,
     variant,
@@ -240,6 +275,7 @@ function ListFilters() {
   }
 
   return (
+    <ModalBase {...modalBaseProps}>
     <Mui.Box>
       <FieldGroupPaper elevation={0} variant="outlined">
         <FieldGroupStack>
@@ -330,6 +366,7 @@ function ListFilters() {
         </FieldGroupStack>
       </FieldGroupPaper>
     </Mui.Box>
+    </ModalBase>
   )
 }
 

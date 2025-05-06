@@ -5,9 +5,7 @@ import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
 import { paths } from '../../../../../Routes'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
-import ModalBase from '../../../../modal/ModalBase'
 import Page from '../../../../Page'
-import { Button } from '../../../../styled'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import ListControls from './ListControls'
@@ -18,27 +16,62 @@ import ListControls from './ListControls'
 
 // TODO: remove date formatter (if it's really not necessary)
 
+// TODO: set new spend page as default page for spends (and new income page as default for incomes)
+
+const INITIAL_SPEND_FILTERS: SpendFilters = {
+  categoryIds: null,
+  subcategoryIds: null,
+  groupIds: null,
+  accountIds: null
+}
+
+interface SpendFilters {
+  categoryIds: number[] | null
+  subcategoryIds: number[] | null
+  groupIds: number[] | null
+  accountIds: number[] | null
+}
+
 interface SpendButtons {
   newReimbursementBtn: unknown
 }
 
 function buildTableRows(
   spends: Api.Spend[] | undefined,
+  filters: SpendFilters,
   navigate: NavigateFunction
 ): UI.Table.BaseRow<Api.Spend, SpendButtons>[] {
   return typeof spends == 'undefined'
     ? []
-    : spends.map((spend) => ({
-        id: spend.id,
-        data: spend,
-        buttons: [
-          {
-            id: 'newReimbursementBtn',
-            label: 'ADD REIMBURSEMENT',
-            clickHandler: () => navigate(paths.income.new, { state: { spend } })
-          }
-        ]
-      }))
+    : spends
+        .filter(
+          (spend) =>
+            (!filters.groupIds ||
+              filters.groupIds.length == 0 ||
+              !spend.groupId ||
+              filters.groupIds.includes(spend.groupId)) &&
+            (!filters.categoryIds ||
+              filters.categoryIds.length == 0 ||
+              filters.categoryIds.includes(spend.categoryId)) &&
+            (!filters.accountIds ||
+              filters.accountIds.length == 0 ||
+              filters.accountIds.includes(spend.accountId)) &&
+            (!filters.subcategoryIds ||
+              filters.subcategoryIds.length == 0 ||
+              !spend.subcategoryId ||
+              filters.subcategoryIds.includes(spend.subcategoryId))
+        )
+        .map((spend) => ({
+          id: spend.id!,
+          data: spend,
+          buttons: [
+            {
+              id: 'newReimbursementBtn',
+              label: 'ADD REIMBURSEMENT',
+              clickHandler: () => navigate(paths.income.new, { state: { spend } })
+            }
+          ]
+        }))
 }
 
 function buildColumnList(apiLists: {
@@ -100,6 +133,8 @@ function SpendList() {
 
   const apiLists = useLoaderData()
 
+  const [filters, setFilters] = useState<SpendFilters>(INITIAL_SPEND_FILTERS)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const navigate = useNavigate()
@@ -112,15 +147,28 @@ function SpendList() {
 
   const columns = buildColumnList(apiLists)
 
-  const rows = buildTableRows(data, navigate)
+  const rows = buildTableRows(data, filters, navigate)
 
   const handleThreeDotsIconClick = useCallback(() => {
     setIsModalOpen(true)
   }, [setIsModalOpen])
 
-  const handleModalCancel = useCallback(() => {
+  const handleModalClose = useCallback(() => {
     setIsModalOpen(false)
   }, [setIsModalOpen])
+
+  const handleSetFilters = useCallback(
+    (categoryIds: number[], subcategoryIds: number[], groupIds: number[], accountIds: number[]) => {
+      setIsModalOpen(false)
+      setFilters({
+        categoryIds,
+        subcategoryIds,
+        groupIds,
+        accountIds
+      })
+    },
+    [setFilters]
+  )
 
   useEffect(() => {
     if (isError) {
@@ -130,41 +178,24 @@ function SpendList() {
     }
   }, [error, isError, notifications])
 
-  const primaryActionButton = (
-    <Button onClick={() => alert('Not implemented')} color="primary" autoFocus>
-      APPLY
-    </Button>
-  )
-
-  const secondaryActionButton = (
-    <Button onClick={handleModalCancel} color="primary">
-      Cancel
-    </Button>
-  )
-
-  const modalBaseProps: Omit<ModalBaseProps, 'children'> = {
-    title: '',
-    primaryActionButton,
-    secondaryActionButton,
-    open: isModalOpen,
-    onClose: () => alert('Not implemented')
-  }
-
   const pageProps: Omit<UI.PageProps, 'children'> = {
     isFetching,
     mainMenu: <MainMenu />,
     onThreeDotsIconClick: handleThreeDotsIconClick
   }
 
+  const listControlsProps: UI.SpendFilterProps = {
+    filters,
+    isModalOpen,
+    onModalClose: handleModalClose,
+    onFiltersSet: handleSetFilters
+  }
+
   return (
     <Page {...pageProps}>
-      {isError ? (
-        <></>
-      ) : (
+      {!isError && (
         <>
-          <ModalBase {...modalBaseProps}>
-            <ListControls />
-          </ModalBase>
+          <ListControls {...listControlsProps} />
           <Table<Api.Spend, SpendButtons> rows={rows} columns={columns} />
         </>
       )}

@@ -31,14 +31,14 @@ declare namespace Api {
   }
 
   interface DescriptionAutocompleteOptions {
-    search: string,
+    search: string
     options: string[]
   }
 
   interface Spend {
     id?: number
     date: string
-    categoryId: number | null
+    categoryId: number
     subcategoryId: number | null
     groupId: number | null
     accountId: number
@@ -47,8 +47,8 @@ declare namespace Api {
   }
 
   interface Income {
-    id: number,
-    date: string, 
+    id: number
+    date: string
     incomeTypeId: number
     accountId: number
     description?: string
@@ -59,19 +59,33 @@ declare namespace Api {
 
 declare namespace UI {
 
-  namespace Table {
+  namespace Hooks {
 
+    namespace UseSpendFilters {
+
+      interface Params {
+        filters: {
+          categoryIds: number[] | null
+          subcategoryIds: number[] | null
+          groupIds: number[] | null
+          accountIds: number[] | null
+        }
+      }
+    }
+  }
+
+  namespace Table {
     interface TableProps<R, B> {
-      rows: BaseRow<R, B>[],
+      rows: BaseRow<R, B>[]
       columns: Column<D>[]
     }
 
     interface BaseRow<R, B> {
-      id: number,
+      id: number
       data: R
       buttons?: Button<B>[]
     }
-    
+
     interface Column<R, B> {
       id: keyof R | keyof B
       label: string
@@ -81,11 +95,27 @@ declare namespace UI {
     }
 
     interface Button<B> {
-      id: keyof B,
-      label: string,
+      id: keyof B
+      label: string
       clickHandler: MouseEventHandler<HTMLButtonElement>
     }
+  }
 
+  interface SpendFilterProps {
+    filters: {
+      categoryIds: number[] | null
+      subcategoryIds: number[] | null
+      groupIds: number[] | null
+      accountIds: number[] | null
+    }
+    isModalOpen: boolean
+    onModalClose: () => void
+    onFiltersSet: (
+      categoryIds: number[],
+      subcategoryIds: number[],
+      groupIds: number[],
+      accountIds: number[]
+    ) => void
   }
 
   type PageProps = {
@@ -94,11 +124,4 @@ declare namespace UI {
     isFetching?: boolean
     onThreeDotsIconClick?: () => void
   }
-
-  type SnackBarMessage = {
-    text: string
-    severity?: SnackBarSeverity
-  }
-
-  type SnackBarSeverity = 'success' | 'error' | 'warning'
 }
