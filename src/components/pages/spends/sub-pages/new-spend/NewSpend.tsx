@@ -15,8 +15,6 @@ const UNDEFINED_GROUP = api.constants.UNDEFINED_GROUP
 
 // TODO: avoid unnecessary re-renders if possible
 
-// TODO: set maxHeight for selects lists
-
 // TODO: set current date as default date
 
 function NewSpend() {

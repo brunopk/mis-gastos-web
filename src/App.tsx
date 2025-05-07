@@ -49,6 +49,13 @@ function App() {
             }
           }
         }
+      },
+      MuiMenu: {
+        styleOverrides: {
+          root: {
+            maxHeight: 250
+          }
+        }
       }
     }
   })

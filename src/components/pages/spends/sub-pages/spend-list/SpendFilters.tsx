@@ -192,13 +192,6 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
 
   const commonMenuProps: Mui.MenuProps = {
     open: false,
-    slotProps: {
-      root: {
-        style: {
-          maxHeight: 300
-        }
-      }
-    }
   }
 
   const variant = 'standard'
