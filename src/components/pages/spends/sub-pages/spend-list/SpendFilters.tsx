@@ -39,6 +39,8 @@ const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
 function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.SpendFilterProps) {
   const notifications = useNotifications()
 
+  // TODO: fix startDate and finalDate type error
+
   const { error, lists, selection, functions, isOpen, isError } = useSpendFilters({ filters })
 
   const handlePrimaryButtonClick = () => {
@@ -175,6 +177,8 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     open: isModalOpen,
     onClose: () => alert('Not implemented')
   }
+
+  // TODO: set date format as constant
 
   const dateFormat = 'DD/MM/YYYY'
 
