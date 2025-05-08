@@ -57,6 +57,12 @@ declare namespace Api {
 
 declare namespace UI {
   namespace Hooks {
+    namespace UseIncomeCreation {
+      interface Params {
+        defaultIncomeTypeId?: number
+      }
+    }
+
     namespace UseSpendFilters {
       interface Params {
         filters: {

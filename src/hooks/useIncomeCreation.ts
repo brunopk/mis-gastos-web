@@ -1,7 +1,10 @@
+import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
 const INITIAL_STATE: State = {
+  isError: false,
+  error: null,
   lists: {
     original: {
       incomeTypes: [],
@@ -12,19 +15,23 @@ const INITIAL_STATE: State = {
     }
   },
   selection: {
-    incomeType: {
-      id: null
-    },
-    account: {
-      id: null
-    }
+    date: null,
+    incomeTypeId: null,
+    accountId: null
   }
 }
 
-type SelectAction = {
+type SelectItemAction = {
   type: 'SELECT_INCOME_TYPE' | 'SELECT_ACCOUNT'
   data: {
     id: number
+  }
+}
+
+interface SelectDateAction {
+  type: 'SELECT_DATE'
+  data: {
+    date: Dayjs
   }
 }
 
@@ -32,38 +39,41 @@ type InitializeAction = {
   type: 'INITIALIZE'
   data: {
     incomeTypes: Api.ListItem[]
-    accounts: Api.Account[]
+    accounts: Api.ListItem[]
   }
 }
 
 interface State {
+  isError: boolean
+  error: string | null
   lists: {
     original: {
       incomeTypes: Api.ListItem[]
-      accounts: Api.Account[]
+      accounts: Api.ListItem[]
     }
     filtered: {
-      accounts: Api.Account[]
+      accounts: Api.ListItem[]
     }
   }
   selection: {
-    incomeType: {
-      id: number | null
-    }
-    account: {
-      id: number | null
-    }
+    date: Dayjs | null
+    incomeTypeId: number | null
+    accountId: number | null
   }
 }
 
-type Action = SelectAction | InitializeAction
+type Action = SelectItemAction | SelectDateAction | InitializeAction
 
-export default function useIncomeCreation(defaultIncomeTypeId?: number) {
+export default function useIncomeCreation({
+  defaultIncomeTypeId
+}: UI.Hooks.UseIncomeCreation.Params) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
+        const selectedDate = dayjs()
+
         let initialIncomeTypes = action.data.incomeTypes
         if (typeof defaultIncomeTypeId != 'undefined')
           initialIncomeTypes = action.data.incomeTypes.filter(
@@ -80,6 +90,7 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
         const selectedAccount = filteredAccounts[0]
 
         return {
+          ...prevState,
           lists: {
             original: {
               incomeTypes: initialIncomeTypes,
@@ -90,12 +101,25 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
             }
           },
           selection: {
-            incomeType: {
-              id: selectedIncomeType.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            date: selectedDate,
+            incomeTypeId: selectedIncomeType.id,
+            accountId: selectedAccount.id
+          }
+        }
+      }
+
+      case 'SELECT_DATE': {
+        const isError = dayjs().isBefore(prevState.selection.date)
+        const error = isError ? 'Date cannot be in the future' : null
+        const date = !isError ? action.data.date : prevState.selection.date
+
+        return {
+          ...prevState,
+          isError,
+          error,
+          selection: {
+            ...prevState.selection,
+            date
           }
         }
       }
@@ -117,19 +141,17 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
         const selectedAccount = filteredAccounts[0]
 
         return {
+          ...prevState,
           lists: {
-            original: prevState.lists.original,
+            ...prevState.lists,
             filtered: {
               accounts: filteredAccounts
             }
           },
           selection: {
-            incomeType: {
-              id: selectedIncomeType!.id
-            },
-            account: {
-              id: selectedAccount.id
-            }
+            ...prevState.selection,
+            incomeTypeId: selectedIncomeType!.id,
+            accountId: selectedAccount.id
           }
         }
       }
@@ -141,9 +163,7 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
           ...prevState,
           selection: {
             ...prevState.selection,
-            account: {
-              id: selectedAccount
-            }
+            accountId: selectedAccount
           }
         }
       }
@@ -151,6 +171,11 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
   }
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+
+  const selectDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SELECT_DATE', data: { date } }),
+    [dispatch]
+  )
 
   const selectIncomeType = useCallback(
     (id: number) => {
@@ -169,20 +194,25 @@ export default function useIncomeCreation(defaultIncomeTypeId?: number) {
     [dispatch]
   )
 
+  // TODO: fix this date that generates infinite loop when passing as useEffect dependency
+
   useEffect(() => {
     dispatch({
       type: 'INITIALIZE',
-      data: apiLists
+      data: { ...apiLists }
     })
   }, [apiLists])
 
   return {
+    isError: state.isError,
+    error: state.error,
     selection: { ...state.selection },
     lists: {
       incomeTypes: state.lists.original.incomeTypes,
       accounts: state.lists.filtered.accounts
     },
     functions: {
+      selectDate,
       selectIncomeType,
       selectAccount
     }

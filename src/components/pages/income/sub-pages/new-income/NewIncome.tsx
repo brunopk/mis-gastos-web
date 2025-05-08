@@ -1,9 +1,12 @@
 import * as Mui from '@mui/material'
-import { memo } from 'react'
+import * as XDatePickers from '@mui/x-date-pickers'
+import { useNotifications } from '@toolpad/core'
+import { Dayjs } from 'dayjs'
+import { memo, useEffect } from 'react'
 import { useLoaderData, useLocation } from 'react-router-dom'
 import * as api from '../../../../../api/mis-gastos'
-import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
+import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
@@ -54,13 +57,17 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 // TODO: use new autocomplete component
 
 function NewIncome() {
+  const notifications = useNotifications()
+
   const apiLists = useLoaderData()
 
   const { state } = useLocation()
 
   const { spend }: { spend: Api.Spend } = state || { spend: null }
 
-  const { lists, functions, selection } = useIncomeCreation(spend ? REIMBURSEMENT : undefined)
+  const { isError, error, lists, functions, selection } = useIncomeCreation({
+    defaultIncomeTypeId: spend ? REIMBURSEMENT : undefined
+  })
 
   let spendCategoryName
   try {
@@ -72,10 +79,7 @@ function NewIncome() {
 
   let spendSubcategoryName
   try {
-    const subcategory = api.utils.findSubcategory(
-      spend.subcategoryId!,
-      apiLists.subcategories
-    )
+    const subcategory = api.utils.findSubcategory(spend.subcategoryId!, apiLists.subcategories)
     spendSubcategoryName = subcategory.name
   } catch {
     spendSubcategoryName = DEFAULT_SUBCATEGORY
@@ -97,6 +101,14 @@ function NewIncome() {
     spendGroupName = DEFAULT_ACCOUNT
   }
 
+  const handleDateChange = (date: Dayjs | null) => {
+    if (!date)
+      notifications.show('Date is null', {
+        severity: 'warning'
+      })
+    else functions.selectDate(date)
+  }
+
   const handleIncomeTypeChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const incomeTypeId = parseInt(event.target.value as string)
     functions.selectIncomeType(incomeTypeId)
@@ -105,6 +117,22 @@ function NewIncome() {
   const handleAccountChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const accountId = parseInt(event.target.value as string)
     functions.selectAccount(accountId)
+  }
+
+  useEffect(() => {
+    if (isError) {
+      notifications.show(error!, {
+        severity: 'warning'
+      })
+    }
+  }, [error, isError, notifications])
+
+  const dateFormat = 'DD/MM/YYYY'
+
+  const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: selection.date,
+    format: dateFormat,
+    onChange: handleDateChange
   }
 
   const variant = 'standard'
@@ -124,7 +152,7 @@ function NewIncome() {
     id: 'income-type-select',
     label: incomeTypeSelectLabel,
     labelId: incomeTypeSelectLabelId,
-    value: selection.incomeType.id ? selection.incomeType.id : '',
+    value: selection.incomeTypeId ? selection.incomeTypeId : '',
     disabled: lists.incomeTypes.length == 1,
     variant,
     fullWidth,
@@ -143,7 +171,7 @@ function NewIncome() {
     id: 'account-select',
     label: accountSelectLabel,
     labelId: accountSelectLabelId,
-    value: selection.account.id ? selection.account.id : '',
+    value: selection.accountId ? selection.accountId : '',
     disabled: lists.accounts.length == 1,
     variant,
     fullWidth,
@@ -182,7 +210,7 @@ function NewIncome() {
     <Page mainMenu={<MainMenu />}>
       <Styled.FormControl>
         <Styled.FieldBox>
-          <Styled.DatePicker />
+          <Styled.DatePicker {...datePickerProps} />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
