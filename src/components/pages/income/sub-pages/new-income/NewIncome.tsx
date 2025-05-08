@@ -50,8 +50,6 @@ const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
 
 // TODO: avoid unnecessary re-renders if possible
 
-// TODO: set current date as default date
-
 // TODO: remove reimbursement as option if spend is not present in useLocation state
 
 // TODO: use new autocomplete component

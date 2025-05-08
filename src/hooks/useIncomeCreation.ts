@@ -194,8 +194,6 @@ export default function useIncomeCreation({
     [dispatch]
   )
 
-  // TODO: fix this date that generates infinite loop when passing as useEffect dependency
-
   useEffect(() => {
     dispatch({
       type: 'INITIALIZE',
