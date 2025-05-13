@@ -9,12 +9,7 @@ import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
-
-// TODO: move this constants to src/utils.ts
-
-const UNDEFINED_SUBCATEGORY = api.constants.UNDEFINED_SUBCATEGORY
-
-const UNDEFINED_GROUP = api.constants.UNDEFINED_GROUP
+import {UNDEFINED_SUBCATEGORY, UNDEFINED_GROUP} from '../../../../../constants'
 
 // TODO: set current date as default date
 

@@ -12,21 +12,6 @@ export const utils = {
   findAccount
 }
 
-export const constants = {
-  UNDEFINED_SUBCATEGORY: {
-    id: -1,
-    name: 'Sin definir',
-    categoryId: -1,
-    accountIds: []
-  },
-  UNDEFINED_GROUP: {
-    id: -1,
-    name: 'Sin definir',
-    subcategoryId: -1,
-    accountIds: []
-  }
-} as { UNDEFINED_SUBCATEGORY: Api.Subcategory; UNDEFINED_GROUP: Api.Group }
-
 export class ApiError extends Error {
   statusCode: number
 

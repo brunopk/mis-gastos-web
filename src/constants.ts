@@ -22,3 +22,17 @@ export const UNKNOWN_SUBCATEGORY = '-'
 export const UNKNOWN_GROUP = '-'
 
 export const UNKNOWN_ACCOUNT = '-'
+
+export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
+    id: -1,
+    name: 'Sin definir',
+    categoryId: -1,
+    accountIds: []
+}
+
+export const UNDEFINED_GROUP: Api.Group = {
+    id: -1,
+    name: 'Sin definir',
+    subcategoryId: -1,
+    accountIds: []
+}

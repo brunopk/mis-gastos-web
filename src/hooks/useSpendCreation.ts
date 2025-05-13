@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import * as api from '../api/mis-gastos'
+import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../constants'
 
 // TODO: use interfaces instead of type (when possible)
 
@@ -98,8 +99,7 @@ function filterAccounts(
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
   filteredAccounts =
-    typeof selectedSubcategory == 'undefined' ||
-    selectedSubcategory.id == api.constants.UNDEFINED_SUBCATEGORY.id
+    typeof selectedSubcategory == 'undefined' || selectedSubcategory.id == UNDEFINED_SUBCATEGORY.id
       ? filteredAccounts
       : filteredAccounts.filter(
           (account) =>
@@ -109,7 +109,7 @@ function filterAccounts(
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
   filteredAccounts =
-    typeof selectedGroup == 'undefined' || selectedGroup.id == api.constants.UNDEFINED_GROUP.id
+    typeof selectedGroup == 'undefined' || selectedGroup.id == UNDEFINED_GROUP.id
       ? filteredAccounts
       : filteredAccounts.filter(
           (account) =>
@@ -142,7 +142,7 @@ export function useSpendCreation({
         const filteredSubcategories = action.data.lists.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([api.constants.UNDEFINED_SUBCATEGORY])
+          .concat([UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = action.data.defaultValues.subcategoryId
           ? api.utils.findSubcategory(
               action.data.defaultValues.subcategoryId,
@@ -153,7 +153,7 @@ export function useSpendCreation({
         const filteredGroups = action.data.lists.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([api.constants.UNDEFINED_GROUP])
+          .concat([UNDEFINED_GROUP])
         const selectedGroup = action.data.defaultValues.groupId
           ? api.utils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
           : filteredGroups[0]
@@ -196,13 +196,13 @@ export function useSpendCreation({
         const filteredSubcategories = prevState.lists.original.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([api.constants.UNDEFINED_SUBCATEGORY])
+          .concat([UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = filteredSubcategories[0]
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([api.constants.UNDEFINED_GROUP])
+          .concat([UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
@@ -241,7 +241,7 @@ export function useSpendCreation({
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([api.constants.UNDEFINED_GROUP])
+          .concat([UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
