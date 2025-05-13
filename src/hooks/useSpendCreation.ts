@@ -37,33 +37,41 @@ type SelectAction = {
 type InitializeAction = {
   type: 'INITIALIZE'
   data: {
-    categories: Api.Category[]
-    subcategories: Api.Subcategory[]
-    groups: Api.Group[]
-    accounts: Api.Account[]
+    lists: {
+      categories: Api.ListItem[]
+      subcategories: Api.Subcategory[]
+      groups: Api.Group[]
+      accounts: Api.ListItem[]
+    }
+    defaultValues: {
+      categoryId: number | null
+      subcategoryId: number | null
+      groupId: number | null
+      accountId: number | null
+    }
   }
 }
 
 type State = {
   lists: {
     original: {
-      categories: Api.Category[]
+      categories: Api.ListItem[]
       subcategories: Api.Subcategory[]
       groups: Api.Group[]
-      accounts: Api.Account[]
+      accounts: Api.ListItem[]
     }
     filtered: {
-      categories: Api.Category[]
+      categories: Api.ListItem[]
       subcategories: Api.Subcategory[]
       groups: Api.Group[]
-      accounts: Api.Account[]
+      accounts: Api.ListItem[]
     }
   }
   selection: {
-    category: Api.Category | null
+    category: Api.ListItem | null
     subcategory: Api.Subcategory | null
     group: Api.Group | null
-    account: Api.Account | null
+    account: Api.ListItem | null
   }
 }
 
@@ -73,7 +81,7 @@ type Action = SelectAction | InitializeAction
 
 function filterAccounts(
   accounts: Api.ListItem[],
-  selectedCategory?: Api.Category,
+  selectedCategory?: Api.ListItem,
   selectedSubcategory?: Api.Subcategory,
   selectedGroup?: Api.Group
 ): Api.ListItem[] {
@@ -113,39 +121,58 @@ function filterAccounts(
   return filteredAccounts.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
 }
 
-export function useSpendCreation() {
+export function useSpendCreation({
+  defaultCategoryId,
+  defaultSubcategoryId,
+  defaultGroupId,
+  defaultAccountId
+}: UI.Hooks.UseSpendCreation.Params) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
-        const selectedCategory = action.data.categories[0]
+        const selectedCategory = action.data.defaultValues.categoryId
+          ? api.utils.findCategory(
+              action.data.defaultValues.categoryId,
+              action.data.lists.categories
+            )
+          : action.data.lists.categories[0]
 
-        const filteredSubcategories = action.data.subcategories
+        const filteredSubcategories = action.data.lists.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
           .concat([api.constants.UNDEFINED_SUBCATEGORY])
-        const selectedSubcategory = filteredSubcategories[0]
+        const selectedSubcategory = action.data.defaultValues.subcategoryId
+          ? api.utils.findSubcategory(
+              action.data.defaultValues.subcategoryId,
+              action.data.lists.subcategories
+            )
+          : filteredSubcategories[0]
 
-        const filteredGroups = action.data.groups
+        const filteredGroups = action.data.lists.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
           .concat([api.constants.UNDEFINED_GROUP])
-        const selectedGroup = filteredGroups[0]
+        const selectedGroup = action.data.defaultValues.groupId
+          ? api.utils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
+          : filteredGroups[0]
 
         const filteredAccounts = filterAccounts(
-          action.data.accounts,
+          action.data.lists.accounts,
           selectedCategory,
           selectedSubcategory,
           selectedGroup
         )
-        const selectedAccount = filteredAccounts[0]
+        const selectedAccount = action.data.defaultValues.accountId
+          ? api.utils.findAccount(action.data.defaultValues.accountId, action.data.lists.accounts)
+          : filteredAccounts[0]
 
         return {
           lists: {
-            original: { ...action.data },
+            original: { ...action.data.lists },
             filtered: {
-              categories: action.data.categories.slice(0),
+              categories: action.data.lists.categories.slice(0),
               subcategories: filteredSubcategories,
               groups: filteredGroups,
               accounts: filteredAccounts
@@ -312,9 +339,17 @@ export function useSpendCreation() {
   useEffect(() => {
     dispatch({
       type: 'INITIALIZE',
-      data: apiLists
+      data: {
+        lists: apiLists,
+        defaultValues: {
+          categoryId: defaultCategoryId,
+          subcategoryId: defaultSubcategoryId,
+          groupId: defaultGroupId,
+          accountId: defaultAccountId
+        }
+      }
     })
-  }, [apiLists])
+  }, [apiLists, defaultCategoryId, defaultSubcategoryId, defaultGroupId, defaultAccountId])
 
   return {
     lists: { ...state.lists.filtered },

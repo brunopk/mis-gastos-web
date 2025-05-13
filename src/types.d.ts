@@ -59,6 +59,15 @@ declare namespace Api {
 
 declare namespace UI {
   namespace Hooks {
+    namespace UseSpendCreation {
+      interface Params {
+        defaultCategoryId: number | null
+        defaultSubcategoryId: number | null
+        defaultGroupId: number | null
+        defaultAccountId: number | null
+      }
+    }
+
     namespace UseIncomeCreation {
       interface Params {
         defaultIncomeTypeId?: number

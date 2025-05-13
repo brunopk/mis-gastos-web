@@ -1,7 +1,8 @@
 import * as Mui from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
-import { FormEvent, memo } from 'react'
+import { FormEvent, memo, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import * as api from '../../../../../api/mis-gastos'
 import { useSpendCreation } from '../../../../../hooks/useSpendCreation'
 import Autocomplete from '../../../../Autocomplete'
@@ -9,16 +10,45 @@ import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
+// TODO: move this constants to src/utils.ts
+
 const UNDEFINED_SUBCATEGORY = api.constants.UNDEFINED_SUBCATEGORY
 
 const UNDEFINED_GROUP = api.constants.UNDEFINED_GROUP
 
-// TODO: avoid unnecessary re-renders if possible
-
 // TODO: set current date as default date
 
+function buildUseSpendCreationHookParams(
+  searchParams: URLSearchParams
+): UI.Hooks.UseSpendCreation.Params {
+  const categoryId = searchParams.get('categoryId')
+    ? parseInt(searchParams.get('categoryId')!)
+    : null
+  const subcategoryId = searchParams.get('subcategoryId')
+    ? parseInt(searchParams.get('subcategoryId')!)
+    : null
+  const groupId = searchParams.get('groupId') ? parseInt(searchParams.get('groupId')!) : null
+  const accountId = searchParams.get('accountId') ? parseInt(searchParams.get('accountId')!) : null
+
+  return {
+    defaultCategoryId: categoryId && !isNaN(categoryId) ? categoryId : null,
+    defaultSubcategoryId: subcategoryId && !isNaN(subcategoryId) ? subcategoryId : null,
+    defaultGroupId: groupId && !isNaN(groupId) ? groupId : null,
+    defaultAccountId: accountId && !isNaN(accountId) ? accountId : null
+  }
+}
+
 function NewSpend() {
-  const { lists, selection, functions } = useSpendCreation()
+  const { search } = useLocation()
+
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
+
+  const spendCreationHookParams = useMemo(
+    () => buildUseSpendCreationHookParams(searchParams),
+    [searchParams]
+  )
+
+  const { lists, selection, functions } = useSpendCreation(spendCreationHookParams)
 
   const notifications = useNotifications()
 
