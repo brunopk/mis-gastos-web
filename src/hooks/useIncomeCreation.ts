@@ -1,6 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
+import {REIMBURSEMENT} from '../constants'
 
 const INITIAL_STATE: State = {
   isError: false,
@@ -78,6 +79,10 @@ export default function useIncomeCreation({
         if (typeof defaultIncomeTypeId != 'undefined')
           initialIncomeTypes = action.data.incomeTypes.filter(
             (incomeType) => incomeType.id == defaultIncomeTypeId
+          )
+        else 
+          initialIncomeTypes = action.data.incomeTypes.filter(
+            (incomeType) => incomeType.id != REIMBURSEMENT
           )
         const selectedIncomeType = initialIncomeTypes[0]
 

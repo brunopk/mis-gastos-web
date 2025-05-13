@@ -10,3 +10,15 @@ export const BOX_SMALL_PADDING_IN_REM = 0.5
 export const BOX_PADDING_IN_REM = 1
 
 export const MODAL_WIDTH = 500
+
+// TODO: use DEFAULT_* constants  instead of hardcoding "-"
+
+export const REIMBURSEMENT = 1
+
+export const UNKNOWN_CATEGORY = '-'
+
+export const UNKNOWN_SUBCATEGORY = '-'
+
+export const UNKNOWN_GROUP = '-'
+
+export const UNKNOWN_ACCOUNT = '-'

@@ -5,21 +5,15 @@ import { Dayjs } from 'dayjs'
 import { memo, useEffect } from 'react'
 import { useLoaderData, useLocation } from 'react-router-dom'
 import * as api from '../../../../../api/mis-gastos'
-import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
+import * as constants from '../../../../../constants'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
+import { buildDateFormatter } from '../../../../../utils'
+import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
-const REIMBURSEMENT = 1
-
-const DEFAULT_CATEGORY = '-'
-
-const DEFAULT_SUBCATEGORY = '-'
-
-const DEFAULT_GROUP = '-'
-
-const DEFAULT_ACCOUNT = '-'
+const formatDate = buildDateFormatter()
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   width: '100%'
@@ -28,31 +22,25 @@ const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
 const AttributeBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   display: 'flex',
   flex: 0,
-  padding: `${BOX_SMALL_PADDING_IN_REM / 8}rem ${BOX_SMALL_PADDING_IN_REM}rem`,
+  padding: `${constants.BOX_SMALL_PADDING_IN_REM / 8}rem ${constants.BOX_SMALL_PADDING_IN_REM}rem`,
   ':first-child': {
-    paddingTop: `${BOX_SMALL_PADDING_IN_REM}rem`
+    paddingTop: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
   },
   ':last-child': {
-    paddingBottom: `${BOX_SMALL_PADDING_IN_REM}rem`
+    paddingBottom: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
   }
 }))
 
 const Attribute = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 0,
   textAlign: 'end',
-  paddingLeft: `${BOX_SMALL_PADDING_IN_REM}rem`
+  paddingLeft: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 const Value = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flex: 1,
   textAlign: 'end'
 }))
-
-// TODO: avoid unnecessary re-renders if possible
-
-// TODO: remove reimbursement as option if spend is not present in useLocation state
-
-// TODO: use new autocomplete component
 
 function NewIncome() {
   const notifications = useNotifications()
@@ -64,7 +52,7 @@ function NewIncome() {
   const { spend }: { spend: Api.Spend } = state || { spend: null }
 
   const { isError, error, lists, functions, selection } = useIncomeCreation({
-    defaultIncomeTypeId: spend ? REIMBURSEMENT : undefined
+    defaultIncomeTypeId: spend ? constants.REIMBURSEMENT : undefined
   })
 
   let spendCategoryName
@@ -72,7 +60,7 @@ function NewIncome() {
     const category = api.utils.findCategory(spend.categoryId!, apiLists.categories)
     spendCategoryName = category.name
   } catch {
-    spendCategoryName = DEFAULT_CATEGORY
+    spendCategoryName = constants.UNKNOWN_CATEGORY
   }
 
   let spendSubcategoryName
@@ -80,7 +68,7 @@ function NewIncome() {
     const subcategory = api.utils.findSubcategory(spend.subcategoryId!, apiLists.subcategories)
     spendSubcategoryName = subcategory.name
   } catch {
-    spendSubcategoryName = DEFAULT_SUBCATEGORY
+    spendSubcategoryName = constants.UNKNOWN_SUBCATEGORY
   }
 
   let spendGroupName
@@ -88,7 +76,7 @@ function NewIncome() {
     const group = api.utils.findGroup(spend.groupId!, apiLists.groups)
     spendGroupName = group.name
   } catch {
-    spendGroupName = DEFAULT_GROUP
+    spendGroupName = constants.UNKNOWN_GROUP
   }
 
   let spendAccountName
@@ -96,7 +84,7 @@ function NewIncome() {
     const account = api.utils.findAccount(spend.accountId, apiLists.accounts)
     spendGroupName = account.name
   } catch {
-    spendGroupName = DEFAULT_ACCOUNT
+    spendGroupName = constants.UNKNOWN_ACCOUNT
   }
 
   const handleDateChange = (date: Dayjs | null) => {
@@ -180,18 +168,6 @@ function NewIncome() {
     id: accountSelectLabelId
   }
 
-  const descriptionFieldProps: Mui.TextFieldProps = {
-    id: 'description-textfield',
-    label: 'Description',
-    type: 'text',
-    variant,
-    slotProps: {
-      inputLabel: {
-        shrink: true
-      }
-    }
-  }
-
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
@@ -231,7 +207,7 @@ function NewIncome() {
               </AttributeBox>
               <AttributeBox>
                 <Attribute>Date</Attribute>
-                <Value>{spend.date}</Value>
+                <Value>{formatDate(spend.date)}</Value>
               </AttributeBox>
               <AttributeBox>
                 <Attribute>Category</Attribute>
@@ -273,7 +249,7 @@ function NewIncome() {
           </Mui.FormControl>
         </Styled.FieldBox>
         <Styled.FieldBox>
-          <Styled.TextField {...descriptionFieldProps} />
+          <Autocomplete query={api.getAutocompleteOptionsForIncomeDescription} />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Styled.TextField {...valueFieldProps} />

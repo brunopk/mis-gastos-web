@@ -233,6 +233,21 @@ export async function getAutocompleteOptionsForSpendDescription(
   return body
 }
 
+export async function getAutocompleteOptionsForIncomeDescription(
+  query: string
+): Promise<Api.AutocompleteOptions> {
+  const response = await fetch(
+    `${API_MIS_GASTOS_HOST}/autocomplete/incomes/description?query=${query}`
+  )
+
+  const body = (await handleApiErrors(response)) as {
+    query: string
+    options: string[]
+  }
+
+  return body
+}
+
 async function post(url: string, json: object): Promise<object> {
   const response = await fetch(url, {
     method: 'POST',
