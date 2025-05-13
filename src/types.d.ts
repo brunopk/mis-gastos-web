@@ -28,8 +28,8 @@ declare namespace Api {
     subcategoryId: number
   }
 
-  interface DescriptionAutocompleteOptions {
-    search: string
+  interface AutocompleteOptions {
+    query: string
     options: string[]
   }
 
@@ -51,9 +51,11 @@ declare namespace Api {
     accountId: number
     description?: string
     value: number
-    spend?: Spend
+    spend: Spend | null
   }
 }
+
+// TODO: create different namespaces (Components, Hooks, etc)and delete UI namespace
 
 declare namespace UI {
   namespace Hooks {

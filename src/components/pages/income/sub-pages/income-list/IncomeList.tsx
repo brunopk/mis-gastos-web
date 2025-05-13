@@ -10,15 +10,15 @@ import MainMenu from '../../MainMenu'
 
 interface Income {
   id: number
-  date: string
+  date: DayjsDate
   incomeTypeId: number
   accountId: number
   description?: string
   spendId?: number
-  spendDate?: string
-  spendCategoryId?: number | null
-  spendSubcategoryId?: number | null
-  spendGroupId?: number | null
+  spendDate?: DayjsDate
+  spendCategoryId?: number
+  spendSubcategoryId?: number
+  spendGroupId?: number
   spendAccountId?: number
   spendDescription?: string
   spendValue?: number
@@ -40,13 +40,13 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
           spendId: income.spend?.id,
           spendDate: income.spend?.date,
           spendCategoryId: income.spend?.categoryId,
-          spendSubcategoryId: income.spend?.subcategoryId,
-          spendGroupId: income.spend?.groupId,
+          spendSubcategoryId: income.spend?.subcategoryId ?? undefined,
+          spendGroupId: income.spend?.groupId ?? undefined,
           spendDescription: income.spend?.description,
           spendAccountId: income.spend?.accountId,
           spendValue: income.spend?.value
         }
-      }))
+    }))
 }
 
 function buildColumnList(apiLists: {

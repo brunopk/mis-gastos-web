@@ -241,7 +241,7 @@ function NewSpend() {
           </Mui.FormControl>
         </Styled.FieldBox>
         <Styled.FieldBox>
-          <Autocomplete />
+          <Autocomplete query={api.getAutocompleteOptionsForSpendDescription} />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Styled.TextField {...valueFieldProps} />

@@ -1,9 +1,12 @@
-import { AutocompleteProps, AutocompleteRenderInputParams, TextFieldProps } from '@mui/material'
+import { AutocompleteRenderInputParams, TextFieldProps } from '@mui/material'
 import * as Styled from './styled'
 import { TextField } from './styled'
 import {throttle, debounce} from 'throttle-debounce'
-import {getDescriptionAutocompleteOptions} from '../api/mis-gastos'
 import { BaseSyntheticEvent, ChangeEventHandler, useMemo, useState } from 'react'
+
+// TODO: adjust throttle and debounce params (times)
+
+// TODO: remove console log (just notify when result.query != text )
 
 function buildAutocompleteThrottledFunction(callback: (text: string) => void) {
   return throttle(500, callback, {noLeading: true, noTrailing: false})
@@ -13,11 +16,11 @@ function buildAutocompleteDebouncedFunction(callback: (text: string) => void) {
   return debounce(500, callback)
 }
 
-// debounce(500, autocompleteSearch)
-// this.autocompleteSearchThrottled = throttle(500, autocompleteSearch)
+interface AutocompleteProps {
+  query: (query: string) => Promise<Api.AutocompleteOptions>
+} 
 
- 
-function Autocomplete() {  
+function Autocomplete({query}: AutocompleteProps) {  
   const [, setValue] = useState(() => "")
 
   const [options, setOptions] = useState<string[]>([])
@@ -25,13 +28,13 @@ function Autocomplete() {
   const variant = 'standard'
 
   const updateOptions = (text: string) => {
-    getDescriptionAutocompleteOptions(text).then((result) => {
+    query(text).then((result) => {
       // Prevent receiving results for an outdated search text
-      if (result.search == text)
+      if (result.query == text)
         setOptions(result.options)
       else {
         console.log(`Search ${text}`)
-        console.log(`Result ${result.search}`)
+        console.log(`Result ${result.query}`)
       }
     }, (error: Error) => { console.error(error)})
   }

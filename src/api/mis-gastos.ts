@@ -1,8 +1,11 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs'
+import { QueryClient } from '@tanstack/react-query'
+import { LoaderFunction } from 'react-router-dom'
 
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
 export const utils = {
+  buildListLoaderFunction,
   findCategory,
   findSubcategory,
   findGroup,
@@ -54,12 +57,7 @@ export async function getIncomeTypes(): Promise<Api.ListItem[]> {
 export async function getCategories(): Promise<Api.ListItem[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response)
 
   return (
     body as {
@@ -77,12 +75,7 @@ export async function getCategories(): Promise<Api.ListItem[]> {
 export async function getSubcategories(): Promise<Api.Subcategory[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/subcategories`)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response)
 
   return (body as { id: number; name: string; category_id: number; account_ids: number[] }[]).map(
     (subcategory) => ({
@@ -97,12 +90,7 @@ export async function getSubcategories(): Promise<Api.Subcategory[]> {
 export async function getGroups(): Promise<Api.Group[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/groups`)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response)
 
   return (
     body as { id: number; name: string; subcategory_id: number; account_ids: number[] }[]
@@ -117,12 +105,7 @@ export async function getGroups(): Promise<Api.Group[]> {
 export async function getAccounts(): Promise<Api.ListItem[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/accounts`)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response) as Api.ListItem[]
 
   return body
 }
@@ -130,12 +113,7 @@ export async function getAccounts(): Promise<Api.ListItem[]> {
 export async function getSpends(): Promise<Api.Spend[]> {
   const response = await fetch(`${API_MIS_GASTOS_HOST}/spends`)
 
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response)
 
   return (
     body as {
@@ -193,16 +171,9 @@ export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
 }
 
 export async function getIncomes(): Promise<Api.Income[]> {
-  // TODO: uncomment this (its just for testing)
+  const response = await fetch(`${API_MIS_GASTOS_HOST}/incomes`)
 
-  /*const response = await fetch(`${API_MIS_GASTOS_HOST}/incomes`)
-
-  const body = await response.json()
-
-  if (!response.ok) {
-    const stringifiedBody = JSON.stringify(body)
-    throw new ApiError(response.status, `Status: ${response.status} Message: ${stringifiedBody}`)
-  }
+  const body = await handleApiErrors(response)
 
   return (
     body as {
@@ -210,77 +181,56 @@ export async function getIncomes(): Promise<Api.Income[]> {
       date: string
       income_type_id: number
       account_id: number
-      description?: string
+      description: string
       value: number
-      spend?: {
-        id: number
-        date: string
-        category_id: number
-        subcategory_id: number
-        group_id: number
-        account_id: number
-        description: string
-        value: number
-      }
+      spend:
+        | {
+            id: number
+            date: string
+            category_id: number
+            subcategory_id: number
+            group_id: number
+            account_id: number
+            description?: string
+            value: number
+          }
+        | undefined
     }[]
   ).map((income) => ({
     id: income.id,
-    date: income.date,
+    date: dayjs(income.date),
     incomeTypeId: income.income_type_id,
     accountId: income.account_id,
     description: income.description,
     value: income.value,
-    spend: typeof income.spend === 'undefined' ? undefined : {
-      id: income.spend.id,
-      date: income.spend.date,
-      categoryId: income.spend.category_id,
-      subcategoryId: income.spend.subcategory_id,
-      groupId: income.spend.group_id,
-      accountId: income.spend.account_id,
-      description: income.spend.description, 
-      value: income.spend.value
-    }
-  }))*/
-
-  // TODO: remove this (its just for testing)
-
-  return [
-    {
-      id: 1,
-      date: dayjs('2025-01-02'),
-      incomeTypeId: 1,
-      accountId: 1,
-      value: 10,
-      spend: {
-        id: 2,
-        categoryId: 1,
-        subcategoryId: 1,
-        groupId: 1,
-        accountId: 2,
-        date: dayjs('2025-01-01'),
-        value: 1
-      }
-    },
-    { id: 2, date: dayjs('2025-01-03'), incomeTypeId: 2, accountId: 1, value: 10, description: 'Test' }
-  ]
+    spend: income.spend
+      ? {
+          id: income.spend.id,
+          date: dayjs(income.spend.date),
+          categoryId: income.spend.category_id,
+          subcategoryId: income.spend.subcategory_id,
+          groupId: income.spend.group_id,
+          accountId: income.spend.account_id,
+          description: income.spend.description,
+          value: income.spend.value
+        }
+      : null
+  }))
 }
 
-// TODO: invoke the real endpoint
+export async function getAutocompleteOptionsForSpendDescription(
+  query: string
+): Promise<Api.AutocompleteOptions> {
+  const response = await fetch(
+    `${API_MIS_GASTOS_HOST}/autocomplete/spends/description?query=${query}`
+  )
 
-export async function getDescriptionAutocompleteOptions(
-  text: string
-): Promise<Api.DescriptionAutocompleteOptions> {
-  const descriptions = ['Padel', 'Supermercado', 'Comida', 'Comida restaurant']
-  return new Promise((resolve) => {
-    setTimeout(
-      () => {
-        console.log(`Returning results from getDescriptions for ${text}`)
-        const result = descriptions.filter((description) => description.includes(text))
-        resolve({ search: text, options: result })
-      },
-      Math.floor(Math.random() * 100)
-    )
-  })
+  const body = (await handleApiErrors(response)) as {
+    query: string
+    options: string[]
+  }
+
+  return body
 }
 
 async function post(url: string, json: object): Promise<object> {
@@ -297,8 +247,6 @@ async function post(url: string, json: object): Promise<object> {
 
 async function handleApiErrors(response: Response): Promise<object> {
   const body = await response.json()
-
-  // TODO: handle errors the same way in all requests
 
   if (!response.ok) {
     throw new ApiError(
@@ -332,4 +280,63 @@ function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem 
   const account = accounts.find((account) => account.id == accountId)
   if (typeof account == 'undefined') throw new Error(`Account ${accountId} not found`)
   return account
+}
+
+function buildListLoaderFunction(queryClient: QueryClient): LoaderFunction {
+  return async () => {
+    const queryCommonAttributes = {
+      staleTime: Infinity,
+      retry: 2
+    }
+
+    const categoriesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['categories'],
+      queryFn: getCategories
+    })
+
+    const subcategoriesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['subcategories'],
+      queryFn: getSubcategories
+    })
+
+    const groupsPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['groups'],
+      queryFn: getGroups
+    })
+
+    const accountsPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['accounts'],
+      queryFn: getAccounts
+    })
+
+    const incomeTypesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['income-types'],
+      queryFn: getIncomeTypes
+    })
+
+
+
+    const lists = await Promise.all([
+      categoriesPromise,
+      subcategoriesPromise,
+      groupsPromise,
+      accountsPromise,
+      incomeTypesPromise
+    ])
+
+    const result = {
+      categories: lists[0],
+      subcategories: lists[1],
+      groups: lists[2],
+      accounts: lists[3],
+      incomeTypes: lists[4]
+    }
+
+    return result
+  }
 }
