@@ -13,6 +13,10 @@ import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
+// TODO: use mutation to send data
+
+// TODO: add value, description, and all missing fields to custom hook
+
 const formatDate = buildDateFormatter()
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
