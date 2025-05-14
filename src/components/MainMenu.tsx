@@ -61,9 +61,9 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
 
   const navigate = useNavigate()
 
-  const handleSpendsClick = () => navigate(paths.spends.list)
+  const handleSpendsClick = () => navigate(paths.spends.new)
 
-  const handleIncomeClick = () => navigate(paths.income.list)
+  const handleIncomeClick = () => navigate(paths.income.new)
 
   const handleDrawerClose = () => setOpen(false)
 
