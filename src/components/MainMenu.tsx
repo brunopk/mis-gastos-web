@@ -1,7 +1,7 @@
 import AddCircle from '@mui/icons-material/AddCircle'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import RemoveCircle from '@mui/icons-material/RemoveCircle'
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
@@ -87,7 +87,7 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
           <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
             <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
               <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)}>
-                <RemoveCircle />
+                <RemoveCircleOutlineIcon />
               </ListItemIcon>
               <ListItemText primary="Spends" />
             </ListItemButton>
