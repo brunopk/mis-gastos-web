@@ -1,63 +1,83 @@
-import { AutocompleteRenderInputParams, TextFieldProps } from '@mui/material'
+import * as Mui from '@mui/material'
+import { useNotifications } from '@toolpad/core'
+import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useMemo, useState } from 'react'
+import { debounce, throttle } from 'throttle-debounce'
 import * as Styled from './styled'
 import { TextField } from './styled'
-import {throttle, debounce} from 'throttle-debounce'
-import { BaseSyntheticEvent, ChangeEventHandler, useMemo, useState } from 'react'
 
 // TODO: adjust throttle and debounce params (times)
 
-// TODO: remove console log (just notify when result.query != text )
-
-function buildAutocompleteThrottledFunction(callback: (text: string) => void) {
-  return throttle(500, callback, {noLeading: true, noTrailing: false})
+function buildThrottledFunction(callback: (text: string) => void) {
+  return throttle(500, callback, { noLeading: true, noTrailing: false })
 }
 
-function buildAutocompleteDebouncedFunction(callback: (text: string) => void) {
+function buildDebouncedFunction(callback: (text: string) => void) {
   return debounce(500, callback)
 }
 
-interface AutocompleteProps {
-  query: (query: string) => Promise<Api.AutocompleteOptions>
-} 
+function Autocomplete({ query, onChange }: UI.AutocompleteProps) {
+  const notifications = useNotifications()
 
-function Autocomplete({query}: AutocompleteProps) {  
-  const [, setValue] = useState(() => "")
+  const [, setValue] = useState(() => '')
 
   const [options, setOptions] = useState<string[]>([])
-  
+
   const variant = 'standard'
 
-  const updateOptions = (text: string) => {
-    query(text).then((result) => {
-      // Prevent receiving results for an outdated search text
-      if (result.query == text)
-        setOptions(result.options)
-      else {
-        console.log(`Search ${text}`)
-        console.log(`Result ${result.query}`)
-      }
-    }, (error: Error) => { console.error(error)})
-  }
+  const updateOptions = useCallback(
+    (text: string) => {
+      query(text).then(
+        (result) => {
+          // Prevent receiving results for an outdated search text
+          if (result.query == text) {
+            setOptions(result.options)
+          } else {
+            notifications.show(
+              `Received autocomplete query from API (${result.query}) do not match expected autocomplete query (${text})`,
+              {
+                severity: 'warning'
+              }
+            )
+          }
+        },
+        (error: Error) => {
+          console.error(error)
+        }
+      )
+    },
+    [query, notifications]
+  )
 
-  const throttle = useMemo(() => buildAutocompleteThrottledFunction(updateOptions), [])
+  const throttleAutocompletion = useMemo(
+    () => buildThrottledFunction(updateOptions),
+    [updateOptions]
+  )
 
-  const debounce = useMemo(() => buildAutocompleteDebouncedFunction(updateOptions), [])
+  const debounceAutocompletion = useMemo(
+    () => buildDebouncedFunction(updateOptions),
+    [updateOptions]
+  )
 
-  const handleAutocompleteChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (event: BaseSyntheticEvent) => {
+  const debounceOnChange = useMemo(() => buildDebouncedFunction(onChange), [onChange])
+
+  const handleAutocompleteChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (
+    event: BaseSyntheticEvent
+  ) => {
     setValue((prevValue) => {
-      console.log(`Prev value : ${prevValue}`)
+      const currentValue = event.target.value
       if (prevValue.length > 1 && prevValue.length < 10) {
-        throttle(prevValue)
+        throttleAutocompletion(prevValue)
       } else if (prevValue.length > 1) {
-        debounce(prevValue)
+        debounceAutocompletion(prevValue)
       }
-      return event.target.value
+      debounceOnChange(currentValue)
+      return currentValue
     })
   }
 
-  const descriptionFieldPropsBuilder: (params: AutocompleteRenderInputParams) => TextFieldProps = (
-    params
-  ) => ({
+  const descriptionFieldPropsBuilder: (
+    params: Mui.AutocompleteRenderInputParams
+  ) => Mui.TextFieldProps = (params) => ({
     ...params,
     id: 'description-textfield',
     label: 'Description',
@@ -74,12 +94,14 @@ function Autocomplete({query}: AutocompleteProps) {
     onChange: handleAutocompleteChange
   })
 
-  const descriptionAutocompleteProps: AutocompleteProps<string, false, true, true> = {
+  const descriptionAutocompleteProps: Mui.AutocompleteProps<string, false, true, true> = {
     id: 'description-autocomplete',
     freeSolo: true,
     disableClearable: true,
     options,
-    renderInput: (params) => <TextField {...descriptionFieldPropsBuilder(params)} />
+    renderInput: (params: Mui.AutocompleteRenderInputParams) => (
+      <TextField {...descriptionFieldPropsBuilder(params)} />
+    )
   }
 
   return <Styled.Autocomplete {...descriptionAutocompleteProps} />

@@ -1,17 +1,18 @@
 import * as Mui from '@mui/material'
+import * as XDatePickers from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
-import { FormEvent, memo, useMemo } from 'react'
+import { Dayjs } from 'dayjs'
+import { FormEvent, memo, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import * as api from '../../../../../api/mis-gastos'
+import * as constants from '../../../../../constants'
 import { useSpendCreation } from '../../../../../hooks/useSpendCreation'
+import { toDate } from '../../../../../utils'
 import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
-import {UNDEFINED_SUBCATEGORY, UNDEFINED_GROUP} from '../../../../../constants'
-
-// TODO: set current date as default date
 
 function buildUseSpendCreationHookParams(
   searchParams: URLSearchParams
@@ -43,7 +44,8 @@ function NewSpend() {
     [searchParams]
   )
 
-  const { lists, selection, functions } = useSpendCreation(spendCreationHookParams)
+  const { lists, values, functions, message, isValidated, isWarning } =
+    useSpendCreation(spendCreationHookParams)
 
   const notifications = useNotifications()
 
@@ -70,6 +72,17 @@ function NewSpend() {
     }
   })
 
+  const handleDateChange = (date: Dayjs | null) => {
+    if (!date) {
+      notifications.show('Date is null', {
+        severity: 'warning'
+      })
+    } else {
+      const newDate = toDate(date)
+      functions.setDate(newDate)
+    }
+  }
+
   const handleCategoryChange = (event: Mui.SelectChangeEvent<unknown>) => {
     const categoryId = parseInt(event.target.value as string)
     functions.selectCategory(categoryId)
@@ -90,23 +103,37 @@ function NewSpend() {
     functions.selectAccount(accountId)
   }
 
-  // TODO: set the correct date
-
-  // TODO: set the correct description
-
-  // TODO: set the correct value (field value)
-
-  const handleSpendCreation = (event: FormEvent) => {
-    event.preventDefault()
-    mutate({
-      date: new Date().toISOString(),
-      categoryId: selection.category!.id,
-      subcategoryId: selection.subcategory!.id,
-      groupId: selection.group!.id,
-      accountId: selection.account!.id,
-      value: 10
-    })
+  const handleDescriptionChange = (value: string) => {
+    functions.setDescription(value)
   }
+
+  const handleValueChange = (event: Mui.SelectChangeEvent<unknown>) => {
+    const value = parseInt(event.target.value as string)
+    functions.setValue(value)
+  }
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+    functions.validate()
+  }
+
+  useEffect(() => {
+    if (isValidated && !isWarning) {
+      functions.reset()
+      mutate({
+        date: values.date!,
+        categoryId: values.category!.id,
+        subcategoryId: values.subcategory!.id,
+        groupId: values.group!.id,
+        accountId: values.account!.id,
+        value: values.value! as number
+      })
+    } else if (isWarning) {
+      notifications.show(message, {
+        severity: 'warning'
+      })
+    }
+  }, [notifications, message, mutate, functions, values, isWarning, isValidated])
 
   const variant = 'standard'
 
@@ -117,27 +144,21 @@ function NewSpend() {
     fullWidth
   }
 
+  const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: values.date,
+    format: constants.DATE_FORMAT,
+    onChange: handleDateChange
+  }
+
   const categorySelectLabel = 'Category'
 
   const categorySelectLabelId = 'category-select-label'
-
-  const subcategorySelectLabel = 'Subcategory'
-
-  const subcategorySelectLabelId = 'subcategory-select-label'
-
-  const groupSelectLabel = 'Group'
-
-  const groupSelectLabelId = 'group-select-label'
-
-  const accountSelectLabel = 'Account'
-
-  const accountSelectLabelId = 'account-select-label'
 
   const categorySelectProps: Mui.SelectProps = {
     id: 'category-select',
     label: categorySelectLabel,
     labelId: categorySelectLabelId,
-    value: selection.category ? selection.category.id : '',
+    value: values.category ? values.category.id : '',
     disabled: lists.categories.length == 0,
     variant,
     fullWidth,
@@ -148,11 +169,15 @@ function NewSpend() {
     id: categorySelectLabelId
   }
 
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectLabelId = 'subcategory-select-label'
+
   const subcategorySelectProps: Mui.SelectProps = {
     id: 'subcategory-select',
     label: subcategorySelectLabel,
     labelId: subcategorySelectLabelId,
-    value: selection.subcategory ? selection.subcategory.id : '',
+    value: values.subcategory ? values.subcategory.id : '',
     disabled: lists.subcategories.length == 0,
     variant,
     fullWidth,
@@ -163,11 +188,15 @@ function NewSpend() {
     id: subcategorySelectLabelId
   }
 
+  const groupSelectLabel = 'Group'
+
+  const groupSelectLabelId = 'group-select-label'
+
   const groupSelectProps: Mui.SelectProps = {
     id: 'group-select',
     label: groupSelectLabel,
     labelId: groupSelectLabelId,
-    value: selection.group ? selection.group.id : '',
+    value: values.group ? values.group.id : '',
     disabled: lists.groups.length == 0,
     variant,
     fullWidth,
@@ -178,11 +207,15 @@ function NewSpend() {
     id: groupSelectLabelId
   }
 
+  const accountSelectLabel = 'Account'
+
+  const accountSelectLabelId = 'account-select-label'
+
   const accountSelectProps: Mui.SelectProps = {
     id: 'group-select',
     label: accountSelectLabel,
     labelId: accountSelectLabelId,
-    value: selection.account ? selection.account.id : '',
+    value: values.account ? values.account.id : '',
     disabled: lists.accounts.length == 0,
     variant,
     fullWidth,
@@ -193,23 +226,30 @@ function NewSpend() {
     id: accountSelectLabelId
   }
 
+  const descriptionAutocompleteProps: UI.AutocompleteProps = {
+    query: api.getAutocompleteOptionsForSpendDescription,
+    onChange: handleDescriptionChange
+  }
+
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
     type: 'number',
+    value: values.value,
     variant,
     slotProps: {
       inputLabel: {
         shrink: true
       }
-    }
+    },
+    onChange: handleValueChange
   }
 
   return (
     <Page mainMenu={<MainMenu />}>
-      <Styled.FormControl component="form" onSubmit={handleSpendCreation}>
+      <Styled.FormControl component="form" onSubmit={handleSubmit}>
         <Styled.FieldBox>
-          <Styled.DatePicker />
+          <Styled.DatePicker {...datePickerProps} />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Mui.FormControl {...formControlProps}>
@@ -231,7 +271,7 @@ function NewSpend() {
             <Styled.Select {...subcategorySelectProps}>
               {lists.subcategories.map((subcategory) => (
                 <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
-                  {subcategory.id == UNDEFINED_SUBCATEGORY.id ? (
+                  {subcategory.id == constants.UNDEFINED_SUBCATEGORY.id ? (
                     <em>{subcategory.name}</em>
                   ) : (
                     subcategory.name
@@ -247,7 +287,7 @@ function NewSpend() {
             <Styled.Select {...groupSelectProps}>
               {lists.groups.map((group) => (
                 <Mui.MenuItem value={group.id} key={group.id}>
-                  {group.id == UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
+                  {group.id == constants.UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
                 </Mui.MenuItem>
               ))}
             </Styled.Select>
@@ -266,7 +306,7 @@ function NewSpend() {
           </Mui.FormControl>
         </Styled.FieldBox>
         <Styled.FieldBox>
-          <Autocomplete query={api.getAutocompleteOptionsForSpendDescription} />
+          <Autocomplete {...descriptionAutocompleteProps} />
         </Styled.FieldBox>
         <Styled.FieldBox>
           <Styled.TextField {...valueFieldProps} />

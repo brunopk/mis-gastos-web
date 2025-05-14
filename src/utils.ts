@@ -39,3 +39,7 @@ export function buildListItemFormatter(list: Api.ListItem[]): Formatter {
     return foundItem.name
   }
 }
+
+export function toDate(date: Dayjs) {
+  return date.set('hours', 0).set('minutes', 0).set('seconds', 0).set('milliseconds', 0)
+}

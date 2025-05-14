@@ -1,4 +1,3 @@
-
 export const ICONS_MARGIN_IN_REM = 1
 
 export const MENU_WIDTH_IN_REM = 13
@@ -13,6 +12,8 @@ export const MODAL_WIDTH = 500
 
 // TODO: use DEFAULT_* constants  instead of hardcoding "-"
 
+export const DATE_FORMAT = 'DD/MM/YYYY'
+
 export const REIMBURSEMENT = 1
 
 export const UNKNOWN_CATEGORY = '-'
@@ -23,16 +24,18 @@ export const UNKNOWN_GROUP = '-'
 
 export const UNKNOWN_ACCOUNT = '-'
 
+export const UNDEFINED_VALUE = ''
+
 export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
-    id: -1,
-    name: 'Sin definir',
-    categoryId: -1,
-    accountIds: []
+  id: -1,
+  name: 'Sin definir',
+  categoryId: -1,
+  accountIds: []
 }
 
 export const UNDEFINED_GROUP: Api.Group = {
-    id: -1,
-    name: 'Sin definir',
-    subcategoryId: -1,
-    accountIds: []
+  id: -1,
+  name: 'Sin definir',
+  subcategoryId: -1,
+  accountIds: []
 }

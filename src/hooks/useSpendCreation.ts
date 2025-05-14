@@ -1,11 +1,13 @@
+import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import * as api from '../api/mis-gastos'
-import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../constants'
-
-// TODO: use interfaces instead of type (when possible)
+import * as constants from '../constants'
 
 const INITIAL_STATE: State = {
+  isWarning: false,
+  isValidated: false,
+  message: null,
   lists: {
     original: {
       categories: [],
@@ -20,22 +22,54 @@ const INITIAL_STATE: State = {
       accounts: []
     }
   },
-  selection: {
+  values: {
+    date: null,
     category: null,
     subcategory: null,
     group: null,
-    account: null
+    account: null,
+    description: null,
+    value: ''
   }
 }
 
-type SelectAction = {
+const DATE_WARNING_MSG = 'Date cannot be in the future'
+
+const VALUE_WARNING_MSG = 'Spend value must greater than 0'
+
+type SelectListItemAction = {
   type: 'SELECT_CATEGORY' | 'SELECT_SUBCATEGORY' | 'SELECT_GROUP' | 'SELECT_ACCOUNT'
   data: {
     id: number
   }
 }
 
-type InitializeAction = {
+interface SetDateAction {
+  type: 'SET_DATE'
+  data: {
+    date: Dayjs
+  }
+}
+
+interface SetValueAction {
+  type: 'SET_VALUE'
+  data: {
+    value: number
+  }
+}
+
+interface SetTextAction {
+  type: 'SET_DESCRIPTION'
+  data: {
+    text: string
+  }
+}
+
+interface ValidateAction {
+  type: 'VALIDATE'
+}
+
+interface InitializeAction {
   type: 'INITIALIZE'
   data: {
     lists: {
@@ -53,7 +87,10 @@ type InitializeAction = {
   }
 }
 
-type State = {
+interface State {
+  isWarning: boolean
+  isValidated: boolean
+  message: string | null
   lists: {
     original: {
       categories: Api.ListItem[]
@@ -68,58 +105,24 @@ type State = {
       accounts: Api.ListItem[]
     }
   }
-  selection: {
+  values: {
+    date: Dayjs | null
     category: Api.ListItem | null
     subcategory: Api.Subcategory | null
     group: Api.Group | null
     account: Api.ListItem | null
+    value: number | ''
+    description: string | null
   }
 }
 
-type Action = SelectAction | InitializeAction
-
-// TODO: generalize to a list of categories, subcategories, etc (to allow this function to be used in ListControls )
-
-function filterAccounts(
-  accounts: Api.ListItem[],
-  selectedCategory?: Api.ListItem,
-  selectedSubcategory?: Api.Subcategory,
-  selectedGroup?: Api.Group
-): Api.ListItem[] {
-  const originalList = accounts.slice(0)
-
-  let filteredAccounts =
-    typeof selectedCategory == 'undefined'
-      ? originalList
-      : originalList.filter(
-          (account) =>
-            typeof selectedCategory?.accountIds != 'undefined' &&
-            selectedCategory.accountIds.includes(account.id)
-        )
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
-  filteredAccounts =
-    typeof selectedSubcategory == 'undefined' || selectedSubcategory.id == UNDEFINED_SUBCATEGORY.id
-      ? filteredAccounts
-      : filteredAccounts.filter(
-          (account) =>
-            typeof selectedSubcategory?.accountIds != 'undefined' &&
-            selectedSubcategory.accountIds.includes(account.id)
-        )
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
-  filteredAccounts =
-    typeof selectedGroup == 'undefined' || selectedGroup.id == UNDEFINED_GROUP.id
-      ? filteredAccounts
-      : filteredAccounts.filter(
-          (account) =>
-            typeof selectedGroup?.accountIds != 'undefined' &&
-            selectedGroup.accountIds.includes(account.id)
-        )
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : originalList
-  return filteredAccounts.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-}
+type Action =
+  | SetDateAction
+  | SetTextAction
+  | SetValueAction
+  | SelectListItemAction
+  | ValidateAction
+  | InitializeAction
 
 export function useSpendCreation({
   defaultCategoryId,
@@ -142,7 +145,7 @@ export function useSpendCreation({
         const filteredSubcategories = action.data.lists.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_SUBCATEGORY])
+          .concat([constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = action.data.defaultValues.subcategoryId
           ? api.utils.findSubcategory(
               action.data.defaultValues.subcategoryId,
@@ -153,22 +156,25 @@ export function useSpendCreation({
         const filteredGroups = action.data.lists.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = action.data.defaultValues.groupId
           ? api.utils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
           : filteredGroups[0]
 
-        const filteredAccounts = filterAccounts(
+        const filteredAccounts = api.utils.filterAccounts(
           action.data.lists.accounts,
-          selectedCategory,
-          selectedSubcategory,
-          selectedGroup
+          [selectedCategory],
+          [selectedSubcategory],
+          [selectedGroup]
         )
         const selectedAccount = action.data.defaultValues.accountId
           ? api.utils.findAccount(action.data.defaultValues.accountId, action.data.lists.accounts)
           : filteredAccounts[0]
 
         return {
+          ...prevState,
+          isWarning: false,
+          isValidated: false,
           lists: {
             original: { ...action.data.lists },
             filtered: {
@@ -178,11 +184,40 @@ export function useSpendCreation({
               accounts: filteredAccounts
             }
           },
-          selection: {
+          values: {
+            date: dayjs(),
             category: selectedCategory,
             subcategory: selectedSubcategory,
             group: selectedGroup,
-            account: selectedAccount
+            account: selectedAccount,
+            description: null,
+            value: ''
+          }
+        }
+      }
+
+      case 'VALIDATE': {
+        const isWarning1 = dayjs().isBefore(prevState.values.date)
+        const isWarning2 =
+          (typeof prevState.values.value == 'number' && prevState.values.value <= 0) ||
+          prevState.values.value == constants.UNDEFINED_VALUE
+        const message = isWarning1 ? DATE_WARNING_MSG : isWarning2 ? VALUE_WARNING_MSG : null
+
+        return {
+          ...prevState,
+          isWarning: isWarning1 || isWarning2,
+          isValidated: true,
+          message
+        }
+      }
+
+      case 'SET_DATE': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            date: action.data.date
           }
         }
       }
@@ -196,34 +231,37 @@ export function useSpendCreation({
         const filteredSubcategories = prevState.lists.original.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_SUBCATEGORY])
+          .concat([constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = filteredSubcategories[0]
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = filterAccounts(
+        const filteredAccounts = api.utils.filterAccounts(
           prevState.lists.original.accounts,
-          selectedCategory,
-          selectedSubcategory,
-          selectedGroup
+          [selectedCategory],
+          [selectedSubcategory],
+          [selectedGroup]
         )
         const selectedAccount = filteredAccounts[0]
 
         return {
+          ...prevState,
+          isValidated: false,
           lists: {
-            original: prevState.lists.original,
+            ...prevState.lists,
             filtered: {
-              categories: prevState.lists.original.categories,
+              ...prevState.lists.filtered,
               subcategories: filteredSubcategories,
               groups: filteredGroups,
               accounts: filteredAccounts
             }
           },
-          selection: {
+          values: {
+            ...prevState.values,
             category: selectedCategory,
             subcategory: selectedSubcategory,
             group: selectedGroup,
@@ -241,18 +279,20 @@ export function useSpendCreation({
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
           .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
-          .concat([UNDEFINED_GROUP])
+          .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = filterAccounts(
+        const filteredAccounts = api.utils.filterAccounts(
           prevState.lists.original.accounts,
-          prevState.selection.category!,
-          selectedSubcategory,
-          selectedGroup
+          [prevState.values.category!],
+          [selectedSubcategory],
+          [selectedGroup]
         )
         const selectedAccount = filteredAccounts[0]
 
         return {
+          ...prevState,
+          isValidated: false,
           lists: {
             original: prevState.lists.original,
             filtered: {
@@ -261,8 +301,8 @@ export function useSpendCreation({
               accounts: filteredAccounts
             }
           },
-          selection: {
-            ...prevState.selection,
+          values: {
+            ...prevState.values,
             subcategory: selectedSubcategory,
             group: selectedGroup,
             account: selectedAccount
@@ -273,15 +313,17 @@ export function useSpendCreation({
       case 'SELECT_GROUP': {
         const selectedGroup = api.utils.findGroup(action.data.id, prevState.lists.filtered.groups)
 
-        const filteredAccounts = filterAccounts(
+        const filteredAccounts = api.utils.filterAccounts(
           prevState.lists.original.accounts,
-          prevState.selection.category!,
-          prevState.selection.subcategory!,
-          selectedGroup
+          [prevState.values.category!],
+          [prevState.values.subcategory!],
+          [selectedGroup]
         )
         const selectedAccount = filteredAccounts[0]
 
         return {
+          ...prevState,
+          isValidated: false,
           lists: {
             original: prevState.lists.original,
             filtered: {
@@ -289,8 +331,8 @@ export function useSpendCreation({
               accounts: filteredAccounts
             }
           },
-          selection: {
-            ...prevState.selection,
+          values: {
+            ...prevState.values,
             group: selectedGroup,
             account: selectedAccount
           }
@@ -305,9 +347,32 @@ export function useSpendCreation({
 
         return {
           ...prevState,
-          selection: {
-            ...prevState.selection,
+          isValidated: false,
+          values: {
+            ...prevState.values,
             account: selectedAccount
+          }
+        }
+      }
+
+      case 'SET_VALUE': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            value: action.data.value
+          }
+        }
+      }
+
+      case 'SET_DESCRIPTION': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            description: action.data.text
           }
         }
       }
@@ -315,6 +380,11 @@ export function useSpendCreation({
   }
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+
+  const setDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SET_DATE', data: { date } }),
+    [dispatch]
+  )
 
   const selectCategory = useCallback(
     (id: number) => dispatch({ type: 'SELECT_CATEGORY', data: { id } }),
@@ -336,6 +406,35 @@ export function useSpendCreation({
     [dispatch]
   )
 
+  const setDescription = useCallback(
+    (text: string) => dispatch({ type: 'SET_DESCRIPTION', data: { text } }),
+    [dispatch]
+  )
+
+  const setValue = useCallback(
+    (value: number) => dispatch({ type: 'SET_VALUE', data: { value } }),
+    [dispatch]
+  )
+
+  const reset = useCallback(
+    () =>
+      dispatch({
+        type: 'INITIALIZE',
+        data: {
+          lists: apiLists,
+          defaultValues: {
+            categoryId: defaultCategoryId,
+            subcategoryId: defaultSubcategoryId,
+            groupId: defaultGroupId,
+            accountId: defaultAccountId
+          }
+        }
+      }),
+    [apiLists, defaultCategoryId, defaultSubcategoryId, defaultGroupId, defaultAccountId]
+  )
+
+  const validate = useCallback(() => dispatch({ type: 'VALIDATE' }), [])
+
   useEffect(() => {
     dispatch({
       type: 'INITIALIZE',
@@ -352,9 +451,17 @@ export function useSpendCreation({
   }, [apiLists, defaultCategoryId, defaultSubcategoryId, defaultGroupId, defaultAccountId])
 
   return {
+    isWarning: state.isWarning,
+    isValidated: state.isValidated,
+    message: state.message,
     lists: { ...state.lists.filtered },
-    selection: { ...state.selection },
+    values: { ...state.values },
     functions: {
+      reset,
+      validate,
+      setDate,
+      setDescription,
+      setValue,
       selectCategory,
       selectSubcategory,
       selectGroup,

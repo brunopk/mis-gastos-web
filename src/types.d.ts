@@ -115,6 +115,11 @@ declare namespace UI {
     }
   }
 
+  interface AutocompleteProps {
+    query: (query: string) => Promise<Api.AutocompleteOptions>
+    onChange: (textt: string) => void
+  }
+
   interface SpendFilterProps {
     isModalOpen: boolean
     filters: {

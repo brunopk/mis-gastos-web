@@ -3,6 +3,8 @@ import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import {REIMBURSEMENT} from '../constants'
 
+// TODO: add isWarning similar to isError 
+
 const INITIAL_STATE: State = {
   isError: false,
   error: null,

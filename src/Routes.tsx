@@ -25,7 +25,7 @@ export const paths = {
 
 export const router = (queryClient: QueryClient) => {
   const commonRouteProps: RouteProps = {
-    loader: api.utils.buildListLoaderFunction(queryClient),
+    loader: api.utils.buildLoaderFunction(queryClient),
     errorElement: <ErrorBoundary />
   }
 

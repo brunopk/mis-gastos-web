@@ -8,6 +8,8 @@ import Page from '../../../../Page'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 
+// TODO: set the correct stale and cache time for tanstack in spend list
+
 interface Income {
   id: number
   date: DayjsDate

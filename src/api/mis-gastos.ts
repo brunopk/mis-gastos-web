@@ -1,15 +1,17 @@
 import dayjs from 'dayjs'
 import { QueryClient } from '@tanstack/react-query'
 import { LoaderFunction } from 'react-router-dom'
+import {UNDEFINED_SUBCATEGORY, UNDEFINED_GROUP} from '../constants'
 
 const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
 
 export const utils = {
-  buildListLoaderFunction,
+  buildLoaderFunction,
   findCategory,
   findSubcategory,
   findGroup,
-  findAccount
+  findAccount,
+  filterAccounts
 }
 
 export class ApiError extends Error {
@@ -282,7 +284,53 @@ function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem 
   return account
 }
 
-function buildListLoaderFunction(queryClient: QueryClient): LoaderFunction {
+function filterAccounts(
+  accounts: Api.ListItem[],
+  selectedCategories: Api.ListItem[],
+  selectedSubcategories: Api.Subcategory[],
+  selectedGroups: Api.Group[]
+): Api.ListItem[] {
+  const accountsCopy = accounts.slice(0)
+
+  let filteredAccounts = accountsCopy
+  if (selectedCategories.length > 0) {
+    const accountIds = flatAccountIds(selectedCategories)
+    if (accountIds.length > 0)
+    filteredAccounts = accountsCopy.filter(
+          (account) =>
+            accountIds.includes(account.id)
+        )
+  }  
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  if (selectedSubcategories.length > 1 || (selectedSubcategories.length == 1 && selectedSubcategories[0].id != UNDEFINED_SUBCATEGORY.id)) {
+    const accountIds = flatAccountIds(selectedSubcategories)
+    if (accountIds.length > 0)
+      filteredAccounts = filteredAccounts.filter(
+          (account) =>
+            accountIds.includes(account.id)
+        )
+  }
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  if (selectedGroups.length > 1 || (selectedGroups.length == 1 && selectedGroups[0].id != UNDEFINED_GROUP.id)) {
+    const accountIds = flatAccountIds(selectedGroups)
+    if (accountIds.length > 0)
+      filteredAccounts = filteredAccounts.filter(
+          (account) =>
+            accountIds.includes(account.id)
+        )
+  }
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  return filteredAccounts.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+}
+
+function flatAccountIds(list: Api.ListItem[]): number[] {
+  return [...new Set(list.flatMap((item) => typeof item.accountIds != 'undefined' ? item.accountIds : []))]
+}
+
+function buildLoaderFunction(queryClient: QueryClient): LoaderFunction {
   return async () => {
     const queryCommonAttributes = {
       staleTime: Infinity,

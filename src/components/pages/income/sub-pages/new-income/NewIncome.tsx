@@ -13,9 +13,11 @@ import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
-// TODO: use mutation to send data
+// TODO: use mutation to send data (take into account that any warning or error in hook must prevent mutating data)
 
 // TODO: add value, description, and all missing fields to custom hook
+
+// TODO: reset all values after posting data
 
 const formatDate = buildDateFormatter()
 
@@ -117,11 +119,9 @@ function NewIncome() {
     }
   }, [error, isError, notifications])
 
-  const dateFormat = 'DD/MM/YYYY'
-
   const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
     value: selection.date,
-    format: dateFormat,
+    format: constants.DATE_FORMAT,
     onChange: handleDateChange
   }
 
