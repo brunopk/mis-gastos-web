@@ -19,6 +19,8 @@ import MainMenu from '../../MainMenu'
 
 // TODO: reset all values after posting data
 
+// TODO: allow nullable income type
+
 const formatDate = buildDateFormatter()
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
