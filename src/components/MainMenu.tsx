@@ -9,8 +9,7 @@ import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import { Dispatch, Fragment, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { paths } from '../Routes'
-import { MENU_WIDTH_IN_REM } from '../constants'
+import { MENU_WIDTH_IN_REM, PATHS } from '../constants'
 import DrawerHeader from './DrawerHeader'
 
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
@@ -61,9 +60,9 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
 
   const navigate = useNavigate()
 
-  const handleSpendsClick = () => navigate(paths.spends.new)
+  const handleSpendsClick = () => navigate(PATHS.SPENDS.INDEX + PATHS.SPENDS.NEW)
 
-  const handleIncomeClick = () => navigate(paths.income.new)
+  const handleIncomeClick = () => navigate(PATHS.INCOME.INDEX + PATHS.INCOME.NEW)
 
   const handleDrawerClose = () => setOpen(false)
 
@@ -77,16 +76,16 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
         </DrawerHeader>
         <List>
           <ListItem key={1} onClick={() => handleIncomeClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(paths.income.index)}>
-              <ListItemIcon selected={location.pathname.startsWith(paths.income.index)}>
+            <ListItemButton selected={location.pathname.startsWith(PATHS.INCOME.INDEX)}>
+              <ListItemIcon selected={location.pathname.startsWith(PATHS.INCOME.INDEX)}>
                 <AddCircle />
               </ListItemIcon>
               <ListItemText primary="Income" />
             </ListItemButton>
           </ListItem>
           <ListItem key={0} onClick={() => handleSpendsClick()} disablePadding>
-            <ListItemButton selected={location.pathname.startsWith(paths.spends.index)}>
-              <ListItemIcon selected={location.pathname.startsWith(paths.spends.index)}>
+            <ListItemButton selected={location.pathname.startsWith(PATHS.SPENDS.INDEX)}>
+              <ListItemIcon selected={location.pathname.startsWith(PATHS.SPENDS.INDEX)}>
                 <RemoveCircleOutlineIcon />
               </ListItemIcon>
               <ListItemText primary="Spends" />

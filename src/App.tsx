@@ -3,11 +3,16 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { NotificationsProvider, NotificationsProviderSlotProps } from '@toolpad/core/useNotifications'
+import * as Notifications from '@toolpad/core/useNotifications'
 import { RouterProvider } from 'react-router-dom'
-import { router } from './Routes'
+import { router } from './components/Routes'
+import { UserProvider } from './context/UserContext'
 
 const queryClient = new QueryClient()
+
+const NotificationsProvider = Notifications.NotificationsProvider
+
+type NotificationsProviderSlotProps = Notifications.NotificationsProviderSlotProps
 
 function App() {
   const theme = createTheme({
@@ -23,8 +28,8 @@ function App() {
             justifyContent: 'center',
             alignItems: 'center',
             height: '100vh'
-          },
-        },
+          }
+        }
       },
       MuiPaginationItem: {
         styleOverrides: {
@@ -62,8 +67,8 @@ function App() {
 
   const slotsProps: NotificationsProviderSlotProps = {
     snackbar: {
-      anchorOrigin: { vertical: 'top', horizontal: 'center' },
-    },
+      anchorOrigin: { vertical: 'top', horizontal: 'center' }
+    }
   }
 
   return (
@@ -71,9 +76,11 @@ function App() {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <QueryClientProvider client={queryClient}>
           <NotificationsProvider slotProps={slotsProps}>
-            <CssBaseline />
-            <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
-            <RouterProvider router={router(queryClient)} />
+            <UserProvider>
+              <CssBaseline />
+              <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
+              <RouterProvider router={router(queryClient)} />
+            </UserProvider>
           </NotificationsProvider>
         </QueryClientProvider>
       </LocalizationProvider>

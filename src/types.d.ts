@@ -14,6 +14,11 @@ type ModalBaseProps = {
 // TODO: convert types to (interfaces if possible)
 
 declare namespace Api {
+  interface AuthCallbackRequest {
+    authorizationCode: string
+    codeVerifier: string
+  }
+
   interface ListItem {
     id: number
     name: string

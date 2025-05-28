@@ -4,12 +4,12 @@ import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import { getSpends } from '../../../../../api/mis-gastos'
-import { paths } from '../../../../../Routes'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import SpendFilters from './SpendFilters'
+import { PATHS } from '../../../../../constants'
 
 // TODO: set new spend page as default page for spends (and new income page as default for incomes)
 
@@ -69,7 +69,7 @@ function buildTableRows(
             {
               id: 'newReimbursementBtn',
               label: 'ADD REIMBURSEMENT',
-              clickHandler: () => navigate(paths.income.new, { state: { spend } })
+              clickHandler: () => navigate(PATHS.INCOME.INDEX + PATHS.INCOME.NEW, { state: { spend } })
             }
           ]
         }))

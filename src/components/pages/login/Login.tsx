@@ -1,22 +1,26 @@
 import * as Mui from '@mui/material'
-import { BOX_PADDING_IN_REM, MODAL_WIDTH } from '../../../constants'
-import { TextField } from '../../styled'
-
-// TODO: continue login implementation
+import { useMutation } from '@tanstack/react-query'
+import { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import GoogleButton from 'react-google-button'
+import { useLocation, useNavigate } from 'react-router-dom'
+import * as api from '../../../api/mis-gastos'
+import * as constants from '../../../constants'
+import { UserContext } from '../../../context/UserContext'
+import { authorizeWithGoogle, generateCodeVerifier } from '../../../utils'
 
 const Container = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
   backgroundColor: 'inherit',
   [theme.breakpoints.up('sm')]: {
-    width: `${MODAL_WIDTH/1.25}px`
+    width: `${constants.MODAL_WIDTH / 1.25}px`
   },
   [theme.breakpoints.down('sm')]: {
     flex: 1
   }
 }))
 
-const FieldPaper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
-  padding: `${BOX_PADDING_IN_REM * 2}rem 0 ${BOX_PADDING_IN_REM * 2}rem 0`,
-  marginTop: `${BOX_PADDING_IN_REM}rem`
+const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
+  padding: `${constants.BOX_PADDING_IN_REM * 2}rem 0 ${constants.BOX_PADDING_IN_REM * 2}rem 0`,
+  marginTop: `${constants.BOX_PADDING_IN_REM}rem`
 }))
 
 const LogoBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
@@ -24,64 +28,76 @@ const LogoBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   justifyContent: 'center'
 }))
 
-const FieldBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
-  display: 'flex',
-  flex: 0,
-  padding: `${BOX_PADDING_IN_REM}rem`,
-  marginTop: `${BOX_PADDING_IN_REM}rem`
-}))
-
-const Button = Mui.styled(Mui.Button)<Mui.ButtonProps>(() => ({
-  flex: 1
-}))
+interface LoginResult {
+  isError: boolean
+  severity: 'error' | 'warning' | null
+  message: string | null
+}
 
 function Login() {
-  const variant = 'standard'
+  const { setLoginInformation } = useContext(UserContext)
 
-  const usernameFieldProps: Mui.TextFieldProps = {
-    id: 'username-textfield',
-    label: 'Username',
-    type: 'text',
-    variant,
-    slotProps: {
-      inputLabel: {
-        shrink: true
+  const didRunRef = useRef(false)
+
+  const { search } = useLocation()
+
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
+
+  const [result, setResult] = useState<LoginResult>({
+    isError: false,
+    severity: null,
+    message: null
+  })
+
+  const navigate = useNavigate()
+
+  const { mutate: authCallback } = useMutation({
+    mutationFn: api.authCallback,
+    onSuccess: () => {
+      setLoginInformation({ isAuthenticated: true })
+      navigate(constants.PATHS.SPENDS.INDEX + constants.PATHS.SPENDS.NEW)
+    },
+    onError: (error) => {
+      if (error instanceof api.ApiError && error.statusCode < 500) {
+        setResult({ isError: true, severity: 'warning', message: error.message })
+      } else {
+        setResult({ isError: true, severity: 'error', message: error.message })
       }
     }
+  })
+
+  const handleLogin = () => {
+    const codeVerifier = generateCodeVerifier()
+    sessionStorage.setItem(constants.SESSION_STORAGE_PKCE_CODE_VERIFIER, codeVerifier)
+    authorizeWithGoogle(codeVerifier)
   }
 
-  const passwordFieldProps: Mui.TextFieldProps = {
-    id: 'password-textfield',
-    label: 'Password',
-    type: 'password',
-    variant,
-    slotProps: {
-      inputLabel: {
-        shrink: true
-      }
+  useEffect(() => {
+    // Prevents sending duplicate requests that cause race conditions on the backend, leading to multiple sessions being created
+    if (didRunRef.current) return
+    didRunRef.current = true
+
+    if (searchParams.size > 0 && searchParams.has('code')) {
+      const authorizationCode = searchParams.get('code')!
+      const codeVerifier = sessionStorage.getItem(constants.SESSION_STORAGE_PKCE_CODE_VERIFIER)!
+      authCallback({ authorizationCode, codeVerifier })
     }
+  }, [searchParams, authCallback])
+
+  const googleButtonStyle: CSSProperties = {
+    width: '100%',
+    marginTop: `${constants.BOX_PADDING_IN_REM}rem`
   }
 
   return (
     <Container>
-      <FieldPaper>
+      {result.isError && <Mui.Alert severity={result.severity!}>{result.message}</Mui.Alert>}
+      <Paper elevation={1} variant="elevation">
         <LogoBox>
           <img src="icon.png" width={100} height={100} />
         </LogoBox>
-      </FieldPaper>
-      <FieldPaper>
-        <FieldBox>
-          <TextField {...usernameFieldProps} />
-        </FieldBox>
-        <FieldBox>
-          <TextField {...passwordFieldProps} />
-        </FieldBox>
-        <FieldBox>
-          <Button variant="contained" type="submit">
-            LOGIN
-          </Button>
-        </FieldBox>
-      </FieldPaper>
+      </Paper>
+      <GoogleButton onClick={handleLogin} style={googleButtonStyle} />
     </Container>
   )
 }

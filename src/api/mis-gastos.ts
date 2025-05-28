@@ -1,17 +1,17 @@
-import dayjs from 'dayjs'
 import { QueryClient } from '@tanstack/react-query'
+import dayjs from 'dayjs'
 import { LoaderFunction } from 'react-router-dom'
-import {UNDEFINED_SUBCATEGORY, UNDEFINED_GROUP} from '../constants'
+import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../constants'
 
-const API_MIS_GASTOS_HOST = import.meta.env.VITE_API_MIS_GASTOS_HOST
+const API_URL = import.meta.env.VITE_MIS_GASTOS_API_URL
 
 export const utils = {
-  buildLoaderFunction,
   findCategory,
   findSubcategory,
   findGroup,
   findAccount,
-  filterAccounts
+  filterAccounts,
+  loaderFunctionBuilder
 }
 
 export class ApiError extends Error {
@@ -23,13 +23,17 @@ export class ApiError extends Error {
   }
 }
 
+export async function authCallback(authCallbackRequest: Api.AuthCallbackRequest): Promise<void> {
+  await post(`${API_URL}/oauth2/callback`, {
+    authorization_code: authCallbackRequest.authorizationCode,
+    code_verifier: authCallbackRequest.codeVerifier
+  })
+}
+
 export async function getIncomeTypes(): Promise<Api.ListItem[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/income-types`)
-
-  const body = await handleApiErrors(response)
-
+  const response = await get(`${API_URL}/income-types`)
   return (
-    body as {
+    response as {
       id: number
       name: string
       account_ids: number[]
@@ -42,12 +46,9 @@ export async function getIncomeTypes(): Promise<Api.ListItem[]> {
 }
 
 export async function getCategories(): Promise<Api.ListItem[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/categories`)
-
-  const body = await handleApiErrors(response)
-
+  const response = await get(`${API_URL}/categories`)
   return (
-    body as {
+    response as {
       id: number
       name: string
       account_ids: number[]
@@ -60,27 +61,21 @@ export async function getCategories(): Promise<Api.ListItem[]> {
 }
 
 export async function getSubcategories(): Promise<Api.Subcategory[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/subcategories`)
-
-  const body = await handleApiErrors(response)
-
-  return (body as { id: number; name: string; category_id: number; account_ids: number[] }[]).map(
-    (subcategory) => ({
-      id: subcategory.id,
-      name: subcategory.name,
-      categoryId: subcategory.category_id,
-      accountIds: subcategory.account_ids
-    })
-  )
+  const response = await get(`${API_URL}/subcategories`)
+  return (
+    response as { id: number; name: string; category_id: number; account_ids: number[] }[]
+  ).map((subcategory) => ({
+    id: subcategory.id,
+    name: subcategory.name,
+    categoryId: subcategory.category_id,
+    accountIds: subcategory.account_ids
+  }))
 }
 
 export async function getGroups(): Promise<Api.Group[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/groups`)
-
-  const body = await handleApiErrors(response)
-
+  const response = await get(`${API_URL}/groups`)
   return (
-    body as { id: number; name: string; subcategory_id: number; account_ids: number[] }[]
+    response as { id: number; name: string; subcategory_id: number; account_ids: number[] }[]
   ).map((group) => ({
     id: group.id,
     name: group.name,
@@ -90,20 +85,14 @@ export async function getGroups(): Promise<Api.Group[]> {
 }
 
 export async function getAccounts(): Promise<Api.ListItem[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/accounts`)
-
-  const body = await handleApiErrors(response) as Api.ListItem[]
-
-  return body
+  const response = await get(`${API_URL}/accounts`)
+  return response as Api.ListItem[]
 }
 
 export async function getSpends(): Promise<Api.Spend[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/spends`)
-
-  const body = await handleApiErrors(response)
-
+  const response = await get(`${API_URL}/spends`)
   return (
-    body as {
+    response as {
       id: number
       date: string
       category_id: number
@@ -126,7 +115,7 @@ export async function getSpends(): Promise<Api.Spend[]> {
 }
 
 export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
-  const body = (await post(`${API_MIS_GASTOS_HOST}/spends`, {
+  const response = (await post(`${API_URL}/spends`, {
     date: newSpend.date.toISOString(),
     category_id: newSpend.categoryId,
     subcategory_id: newSpend.subcategoryId,
@@ -146,24 +135,21 @@ export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
   }
 
   return {
-    id: body.id,
-    date: dayjs(body.date),
-    categoryId: body.category_id,
-    subcategoryId: body.subcategory_id,
-    groupId: body.group_id,
-    accountId: body.account_id,
-    description: body.description,
-    value: body.value
+    id: response.id,
+    date: dayjs(response.date),
+    categoryId: response.category_id,
+    subcategoryId: response.subcategory_id,
+    groupId: response.group_id,
+    accountId: response.account_id,
+    description: response.description,
+    value: response.value
   }
 }
 
 export async function getIncomes(): Promise<Api.Income[]> {
-  const response = await fetch(`${API_MIS_GASTOS_HOST}/incomes`)
-
-  const body = await handleApiErrors(response)
-
+  const response = await get(`${API_URL}/incomes`)
   return (
-    body as {
+    response as {
       id: number
       date: string
       income_type_id: number
@@ -208,43 +194,32 @@ export async function getIncomes(): Promise<Api.Income[]> {
 export async function getAutocompleteOptionsForSpendDescription(
   query: string
 ): Promise<Api.AutocompleteOptions> {
-  const response = await fetch(
-    `${API_MIS_GASTOS_HOST}/autocomplete/spends/description?query=${query}`
-  )
-
-  const body = (await handleApiErrors(response)) as {
-    query: string
-    options: string[]
-  }
-
-  return body
+  const response = await get(`${API_URL}/autocomplete/spends/description?query=${query}`)
+  return response as Api.AutocompleteOptions
 }
 
 export async function getAutocompleteOptionsForIncomeDescription(
   query: string
 ): Promise<Api.AutocompleteOptions> {
-  const response = await fetch(
-    `${API_MIS_GASTOS_HOST}/autocomplete/incomes/description?query=${query}`
-  )
-
-  const body = (await handleApiErrors(response)) as {
-    query: string
-    options: string[]
-  }
-
-  return body
+  const response = await get(`${API_URL}/autocomplete/incomes/description?query=${query}`)
+  return response as Api.AutocompleteOptions
 }
 
 async function post(url: string, json: object): Promise<object> {
   const response = await fetch(url, {
     method: 'POST',
     body: JSON.stringify(json),
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     }
   })
+  return await handleApiErrors(response)
+}
 
-  return handleApiErrors(response)
+async function get(url: string): Promise<object> {
+  const response = await fetch(url, { credentials: 'include' })
+  return await handleApiErrors(response)
 }
 
 async function handleApiErrors(response: Response): Promise<object> {
@@ -258,6 +233,63 @@ async function handleApiErrors(response: Response): Promise<object> {
   }
 
   return body
+}
+
+function loaderFunctionBuilder(queryClient: QueryClient): LoaderFunction {
+  return async () => {
+    const queryCommonAttributes = {
+      staleTime: Infinity,
+      retry: 2
+    }
+
+    const categoriesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['categories'],
+      queryFn: getCategories
+    })
+
+    const subcategoriesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['subcategories'],
+      queryFn: getSubcategories
+    })
+
+    const groupsPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['groups'],
+      queryFn: getGroups
+    })
+
+    const accountsPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['accounts'],
+      queryFn: getAccounts
+    })
+
+    const incomeTypesPromise = queryClient.fetchQuery({
+      ...queryCommonAttributes,
+      queryKey: ['income-types'],
+      queryFn: getIncomeTypes
+    })
+
+    const lists = await Promise.all([
+      categoriesPromise,
+      subcategoriesPromise,
+      groupsPromise,
+      accountsPromise,
+      incomeTypesPromise
+    ])
+
+    const result = {
+      categories: lists[0],
+      subcategories: lists[1],
+      groups: lists[2],
+      accounts: lists[3],
+      incomeTypes: lists[4]
+    }
+
+    return result
+  }
 }
 
 function findCategory(categoryId: number, categories: Api.ListItem[]): Api.ListItem {
@@ -296,30 +328,27 @@ function filterAccounts(
   if (selectedCategories.length > 0) {
     const accountIds = flatAccountIds(selectedCategories)
     if (accountIds.length > 0)
-    filteredAccounts = accountsCopy.filter(
-          (account) =>
-            accountIds.includes(account.id)
-        )
-  }  
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-  if (selectedSubcategories.length > 1 || (selectedSubcategories.length == 1 && selectedSubcategories[0].id != UNDEFINED_SUBCATEGORY.id)) {
-    const accountIds = flatAccountIds(selectedSubcategories)
-    if (accountIds.length > 0)
-      filteredAccounts = filteredAccounts.filter(
-          (account) =>
-            accountIds.includes(account.id)
-        )
+      filteredAccounts = accountsCopy.filter((account) => accountIds.includes(account.id))
   }
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-  if (selectedGroups.length > 1 || (selectedGroups.length == 1 && selectedGroups[0].id != UNDEFINED_GROUP.id)) {
+  if (
+    selectedSubcategories.length > 1 ||
+    (selectedSubcategories.length == 1 && selectedSubcategories[0].id != UNDEFINED_SUBCATEGORY.id)
+  ) {
+    const accountIds = flatAccountIds(selectedSubcategories)
+    if (accountIds.length > 0)
+      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
+  }
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  if (
+    selectedGroups.length > 1 ||
+    (selectedGroups.length == 1 && selectedGroups[0].id != UNDEFINED_GROUP.id)
+  ) {
     const accountIds = flatAccountIds(selectedGroups)
     if (accountIds.length > 0)
-      filteredAccounts = filteredAccounts.filter(
-          (account) =>
-            accountIds.includes(account.id)
-        )
+      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
   }
 
   filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
@@ -327,64 +356,9 @@ function filterAccounts(
 }
 
 function flatAccountIds(list: Api.ListItem[]): number[] {
-  return [...new Set(list.flatMap((item) => typeof item.accountIds != 'undefined' ? item.accountIds : []))]
-}
-
-function buildLoaderFunction(queryClient: QueryClient): LoaderFunction {
-  return async () => {
-    const queryCommonAttributes = {
-      staleTime: Infinity,
-      retry: 2
-    }
-
-    const categoriesPromise = queryClient.fetchQuery({
-      ...queryCommonAttributes,
-      queryKey: ['categories'],
-      queryFn: getCategories
-    })
-
-    const subcategoriesPromise = queryClient.fetchQuery({
-      ...queryCommonAttributes,
-      queryKey: ['subcategories'],
-      queryFn: getSubcategories
-    })
-
-    const groupsPromise = queryClient.fetchQuery({
-      ...queryCommonAttributes,
-      queryKey: ['groups'],
-      queryFn: getGroups
-    })
-
-    const accountsPromise = queryClient.fetchQuery({
-      ...queryCommonAttributes,
-      queryKey: ['accounts'],
-      queryFn: getAccounts
-    })
-
-    const incomeTypesPromise = queryClient.fetchQuery({
-      ...queryCommonAttributes,
-      queryKey: ['income-types'],
-      queryFn: getIncomeTypes
-    })
-
-
-
-    const lists = await Promise.all([
-      categoriesPromise,
-      subcategoriesPromise,
-      groupsPromise,
-      accountsPromise,
-      incomeTypesPromise
-    ])
-
-    const result = {
-      categories: lists[0],
-      subcategories: lists[1],
-      groups: lists[2],
-      accounts: lists[3],
-      incomeTypes: lists[4]
-    }
-
-    return result
-  }
+  return [
+    ...new Set(
+      list.flatMap((item) => (typeof item.accountIds != 'undefined' ? item.accountIds : []))
+    )
+  ]
 }
