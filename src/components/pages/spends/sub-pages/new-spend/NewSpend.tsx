@@ -231,6 +231,8 @@ function NewSpend() {
     onChange: handleDescriptionChange
   }
 
+  // TODO: set the correct type for handleValueChange
+  
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
