@@ -87,6 +87,8 @@ interface InitializeAction {
   }
 }
 
+// TODO: type for value may be number | null
+
 interface State {
   isWarning: boolean
   isValidated: boolean
