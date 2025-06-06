@@ -14,6 +14,20 @@ import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import MainMenu from '../../MainMenu'
 
+const FormControl = Styled.FormControl
+
+const FieldBox = Styled.FieldBox
+
+const DatePicker = Styled.DatePicker
+
+const Button = Styled.Button
+
+const ButtonBox = Styled.ButtonBox
+
+const TextField = Styled.TextField
+
+const Select = Styled.Select
+
 function buildUseSpendCreationHookParams(
   searchParams: URLSearchParams
 ): UI.Hooks.UseSpendCreation.Params {
@@ -39,13 +53,9 @@ function NewSpend() {
 
   const searchParams = useMemo(() => new URLSearchParams(search), [search])
 
-  const spendCreationHookParams = useMemo(
-    () => buildUseSpendCreationHookParams(searchParams),
-    [searchParams]
-  )
+  const hookParams = useMemo(() => buildUseSpendCreationHookParams(searchParams), [searchParams])
 
-  const { lists, values, functions, message, isValidated, isWarning } =
-    useSpendCreation(spendCreationHookParams)
+  const { lists, values, functions, warning, isValidated, isWarning } = useSpendCreation(hookParams)
 
   const notifications = useNotifications()
 
@@ -107,7 +117,7 @@ function NewSpend() {
     functions.setDescription(value)
   }
 
-  const handleValueChange = (event: Mui.SelectChangeEvent<unknown>) => {
+  const handleValueChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = parseInt(event.target.value as string)
     functions.setValue(value)
   }
@@ -116,24 +126,6 @@ function NewSpend() {
     event.preventDefault()
     functions.validate()
   }
-
-  useEffect(() => {
-    if (isValidated && !isWarning) {
-      functions.reset()
-      mutate({
-        date: values.date!,
-        categoryId: values.category!.id,
-        subcategoryId: values.subcategory!.id,
-        groupId: values.group!.id,
-        accountId: values.account!.id,
-        value: values.value! as number
-      })
-    } else if (isWarning) {
-      notifications.show(message, {
-        severity: 'warning'
-      })
-    }
-  }, [notifications, message, mutate, functions, values, isWarning, isValidated])
 
   const variant = 'standard'
 
@@ -144,15 +136,27 @@ function NewSpend() {
     fullWidth
   }
 
+  const categorySelectLabel = 'Category'
+
+  const categorySelectLabelId = 'category-select-label'
+
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectLabelId = 'subcategory-select-label'
+
+  const groupSelectLabel = 'Group'
+
+  const groupSelectLabelId = 'group-select-label'
+
+  const accountSelectLabel = 'Account'
+
+  const accountSelectLabelId = 'account-select-label'
+
   const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
     value: values.date,
     format: constants.DATE_FORMAT,
     onChange: handleDateChange
   }
-
-  const categorySelectLabel = 'Category'
-
-  const categorySelectLabelId = 'category-select-label'
 
   const categorySelectProps: Mui.SelectProps = {
     id: 'category-select',
@@ -169,10 +173,6 @@ function NewSpend() {
     id: categorySelectLabelId
   }
 
-  const subcategorySelectLabel = 'Subcategory'
-
-  const subcategorySelectLabelId = 'subcategory-select-label'
-
   const subcategorySelectProps: Mui.SelectProps = {
     id: 'subcategory-select',
     label: subcategorySelectLabel,
@@ -188,10 +188,6 @@ function NewSpend() {
     id: subcategorySelectLabelId
   }
 
-  const groupSelectLabel = 'Group'
-
-  const groupSelectLabelId = 'group-select-label'
-
   const groupSelectProps: Mui.SelectProps = {
     id: 'group-select',
     label: groupSelectLabel,
@@ -206,10 +202,6 @@ function NewSpend() {
   const groupInputLabelProps: Mui.InputLabelProps = {
     id: groupSelectLabelId
   }
-
-  const accountSelectLabel = 'Account'
-
-  const accountSelectLabelId = 'account-select-label'
 
   const accountSelectProps: Mui.SelectProps = {
     id: 'group-select',
@@ -227,50 +219,67 @@ function NewSpend() {
   }
 
   const descriptionAutocompleteProps: UI.AutocompleteProps = {
-    query: api.getAutocompleteOptionsForSpendDescription,
+    reset: !values.description,
+    queryFn: api.getAutocompleteOptionsForSpendDescription,
     onChange: handleDescriptionChange
   }
 
-  // TODO: set the correct type for handleValueChange
-  
   const valueFieldProps: Mui.TextFieldProps = {
     id: 'value-textfield',
     label: 'Value',
     type: 'number',
-    value: values.value,
+    value: values.value ? values.value : '',
     variant,
+    onChange: handleValueChange,
     slotProps: {
       inputLabel: {
         shrink: true
       }
-    },
-    onChange: handleValueChange
+    }
   }
+
+  useEffect(() => {
+    if (isValidated && !isWarning) {
+      functions.reset()
+      mutate({
+        date: values.date!,
+        categoryId: values.category!.id,
+        subcategoryId: values.subcategory!.id,
+        groupId: values.group!.id,
+        accountId: values.account!.id,
+        value: values.value! as number
+      })
+    } else if (isWarning) {
+      notifications.show(warning, {
+        severity: 'warning'
+      })
+    }
+  }, [mutate, notifications, warning, functions, values, isWarning, isValidated])
 
   return (
     <Page mainMenu={<MainMenu />}>
-      <Styled.FormControl component="form" onSubmit={handleSubmit}>
-        <Styled.FieldBox>
-          <Styled.DatePicker {...datePickerProps} />
-        </Styled.FieldBox>
-        <Styled.FieldBox>
+      <FormControl component="form" onSubmit={handleSubmit}>
+        <FieldBox>
+          <DatePicker {...datePickerProps} />
+        </FieldBox>
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...categoryInputLabelProps}>{categorySelectLabel}</Mui.InputLabel>
-            <Styled.Select {...categorySelectProps}>
+            <Select {...categorySelectProps}>
               {lists.categories.map((category) => (
                 <Mui.MenuItem value={category.id} key={category.id}>
                   {category.name}
                 </Mui.MenuItem>
               ))}
-            </Styled.Select>
+            </Select>
           </Mui.FormControl>
-        </Styled.FieldBox>
-        <Styled.FieldBox>
+        </FieldBox>
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...subcategoryInputLabelProps}>
               {subcategorySelectLabel}
             </Mui.InputLabel>
-            <Styled.Select {...subcategorySelectProps}>
+            <Select {...subcategorySelectProps}>
               {lists.subcategories.map((subcategory) => (
                 <Mui.MenuItem value={subcategory.id} key={subcategory.id}>
                   {subcategory.id == constants.UNDEFINED_SUBCATEGORY.id ? (
@@ -280,45 +289,45 @@ function NewSpend() {
                   )}
                 </Mui.MenuItem>
               ))}
-            </Styled.Select>
+            </Select>
           </Mui.FormControl>
-        </Styled.FieldBox>
-        <Styled.FieldBox>
+        </FieldBox>
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...groupInputLabelProps}>{groupSelectLabel}</Mui.InputLabel>
-            <Styled.Select {...groupSelectProps}>
+            <Select {...groupSelectProps}>
               {lists.groups.map((group) => (
                 <Mui.MenuItem value={group.id} key={group.id}>
                   {group.id == constants.UNDEFINED_GROUP.id ? <em>{group.name}</em> : group.name}
                 </Mui.MenuItem>
               ))}
-            </Styled.Select>
+            </Select>
           </Mui.FormControl>
-        </Styled.FieldBox>
-        <Styled.FieldBox>
+        </FieldBox>
+        <FieldBox>
           <Mui.FormControl {...formControlProps}>
             <Mui.InputLabel {...accountInputLabelProps}>{accountSelectLabel}</Mui.InputLabel>
-            <Styled.Select {...accountSelectProps}>
+            <Select {...accountSelectProps}>
               {lists.accounts.map((account) => (
                 <Mui.MenuItem value={account.id} key={account.id}>
                   {account.name}
                 </Mui.MenuItem>
               ))}
-            </Styled.Select>
+            </Select>
           </Mui.FormControl>
-        </Styled.FieldBox>
-        <Styled.FieldBox>
+        </FieldBox>
+        <FieldBox>
           <Autocomplete {...descriptionAutocompleteProps} />
-        </Styled.FieldBox>
-        <Styled.FieldBox>
-          <Styled.TextField {...valueFieldProps} />
-        </Styled.FieldBox>
-        <Styled.ButtonBox>
-          <Styled.Button variant="contained" type="submit" loading={isPending}>
+        </FieldBox>
+        <FieldBox>
+          <TextField {...valueFieldProps} />
+        </FieldBox>
+        <ButtonBox>
+          <Button variant="contained" type="submit" loading={isPending}>
             SEND
-          </Styled.Button>
-        </Styled.ButtonBox>
-      </Styled.FormControl>
+          </Button>
+        </ButtonBox>
+      </FormControl>
     </Page>
   )
 }

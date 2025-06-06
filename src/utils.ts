@@ -40,6 +40,11 @@ export function buildListItemFormatter(list: Api.ListItem[]): Formatter {
   }
 }
 
+/**
+ * Sets hours, minutes, seconds and milliseconds to 0
+ * @param date date to be modified
+ * @returns returns a new object modified as mentioned before
+ */
 export function toDate(date: Dayjs) {
   return date.set('hours', 0).set('minutes', 0).set('seconds', 0).set('milliseconds', 0)
 }

@@ -1,9 +1,10 @@
 import * as Mui from '@mui/material'
 import { useNotifications } from '@toolpad/core'
-import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useMemo, useState } from 'react'
+import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 import { debounce, throttle } from 'throttle-debounce'
 import * as Styled from './styled'
 import { TextField } from './styled'
+import { VALUE_WARNING_MSG } from '../constants'
 
 // TODO: adjust throttle and debounce params (times)
 
@@ -15,10 +16,10 @@ function buildDebouncedFunction(callback: (text: string) => void) {
   return debounce(500, callback)
 }
 
-function Autocomplete({ query, onChange }: UI.AutocompleteProps) {
+function Autocomplete({ reset, queryFn, onChange }: UI.AutocompleteProps) {
   const notifications = useNotifications()
 
-  const [, setValue] = useState(() => '')
+  const [value, setValue] = useState(() => '')
 
   const [options, setOptions] = useState<string[]>([])
 
@@ -26,7 +27,7 @@ function Autocomplete({ query, onChange }: UI.AutocompleteProps) {
 
   const updateOptions = useCallback(
     (text: string) => {
-      query(text).then(
+      queryFn(text).then(
         (result) => {
           // Prevent receiving results for an outdated search text
           if (result.query == text) {
@@ -45,7 +46,7 @@ function Autocomplete({ query, onChange }: UI.AutocompleteProps) {
         }
       )
     },
-    [query, notifications]
+    [queryFn, notifications]
   )
 
   const throttleAutocompletion = useMemo(
@@ -97,12 +98,17 @@ function Autocomplete({ query, onChange }: UI.AutocompleteProps) {
   const descriptionAutocompleteProps: Mui.AutocompleteProps<string, false, true, true> = {
     id: 'description-autocomplete',
     freeSolo: true,
-    disableClearable: true,
+    disableClearable: true, 
+    value,
     options,
     renderInput: (params: Mui.AutocompleteRenderInputParams) => (
       <TextField {...descriptionFieldPropsBuilder(params)} />
     )
   }
+
+  useEffect(() => {
+    if (reset) setValue('')
+  }, [reset, setValue])
 
   return <Styled.Autocomplete {...descriptionAutocompleteProps} />
 }

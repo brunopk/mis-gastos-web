@@ -3,11 +3,12 @@ import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import * as api from '../api/mis-gastos'
 import * as constants from '../constants'
+import { toDate } from '../utils'
 
 const INITIAL_STATE: State = {
   isWarning: false,
   isValidated: false,
-  message: null,
+  warning: null,
   lists: {
     original: {
       categories: [],
@@ -29,15 +30,11 @@ const INITIAL_STATE: State = {
     group: null,
     account: null,
     description: null,
-    value: ''
+    value: null
   }
 }
 
-const DATE_WARNING_MSG = 'Date cannot be in the future'
-
-const VALUE_WARNING_MSG = 'Spend value must greater than 0'
-
-type SelectListItemAction = {
+interface SelectListItemAction {
   type: 'SELECT_CATEGORY' | 'SELECT_SUBCATEGORY' | 'SELECT_GROUP' | 'SELECT_ACCOUNT'
   data: {
     id: number
@@ -58,7 +55,7 @@ interface SetValueAction {
   }
 }
 
-interface SetTextAction {
+interface SetDescriptionAction {
   type: 'SET_DESCRIPTION'
   data: {
     text: string
@@ -87,12 +84,10 @@ interface InitializeAction {
   }
 }
 
-// TODO: type for value may be number | null
-
 interface State {
   isWarning: boolean
   isValidated: boolean
-  message: string | null
+  warning: string | null
   lists: {
     original: {
       categories: Api.ListItem[]
@@ -113,14 +108,14 @@ interface State {
     subcategory: Api.Subcategory | null
     group: Api.Group | null
     account: Api.ListItem | null
-    value: number | ''
+    value: number | null
     description: string | null
   }
 }
 
 type Action =
   | SetDateAction
-  | SetTextAction
+  | SetDescriptionAction
   | SetValueAction
   | SelectListItemAction
   | ValidateAction
@@ -146,7 +141,7 @@ export function useSpendCreation({
 
         const filteredSubcategories = action.data.lists.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
-          .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+          .sort((subcategoryA, subcategoryB) => subcategoryA.name.localeCompare(subcategoryB.name))
           .concat([constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = action.data.defaultValues.subcategoryId
           ? api.utils.findSubcategory(
@@ -157,26 +152,28 @@ export function useSpendCreation({
 
         const filteredGroups = action.data.lists.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
-          .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+          .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = action.data.defaultValues.groupId
           ? api.utils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
           : filteredGroups[0]
 
-        const filteredAccounts = api.utils.filterAccounts(
-          action.data.lists.accounts,
-          [selectedCategory],
-          [selectedSubcategory],
-          [selectedGroup]
-        )
+        const filteredAccounts = api.utils
+          .filterAccounts(
+            action.data.lists.accounts,
+            [selectedCategory],
+            [selectedSubcategory],
+            [selectedGroup]
+          )
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = action.data.defaultValues.accountId
           ? api.utils.findAccount(action.data.defaultValues.accountId, action.data.lists.accounts)
           : filteredAccounts[0]
 
         return {
-          ...prevState,
           isWarning: false,
           isValidated: false,
+          warning: null,
           lists: {
             original: { ...action.data.lists },
             filtered: {
@@ -187,32 +184,36 @@ export function useSpendCreation({
             }
           },
           values: {
-            date: dayjs(),
+            date: toDate(dayjs()),
             category: selectedCategory,
             subcategory: selectedSubcategory,
             group: selectedGroup,
             account: selectedAccount,
             description: null,
-            value: ''
+            value: 0
           }
         }
       }
-
-      case 'VALIDATE': {
-        const isWarning1 = dayjs().isBefore(prevState.values.date)
-        const isWarning2 =
-          (typeof prevState.values.value == 'number' && prevState.values.value <= 0) ||
-          prevState.values.value == constants.UNDEFINED_VALUE
-        const message = isWarning1 ? DATE_WARNING_MSG : isWarning2 ? VALUE_WARNING_MSG : null
-
+      case 'SET_VALUE': {
         return {
           ...prevState,
-          isWarning: isWarning1 || isWarning2,
-          isValidated: true,
-          message
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            value: action.data.value
+          }
         }
       }
-
+      case 'SET_DESCRIPTION': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            description: action.data.text
+          }
+        }
+      }
       case 'SET_DATE': {
         return {
           ...prevState,
@@ -223,7 +224,6 @@ export function useSpendCreation({
           }
         }
       }
-
       case 'SELECT_CATEGORY': {
         const selectedCategory = api.utils.findCategory(
           action.data.id,
@@ -232,22 +232,24 @@ export function useSpendCreation({
 
         const filteredSubcategories = prevState.lists.original.subcategories
           .filter((subcategory) => subcategory.categoryId == selectedCategory.id)
-          .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+          .sort((subcategoryA, subcategoryB) => subcategoryA.name.localeCompare(subcategoryB.name))
           .concat([constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = filteredSubcategories[0]
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
-          .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+          .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = api.utils.filterAccounts(
-          prevState.lists.original.accounts,
-          [selectedCategory],
-          [selectedSubcategory],
-          [selectedGroup]
-        )
+        const filteredAccounts = api.utils
+          .filterAccounts(
+            prevState.lists.original.accounts,
+            [selectedCategory],
+            [selectedSubcategory],
+            [selectedGroup]
+          )
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -271,7 +273,6 @@ export function useSpendCreation({
           }
         }
       }
-
       case 'SELECT_SUBCATEGORY': {
         const selectedSubcategory = api.utils.findSubcategory(
           action.data.id,
@@ -280,16 +281,18 @@ export function useSpendCreation({
 
         const filteredGroups = prevState.lists.original.groups
           .filter((group) => group.subcategoryId == selectedSubcategory.id)
-          .sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+          .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = api.utils.filterAccounts(
-          prevState.lists.original.accounts,
-          [prevState.values.category!],
-          [selectedSubcategory],
-          [selectedGroup]
-        )
+        const filteredAccounts = api.utils
+          .filterAccounts(
+            prevState.lists.original.accounts,
+            [prevState.values.category!],
+            [selectedSubcategory],
+            [selectedGroup]
+          )
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -311,16 +314,17 @@ export function useSpendCreation({
           }
         }
       }
-
       case 'SELECT_GROUP': {
         const selectedGroup = api.utils.findGroup(action.data.id, prevState.lists.filtered.groups)
 
-        const filteredAccounts = api.utils.filterAccounts(
-          prevState.lists.original.accounts,
-          [prevState.values.category!],
-          [prevState.values.subcategory!],
-          [selectedGroup]
-        )
+        const filteredAccounts = api.utils
+          .filterAccounts(
+            prevState.lists.original.accounts,
+            [prevState.values.category!],
+            [prevState.values.subcategory!],
+            [selectedGroup]
+          )
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -340,7 +344,6 @@ export function useSpendCreation({
           }
         }
       }
-
       case 'SELECT_ACCOUNT': {
         const selectedAccount = api.utils.findAccount(
           action.data.id,
@@ -356,26 +359,22 @@ export function useSpendCreation({
           }
         }
       }
+      case 'VALIDATE': {
+        const isWarning1 = dayjs().isBefore(prevState.values.date)
+        const isWarning2 =
+          !prevState.values.value ||
+          (typeof prevState.values.value == 'number' && prevState.values.value <= 0)
+        const message = isWarning1
+          ? constants.DATE_WARNING_MSG
+          : isWarning2
+            ? constants.VALUE_WARNING_MSG
+            : null
 
-      case 'SET_VALUE': {
         return {
           ...prevState,
-          isValidated: false,
-          values: {
-            ...prevState.values,
-            value: action.data.value
-          }
-        }
-      }
-
-      case 'SET_DESCRIPTION': {
-        return {
-          ...prevState,
-          isValidated: false,
-          values: {
-            ...prevState.values,
-            description: action.data.text
-          }
+          isWarning: isWarning1 || isWarning2,
+          isValidated: true,
+          warning: message
         }
       }
     }
@@ -385,6 +384,16 @@ export function useSpendCreation({
 
   const setDate = useCallback(
     (date: Dayjs) => dispatch({ type: 'SET_DATE', data: { date } }),
+    [dispatch]
+  )
+
+  const setDescription = useCallback(
+    (text: string) => dispatch({ type: 'SET_DESCRIPTION', data: { text } }),
+    [dispatch]
+  )
+
+  const setValue = useCallback(
+    (value: number) => dispatch({ type: 'SET_VALUE', data: { value } }),
     [dispatch]
   )
 
@@ -405,16 +414,6 @@ export function useSpendCreation({
 
   const selectAccount = useCallback(
     (id: number) => dispatch({ type: 'SELECT_ACCOUNT', data: { id } }),
-    [dispatch]
-  )
-
-  const setDescription = useCallback(
-    (text: string) => dispatch({ type: 'SET_DESCRIPTION', data: { text } }),
-    [dispatch]
-  )
-
-  const setValue = useCallback(
-    (value: number) => dispatch({ type: 'SET_VALUE', data: { value } }),
     [dispatch]
   )
 
@@ -455,7 +454,7 @@ export function useSpendCreation({
   return {
     isWarning: state.isWarning,
     isValidated: state.isValidated,
-    message: state.message,
+    warning: state.warning,
     lists: { ...state.lists.filtered },
     values: { ...state.values },
     functions: {

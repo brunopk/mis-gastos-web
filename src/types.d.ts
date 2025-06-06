@@ -50,13 +50,13 @@ declare namespace Api {
   }
 
   interface Income {
-    id: number
+    id?: number
     date: DayjsDate
     incomeTypeId: number
     accountId: number
     description?: string
     value: number
-    spend: Spend | null
+    spend?: Spend
   }
 }
 
@@ -75,7 +75,8 @@ declare namespace UI {
 
     namespace UseIncomeCreation {
       interface Params {
-        defaultIncomeTypeId?: number
+        defaultIncomeTypeId: number | null
+        excludedIncomeTypeIds: number[]
       }
     }
 
@@ -121,8 +122,9 @@ declare namespace UI {
   }
 
   interface AutocompleteProps {
-    query: (query: string) => Promise<Api.AutocompleteOptions>
-    onChange: (textt: string) => void
+    reset: boolean
+    queryFn: (query: string) => Promise<Api.AutocompleteOptions>
+    onChange: (text: string) => void
   }
 
   interface SpendFilterProps {

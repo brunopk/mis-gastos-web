@@ -1,177 +1,256 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import {REIMBURSEMENT} from '../constants'
-
-// TODO: add isWarning similar to isError 
+import * as api from '../api/mis-gastos'
+import * as constants from '../constants'
+import { toDate } from '../utils'
 
 const INITIAL_STATE: State = {
-  isError: false,
-  error: null,
+  isWarning: false,
+  isValidated: false,
+  warning: null,
   lists: {
     original: {
       incomeTypes: [],
       accounts: []
     },
     filtered: {
+      incomeTypes: [],
       accounts: []
     }
   },
-  selection: {
+  values: {
     date: null,
-    incomeTypeId: null,
-    accountId: null
+    incomeType: null,
+    account: null,
+    description: null,
+    value: null
   }
 }
 
-type SelectItemAction = {
+interface SelectListItemAction {
   type: 'SELECT_INCOME_TYPE' | 'SELECT_ACCOUNT'
   data: {
     id: number
   }
 }
 
-interface SelectDateAction {
-  type: 'SELECT_DATE'
+interface SetDateAction {
+  type: 'SET_DATE'
   data: {
     date: Dayjs
   }
 }
 
+interface SetValueAction {
+  type: 'SET_VALUE'
+  data: {
+    value: number
+  }
+}
+
+interface SetValueAction {
+  type: 'SET_VALUE'
+  data: {
+    value: number
+  }
+}
+
+interface SetDescriptionAction {
+  type: 'SET_DESCRIPTION'
+  data: {
+    text: string
+  }
+}
+
+interface ValidateAction {
+  type: 'VALIDATE'
+}
+
 type InitializeAction = {
   type: 'INITIALIZE'
   data: {
-    incomeTypes: Api.ListItem[]
-    accounts: Api.ListItem[]
+    lists: {
+      incomeTypes: Api.ListItem[]
+      accounts: Api.ListItem[]
+    }
+    defaultValues: {
+      incomeTypeId: number | null
+    }
+    excludedValues: {
+      incomeTypeId: number[]
+    }
   }
 }
 
 interface State {
-  isError: boolean
-  error: string | null
+  isWarning: boolean
+  isValidated: boolean
+  warning: string | null
   lists: {
     original: {
       incomeTypes: Api.ListItem[]
       accounts: Api.ListItem[]
     }
     filtered: {
+      incomeTypes: Api.ListItem[]
       accounts: Api.ListItem[]
     }
   }
-  selection: {
+  values: {
     date: Dayjs | null
-    incomeTypeId: number | null
-    accountId: number | null
+    incomeType: Api.ListItem | null
+    account: Api.ListItem | null
+    value: number | null
+    description: string | null
   }
 }
 
-type Action = SelectItemAction | SelectDateAction | InitializeAction
+type Action =
+  | SetDateAction
+  | SetDescriptionAction
+  | SetValueAction
+  | SelectListItemAction
+  | ValidateAction
+  | InitializeAction
 
 export default function useIncomeCreation({
-  defaultIncomeTypeId
+  defaultIncomeTypeId,
+  excludedIncomeTypeIds
 }: UI.Hooks.UseIncomeCreation.Params) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
-        const selectedDate = dayjs()
+        // If default income type is set, the list have only this income type
+        let filteredIncomeTypes = action.data.defaultValues.incomeTypeId
+          ? [
+              api.utils.findIncomeType(
+                action.data.defaultValues.incomeTypeId,
+                action.data.lists.incomeTypes
+              )
+            ]
+          : action.data.lists.incomeTypes
+        filteredIncomeTypes = filteredIncomeTypes
+          .filter((incomeType) => !action.data.excludedValues.incomeTypeId.includes(incomeType.id))
+          .sort((incomeTypeA, incomeTypeB) => incomeTypeA.name.localeCompare(incomeTypeB.name))
+        const selectedIncomeType = filteredIncomeTypes[0]
 
-        let initialIncomeTypes = action.data.incomeTypes
-        if (typeof defaultIncomeTypeId != 'undefined')
-          initialIncomeTypes = action.data.incomeTypes.filter(
-            (incomeType) => incomeType.id == defaultIncomeTypeId
-          )
-        else 
-          initialIncomeTypes = action.data.incomeTypes.filter(
-            (incomeType) => incomeType.id != REIMBURSEMENT
-          )
-        const selectedIncomeType = initialIncomeTypes[0]
-
-        let filteredAccounts = action.data.accounts.filter(
-          (account) =>
-            typeof selectedIncomeType.accountIds != 'undefined' &&
-            selectedIncomeType.accountIds.includes(account.id)
-        )
-        if (filteredAccounts.length == 0) filteredAccounts = action.data.accounts.slice(0)
+        const filteredAccounts = api.utils
+          .filterAccountsByIncomeTypes(action.data.lists.accounts, selectedIncomeType)
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
-          ...prevState,
+          isValidated: false,
+          isWarning: false,
+          warning: null,
           lists: {
-            original: {
-              incomeTypes: initialIncomeTypes,
-              accounts: action.data.accounts
-            },
+            original: { ...action.data.lists },
             filtered: {
+              incomeTypes: filteredIncomeTypes,
               accounts: filteredAccounts
             }
           },
-          selection: {
-            date: selectedDate,
-            incomeTypeId: selectedIncomeType.id,
-            accountId: selectedAccount.id
+          values: {
+            date: toDate(dayjs()),
+            incomeType: selectedIncomeType,
+            account: selectedAccount,
+            description: null,
+            value: 0
           }
         }
       }
-
-      case 'SELECT_DATE': {
-        const isError = dayjs().isBefore(prevState.selection.date)
-        const error = isError ? 'Date cannot be in the future' : null
-        const date = !isError ? action.data.date : prevState.selection.date
-
+      case 'SET_VALUE': {
         return {
           ...prevState,
-          isError,
-          error,
-          selection: {
-            ...prevState.selection,
-            date
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            value: action.data.value
           }
         }
       }
-
-      // Income source selection is not allowed when typeof defaultIncomeTypeId == 'undefined'
+      case 'SET_DESCRIPTION': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            description: action.data.text
+          }
+        }
+      }
+      case 'SET_DATE': {
+        return {
+          ...prevState,
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            date: action.data.date
+          }
+        }
+      }
       case 'SELECT_INCOME_TYPE': {
-        const selectedIncomeTypeId = action.data.id
-        const selectedIncomeType = prevState.lists.original.incomeTypes.find(
-          (incomeType) => incomeType.id == selectedIncomeTypeId
+        const selectedIncomeType = api.utils.findIncomeType(
+          action.data.id,
+          prevState.lists.original.incomeTypes
         )
 
-        let filteredAccounts = prevState.lists.original.accounts.filter(
-          (account) =>
-            typeof selectedIncomeType!.accountIds != 'undefined' &&
-            selectedIncomeType!.accountIds.includes(account.id)
-        )
-        if (filteredAccounts.length == 0)
-          filteredAccounts = prevState.lists.original.accounts.slice(0)
+        const filteredAccounts = api.utils
+          .filterAccountsByIncomeTypes(prevState.lists.original.accounts, selectedIncomeType)
+          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
           ...prevState,
+          isValidated: false,
           lists: {
             ...prevState.lists,
             filtered: {
+              ...prevState.lists.filtered,
               accounts: filteredAccounts
             }
           },
-          selection: {
-            ...prevState.selection,
-            incomeTypeId: selectedIncomeType!.id,
-            accountId: selectedAccount.id
+          values: {
+            ...prevState.values,
+            incomeType: selectedIncomeType,
+            account: selectedAccount
           }
         }
       }
-
       case 'SELECT_ACCOUNT': {
-        const selectedAccount = action.data.id
+        const selectedAccount = api.utils.findAccount(
+          action.data.id,
+          prevState.lists.original.accounts
+        )
 
         return {
           ...prevState,
-          selection: {
-            ...prevState.selection,
-            accountId: selectedAccount
+          isValidated: false,
+          values: {
+            ...prevState.values,
+            account: selectedAccount
           }
+        }
+      }
+      case 'VALIDATE': {
+        const isWarning1 = dayjs().isBefore(prevState.values.date)
+        const isWarning2 =
+          !prevState.values.value ||
+          (typeof prevState.values.value == 'number' && prevState.values.value <= 0)
+        const message = isWarning1
+          ? constants.DATE_WARNING_MSG
+          : isWarning2
+            ? constants.VALUE_WARNING_MSG
+            : null
+
+        return {
+          ...prevState,
+          isWarning: isWarning1 || isWarning2,
+          isValidated: true,
+          warning: message
         }
       }
     }
@@ -179,8 +258,18 @@ export default function useIncomeCreation({
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
-  const selectDate = useCallback(
-    (date: Dayjs) => dispatch({ type: 'SELECT_DATE', data: { date } }),
+  const setDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SET_DATE', data: { date } }),
+    [dispatch]
+  )
+
+  const setDescription = useCallback(
+    (text: string) => dispatch({ type: 'SET_DESCRIPTION', data: { text } }),
+    [dispatch]
+  )
+
+  const setValue = useCallback(
+    (value: number) => dispatch({ type: 'SET_VALUE', data: { value } }),
     [dispatch]
   )
 
@@ -201,25 +290,58 @@ export default function useIncomeCreation({
     [dispatch]
   )
 
+  const reset = useCallback(
+    () =>
+      dispatch({
+        type: 'INITIALIZE',
+        data: {
+          lists: {
+            ...apiLists
+          },
+          defaultValues: {
+            incomeTypeId: defaultIncomeTypeId
+          },
+          excludedValues: {
+            incomeTypeId: excludedIncomeTypeIds
+          }
+        }
+      }),
+    [apiLists, defaultIncomeTypeId, excludedIncomeTypeIds]
+  )
+
+  const validate = useCallback(() => dispatch({ type: 'VALIDATE' }), [])
+
   useEffect(() => {
     dispatch({
       type: 'INITIALIZE',
-      data: { ...apiLists }
+      data: {
+        lists: {
+          ...apiLists
+        },
+        defaultValues: {
+          incomeTypeId: defaultIncomeTypeId
+        },
+        excludedValues: {
+          incomeTypeId: excludedIncomeTypeIds
+        }
+      }
     })
-  }, [apiLists])
+  }, [apiLists, defaultIncomeTypeId, excludedIncomeTypeIds])
 
   return {
-    isError: state.isError,
-    error: state.error,
-    selection: { ...state.selection },
-    lists: {
-      incomeTypes: state.lists.original.incomeTypes,
-      accounts: state.lists.filtered.accounts
-    },
+    isWarning: state.isWarning,
+    isValidated: state.isValidated,
+    warning: state.warning,
+    lists: { ...state.lists.filtered },
+    values: { ...state.values },
     functions: {
-      selectDate,
+      setDate,
+      setDescription,
+      setValue,
       selectIncomeType,
-      selectAccount
+      selectAccount,
+      reset,
+      validate
     }
   }
 }

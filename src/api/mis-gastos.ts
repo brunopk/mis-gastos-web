@@ -10,7 +10,9 @@ export const utils = {
   findSubcategory,
   findGroup,
   findAccount,
+  findIncomeType,
   filterAccounts,
+  filterAccountsByIncomeTypes,
   loaderFunctionBuilder
 }
 
@@ -114,38 +116,6 @@ export async function getSpends(): Promise<Api.Spend[]> {
   }))
 }
 
-export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
-  const response = (await post(`${API_URL}/spends`, {
-    date: newSpend.date.toISOString(),
-    category_id: newSpend.categoryId,
-    subcategory_id: newSpend.subcategoryId,
-    group_id: newSpend.groupId,
-    account_id: newSpend.accountId,
-    description: newSpend.description,
-    value: newSpend.value
-  })) as {
-    id: number
-    date: string
-    category_id: number
-    subcategory_id: number | null
-    group_id: number | null
-    account_id: number
-    description?: string
-    value: number
-  }
-
-  return {
-    id: response.id,
-    date: dayjs(response.date),
-    categoryId: response.category_id,
-    subcategoryId: response.subcategory_id,
-    groupId: response.group_id,
-    accountId: response.account_id,
-    description: response.description,
-    value: response.value
-  }
-}
-
 export async function getIncomes(): Promise<Api.Income[]> {
   const response = await get(`${API_URL}/incomes`)
   return (
@@ -203,6 +173,87 @@ export async function getAutocompleteOptionsForIncomeDescription(
 ): Promise<Api.AutocompleteOptions> {
   const response = await get(`${API_URL}/autocomplete/incomes/description?query=${query}`)
   return response as Api.AutocompleteOptions
+}
+
+export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
+  const response = (await post(`${API_URL}/spends`, {
+    date: newSpend.date.toISOString(),
+    category_id: newSpend.categoryId,
+    subcategory_id: newSpend.subcategoryId,
+    group_id: newSpend.groupId,
+    account_id: newSpend.accountId,
+    description: typeof newSpend.description == 'undefined' ? null : newSpend.description,
+    value: newSpend.value
+  })) as {
+    id: number
+    date: string
+    category_id: number
+    subcategory_id: number | null
+    group_id: number | null
+    account_id: number
+    description: string | null
+    value: number
+  }
+
+  return {
+    id: response.id,
+    date: dayjs(response.date),
+    categoryId: response.category_id,
+    subcategoryId: response.subcategory_id,
+    groupId: response.group_id,
+    accountId: response.account_id,
+    description: response.description ? response.description : undefined,
+    value: response.value
+  }
+}
+
+export async function createIncome(newIncome: Api.Income): Promise<Api.Income> {
+  const response = (await post(`${API_URL}/incomes`, {
+    date: newIncome.date.toISOString(),
+    income_type_id: newIncome.incomeTypeId,
+    account_id: newIncome.accountId,
+    description: typeof newIncome.description == 'undefined' ? null : newIncome.description,
+    value: newIncome.value,
+    spend: newIncome.spend ? { id: newIncome.spend.id! } : null
+  })) as {
+    id: number
+    date: string
+    income_type_id: number
+    account_id: number
+    description: string | null
+    value: number
+    spend: null | {
+      id: number
+      date: string
+      category_id: number
+      subcategory_id: number | null
+      group_id: number | null
+      account_id: number
+      description: string | null
+      value: number
+    }
+  }
+
+  return {
+    id: response.id,
+    date: dayjs(response.date),
+    incomeTypeId: response.income_type_id,
+    accountId: response.account_id,
+    description: response.description ? response.description : undefined,
+    value: response.value,
+    spend: !response.spend
+      ? undefined
+      : {
+          id: response.spend.id,
+          date: dayjs(response.spend.date),
+          categoryId: response.spend.category_id,
+          subcategoryId: response.spend.subcategory_id,
+          groupId: response.spend.group_id,
+          accountId: response.spend.account_id,
+          description: response.description ? response.description : undefined,
+          value: response.spend.value
+        }
+  }
 }
 
 async function post(url: string, json: object): Promise<object> {
@@ -316,6 +367,12 @@ function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem 
   return account
 }
 
+function findIncomeType(incomeTypeId: number, incomeTypes: Api.ListItem[]): Api.ListItem {
+  const incomeType = incomeTypes.find((incomeType) => incomeType.id == incomeTypeId)
+  if (typeof incomeType == 'undefined') throw new Error(`Income type ${incomeTypeId} not found`)
+  return incomeType
+}
+
 function filterAccounts(
   accounts: Api.ListItem[],
   selectedCategories: Api.ListItem[],
@@ -351,8 +408,20 @@ function filterAccounts(
       filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
   }
 
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-  return filteredAccounts.sort((itemA, itemB) => itemA.name.localeCompare(itemB.name))
+  return filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+}
+
+function filterAccountsByIncomeTypes(
+  accounts: Api.ListItem[],
+  selectedIncomeType: Api.ListItem
+): Api.ListItem[] {
+  const allAccounts = accounts.slice(0)
+  let filteredAccounts = allAccounts
+  const accountIds = flatAccountIds([selectedIncomeType])
+  if (accountIds.length > 0)
+    filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
+
+  return filteredAccounts.length > 0 ? filteredAccounts : allAccounts
 }
 
 function flatAccountIds(list: Api.ListItem[]): number[] {

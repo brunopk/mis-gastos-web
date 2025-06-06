@@ -13,6 +13,8 @@ import { PATHS } from '../../../../../constants'
 
 // TODO: set new spend page as default page for spends (and new income page as default for incomes)
 
+// TODO: show "-" when description == null
+
 const INITIAL_SPEND_FILTERS: SpendFilters = {
   startDate: dayjs().add(-1, 'month'),
   finalDate: dayjs(),
