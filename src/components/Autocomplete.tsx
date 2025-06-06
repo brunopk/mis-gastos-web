@@ -4,7 +4,6 @@ import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useEffect, useMemo
 import { debounce, throttle } from 'throttle-debounce'
 import * as Styled from './styled'
 import { TextField } from './styled'
-import { VALUE_WARNING_MSG } from '../constants'
 
 // TODO: adjust throttle and debounce params (times)
 
