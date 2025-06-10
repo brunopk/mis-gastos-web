@@ -1,10 +1,8 @@
-import dayjs, { Dayjs } from 'dayjs'
+import { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
 
 // TODO: filter accounts by category/subcategory/group
-
-// TODO: disable toggle if list length is 0
 
 const INITIAL_STATE: State = {
   isError: false,
@@ -545,16 +543,21 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
     [dispatch]
   )
 
-  const toggleCategories = useCallback(() => dispatch({ type: 'TOGGLE_CATEGORIES' }), [dispatch])
+  const toggleCategories = useCallback(() => {
+    if (state.lists.filtered.categories.length > 0) dispatch({ type: 'TOGGLE_CATEGORIES' })
+  }, [dispatch, state.lists.filtered.categories.length])
 
-  const toggleSubcategories = useCallback(
-    () => dispatch({ type: 'TOGGLE_SUBCATEGORIES' }),
-    [dispatch]
-  )
+  const toggleSubcategories = useCallback(() => {
+    if (state.lists.filtered.subcategories.length > 0) dispatch({ type: 'TOGGLE_SUBCATEGORIES' })
+  }, [dispatch, state.lists.filtered.subcategories.length])
 
-  const toggleGroups = useCallback(() => dispatch({ type: 'TOGGLE_GROUPS' }), [dispatch])
+  const toggleGroups = useCallback(() => {
+    if (state.lists.filtered.groups.length > 0) dispatch({ type: 'TOGGLE_GROUPS' })
+  }, [dispatch, state.lists.filtered.groups.length])
 
-  const toggleAccounts = useCallback(() => dispatch({ type: 'TOGGLE_ACCOUNTS' }), [dispatch])
+  const toggleAccounts = useCallback(() => {
+    if (state.lists.filtered.accounts.length > 0) dispatch({ type: 'TOGGLE_ACCOUNTS' })
+  }, [dispatch, state.lists.filtered.accounts.length])
 
   useEffect(() => {
     dispatch({
