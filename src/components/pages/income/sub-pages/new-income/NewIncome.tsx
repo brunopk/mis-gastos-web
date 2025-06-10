@@ -173,7 +173,7 @@ function NewIncome() {
   const { mutate, isPending } = useMutation({
     mutationFn: api.createIncome,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['spends'] })
+      queryClient.invalidateQueries({ queryKey: ['incomes'] })
       notifications.show('Income added correctly', {
         severity: 'success'
       })
