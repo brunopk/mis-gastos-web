@@ -8,8 +8,6 @@ import Page from '../../../../Page'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 
-// TODO: set the correct stale and cache time for tanstack in spend list
-
 interface Income {
   id: number
   date: DayjsDate
@@ -31,9 +29,9 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
   return typeof incomes == 'undefined'
     ? []
     : incomes.map((income) => ({
-        id: income.id,
+        id: income.id!,
         data: {
-          id: income.id,
+          id: income.id!,
           date: income.date,
           incomeTypeId: income.incomeTypeId,
           accountId: income.accountId,
@@ -124,9 +122,15 @@ function buildColumnList(apiLists: {
 function IncomeList() {
   const apiLists = useLoaderData()
 
+  // For more information about staleTime and gcTime see :
+  // - https://dev.to/delisrey/react-query-staletime-vs-cachetime-hml
+  // - https://www.codemzy.com/blog/react-query-cachetime-staletime
+
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['incomes'],
     queryFn: getIncomes,
+    staleTime: Infinity,
+    gcTime: Infinity,
     retry: 2
   })
 

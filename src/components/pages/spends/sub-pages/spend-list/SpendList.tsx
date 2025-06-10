@@ -142,9 +142,15 @@ function SpendList() {
 
   const navigate = useNavigate()
 
+  // For more information about staleTime and gcTime see :
+  // - https://dev.to/delisrey/react-query-staletime-vs-cachetime-hml
+  // - https://www.codemzy.com/blog/react-query-cachetime-staletime
+
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['spends'],
     queryFn: getSpends,
+    staleTime: Infinity,
+    gcTime: Infinity,
     retry: 2
   })
 

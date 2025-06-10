@@ -288,8 +288,13 @@ async function handleApiErrors(response: Response): Promise<object> {
 
 function loaderFunctionBuilder(queryClient: QueryClient): LoaderFunction {
   return async () => {
+    // For more information about staleTime and gcTime see :
+    // - https://dev.to/delisrey/react-query-staletime-vs-cachetime-hml
+    // - https://www.codemzy.com/blog/react-query-cachetime-staletime
+    
     const queryCommonAttributes = {
       staleTime: Infinity,
+      gcTime: Infinity,
       retry: 2
     }
 
