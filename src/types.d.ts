@@ -130,8 +130,8 @@ declare namespace UI {
   interface SpendFilterProps {
     isModalOpen: boolean
     filters: {
-      startDate: DayjsDate | null
-      finalDate: DayjsDate | null
+      startDate: DayjsDate
+      finalDate: DayjsDate
       categoryIds: number[] | null
       subcategoryIds: number[] | null
       groupIds: number[] | null

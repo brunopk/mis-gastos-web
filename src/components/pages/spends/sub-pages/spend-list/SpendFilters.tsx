@@ -3,12 +3,10 @@ import * as XDatePickers from '@mui/x-date-pickers'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { Dayjs } from 'dayjs'
 import { useEffect } from 'react'
-import { BOX_SMALL_PADDING_IN_REM } from '../../../../../constants'
+import * as constants from '../../../../../constants'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
 import ModalBase from '../../../../modal/ModalBase'
 import { Button, Select, SmallFieldBox } from '../../../../styled'
-
-// TODO: set "Sin definir" when there is no option checked
 
 const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -20,26 +18,24 @@ const DatePicker = Mui.styled(XDatePickers.DatePicker)(() => ({
 
 const FieldGroupPaper = Mui.styled(Mui.Paper)(() => ({
   width: '100%',
-  marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`,
-  padding: `${BOX_SMALL_PADDING_IN_REM}rem`,
+  marginTop: `${constants.BOX_SMALL_PADDING_IN_REM}rem`,
+  padding: `${constants.BOX_SMALL_PADDING_IN_REM}rem`,
   flex: 0,
   backgroundColor: 'inherit'
 }))
 
 const FieldGroupTitle = Mui.styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 1,
-  marginLeft: `${BOX_SMALL_PADDING_IN_REM}rem`
+  marginLeft: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   textAlign: 'start',
-  marginTop: `${BOX_SMALL_PADDING_IN_REM}rem`
+  marginTop: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
 function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.SpendFilterProps) {
   const notifications = useNotifications()
-
-  // TODO: fix startDate and finalDate type error
 
   const { error, lists, selection, functions, isOpen, isError } = useSpendFilters({ filters })
 
@@ -90,7 +86,14 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   }
 
   const handleCategoriesRenderValue = (selected: unknown) => {
-    return <Mui.Typography>{functions.categories.getNames(selected)}</Mui.Typography>
+    return (selected as number[]).length > 0 ? (
+      <Mui.Typography>{functions.categories.getNames(selected)}</Mui.Typography>
+    ) : (
+      <Mui.Typography>
+        <br />
+        <em>{constants.NOT_DEFINED}</em>
+      </Mui.Typography>
+    )
   }
 
   const handleSubcategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -109,7 +112,14 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   }
 
   const handleSubcategoriesRenderValue = (selected: unknown) => {
-    return <Mui.Typography>{functions.subcategories.getNames(selected)}</Mui.Typography>
+    return (selected as number[]).length > 0 ? (
+      <Mui.Typography>{functions.subcategories.getNames(selected)}</Mui.Typography>
+    ) : (
+      <Mui.Typography>
+        <br />
+        <em>{constants.NOT_DEFINED}</em>
+      </Mui.Typography>
+    )
   }
 
   const handleGroupsChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -128,7 +138,14 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   }
 
   const handleGroupsRenderValue = (selected: unknown) => {
-    return <Mui.Typography>{functions.groups.getNames(selected)}</Mui.Typography>
+    return (selected as number[]).length > 0 ? (
+      <Mui.Typography>{functions.groups.getNames(selected)}</Mui.Typography>
+    ) : (
+      <Mui.Typography>
+        <br />
+        <em>{constants.NOT_DEFINED}</em>
+      </Mui.Typography>
+    )
   }
 
   const handleAccountsChange = (event: Mui.SelectChangeEvent<unknown>) => {
@@ -147,7 +164,14 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   }
 
   const handleAccountsRenderValue = (selected: unknown) => {
-    return <Mui.Typography>{functions.accounts.getNames(selected)}</Mui.Typography>
+    return (selected as number[]).length > 0 ? (
+      <Mui.Typography>{functions.accounts.getNames(selected)}</Mui.Typography>
+    ) : (
+      <Mui.Typography>
+        <br />
+        <em>{constants.NOT_DEFINED}</em>
+      </Mui.Typography>
+    )
   }
 
   useEffect(() => {
@@ -178,40 +202,50 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     onClose: () => alert('Not implemented')
   }
 
-  // TODO: set date format as constant
-
-  const dateFormat = 'DD/MM/YYYY'
-
-  const startDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
-    value: selection.startDate,
-    format: dateFormat,
-    onChange: handleStartDateChange
-  }
-
-  const finalDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
-    value: selection.finalDate,
-    format: dateFormat,
-    onChange: handleFinalDateChange
-  }
-
-  const commonMenuProps: Mui.MenuProps = {
-    open: false,
-  }
-
   const variant = 'standard'
 
   const fullWidth = true
 
   const multiple = true
 
+  const displayEmpty = true
+
+  const categorySelectLabel = 'Category'
+
+  const categorySelectId = 'category-select'
+
+  const subcategorySelectLabel = 'Subcategory'
+
+  const subcategorySelectId = 'subcategory-select'
+
+  const groupSelectLabel = 'Group'
+
+  const groupSelectId = 'group-select'
+
+  const accountSelectLabel = 'Account'
+
+  const accountSelectId = 'account-select'
+
   const formControlProps: Mui.FormControlProps = {
     variant,
     fullWidth
   }
 
-  const categorySelectLabel = 'Category'
+  const commonMenuProps: Mui.MenuProps = {
+    open: false
+  }
 
-  const categorySelectId = 'category-select'
+  const startDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: selection.startDate,
+    format: constants.DATE_PICKER_FORMAT,
+    onChange: handleStartDateChange
+  }
+
+  const finalDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+    value: selection.finalDate,
+    format: constants.DATE_PICKER_FORMAT,
+    onChange: handleFinalDateChange
+  }
 
   const categoryInputLabelProps: Mui.InputLabelProps = {
     htmlFor: categorySelectId
@@ -231,14 +265,11 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     variant,
     fullWidth,
     multiple,
+    displayEmpty,
     renderValue: handleCategoriesRenderValue,
     onChange: handleCategoriesChange,
     onClick: handleCategoriesClick
   }
-
-  const subcategorySelectLabel = 'Subcategory'
-
-  const subcategorySelectId = 'subcategory-select'
 
   const subcategoryMenuProps: Mui.MenuProps = {
     ...commonMenuProps,
@@ -254,6 +285,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     variant,
     fullWidth,
     multiple,
+    displayEmpty,
     renderValue: handleSubcategoriesRenderValue,
     onChange: handleSubcategoriesChange,
     onClick: handleSubcategoriesClick
@@ -262,10 +294,6 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   const subcategoryInputLabelProps: Mui.InputLabelProps = {
     htmlFor: subcategorySelectId
   }
-
-  const groupSelectLabel = 'Group'
-
-  const groupSelectId = 'group-select'
 
   const groupMenuProps: Mui.MenuProps = {
     ...commonMenuProps,
@@ -281,6 +309,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     variant,
     fullWidth,
     multiple,
+    displayEmpty,
     renderValue: handleGroupsRenderValue,
     onChange: handleGroupsChange,
     onClick: handleGroupsClick
@@ -289,10 +318,6 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   const groupInputLabelProps: Mui.InputLabelProps = {
     htmlFor: groupSelectId
   }
-
-  const accountSelectLabel = 'Account'
-
-  const accountSelectId = 'account-select'
 
   const accountMenuProps: Mui.MenuProps = {
     ...commonMenuProps,
@@ -308,6 +333,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     variant,
     fullWidth,
     multiple,
+    displayEmpty,
     renderValue: handleAccountsRenderValue,
     onChange: handleAccountsChange,
     onClick: handleAccountsClick

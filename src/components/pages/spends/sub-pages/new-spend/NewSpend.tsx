@@ -154,7 +154,7 @@ function NewSpend() {
 
   const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
     value: values.date,
-    format: constants.DATE_FORMAT,
+    format: constants.DATE_PICKER_FORMAT,
     onChange: handleDateChange
   }
 

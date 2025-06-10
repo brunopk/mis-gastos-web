@@ -31,27 +31,29 @@ export const MODAL_WIDTH = 500
 
 // TODO: use DEFAULT_* constants  instead of hardcoding "-"
 
-export const DATE_FORMAT = 'DD/MM/YYYY'
+export const DATE_PICKER_FORMAT = 'DD/MM/YYYY'
 
 export const REIMBURSEMENT = 1
 
 export const UNKNOWN_STRING = '-'
 
+export const NOT_DEFINED = "Sin definir"
+
+export const DATE_WARNING_MSG = 'Date cannot be in the future'
+
+export const VALUE_WARNING_MSG = 'Value must greater than 0'
+
 export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
   id: -1,
-  name: 'Sin definir',
+  name: NOT_DEFINED,
   categoryId: -1,
   accountIds: []
 }
 
 export const UNDEFINED_GROUP: Api.Group = {
   id: -1,
-  name: 'Sin definir',
+  name: NOT_DEFINED,
   subcategoryId: -1,
   accountIds: []
 }
-
-export const DATE_WARNING_MSG = 'Date cannot be in the future'
-
-export const VALUE_WARNING_MSG = 'Value must greater than 0'
 
