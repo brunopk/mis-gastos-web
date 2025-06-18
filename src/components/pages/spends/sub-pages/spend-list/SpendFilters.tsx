@@ -51,6 +51,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
   }
 
   const handleSecondaryButtonClick = () => {
+    functions.resetFilters()
     onModalClose()
   }
 
@@ -59,7 +60,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
       notifications.show('Start date is null', {
         severity: 'warning'
       })
-    else functions.startDate.select(date)
+    else functions.startDate.set(date)
   }
 
   const handleFinalDateChange = (date: Dayjs | null) => {
@@ -67,7 +68,7 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
       notifications.show('Final date is null', {
         severity: 'warning'
       })
-    else functions.startDate.select(date)
+    else functions.startDate.set(date)
   }
 
   const handleCategoriesChange = (event: Mui.SelectChangeEvent<unknown>) => {

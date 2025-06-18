@@ -40,6 +40,34 @@ export function buildListItemFormatter(list: Api.ListItem[]): Formatter {
   }
 }
 
+export function difference<T>(A: T[] | Set<T>, B: T[] | Set<T>): Set<T> {
+  return new Set(
+    [...A].filter((a) =>
+      B instanceof Set ? !B.has(a) : typeof B.find((b) => a == b) == 'undefined'
+    )
+  )
+}
+
+export function union<T>(A: T[] | Set<T>, B: T[] | Set<T>): Set<T> {
+  return new Set([...A, ...B])
+}
+
+export function intersection<T>(A: T[] | Set<T>, B: T[] | Set<T>): Set<T> {
+  return new Set(
+    [...A].filter((a) =>
+      B instanceof Set ? B.has(a) : typeof B.find((b) => a == b) != 'undefined'
+    )
+  )
+}
+
+export function deepCopyNestedArray<T>(source: T[][]): T[][] {
+  return source.map((subList) => subList.map((t) => ({...t})))
+}
+
+export function deepCopyArray<T>(source: T[]): T[] {
+  return source.map((t) => ({...t}))
+}
+
 /**
  * Sets hours, minutes, seconds and milliseconds to 0
  * @param date date to be modified

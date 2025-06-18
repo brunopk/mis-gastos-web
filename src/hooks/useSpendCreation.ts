@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import * as api from '../api/mis-gastos'
+import { MisGastosUtils } from '../api/mis-gastos'
 import * as constants from '../constants'
 import { toDate } from '../utils'
 
@@ -133,7 +133,7 @@ export function useSpendCreation({
     switch (action.type) {
       case 'INITIALIZE': {
         const selectedCategory = action.data.defaultValues.categoryId
-          ? api.utils.findCategory(
+          ? MisGastosUtils.findCategory(
               action.data.defaultValues.categoryId,
               action.data.lists.categories
             )
@@ -144,7 +144,7 @@ export function useSpendCreation({
           .sort((subcategoryA, subcategoryB) => subcategoryA.name.localeCompare(subcategoryB.name))
           .concat([constants.UNDEFINED_SUBCATEGORY])
         const selectedSubcategory = action.data.defaultValues.subcategoryId
-          ? api.utils.findSubcategory(
+          ? MisGastosUtils.findSubcategory(
               action.data.defaultValues.subcategoryId,
               action.data.lists.subcategories
             )
@@ -155,19 +155,20 @@ export function useSpendCreation({
           .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = action.data.defaultValues.groupId
-          ? api.utils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
+          ? MisGastosUtils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
           : filteredGroups[0]
 
-        const filteredAccounts = api.utils
-          .filterAccounts(
-            action.data.lists.accounts,
-            [selectedCategory],
-            [selectedSubcategory],
-            [selectedGroup]
-          )
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccounts(
+          action.data.lists.accounts,
+          [selectedCategory],
+          [selectedSubcategory],
+          [selectedGroup]
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = action.data.defaultValues.accountId
-          ? api.utils.findAccount(action.data.defaultValues.accountId, action.data.lists.accounts)
+          ? MisGastosUtils.findAccount(
+              action.data.defaultValues.accountId,
+              action.data.lists.accounts
+            )
           : filteredAccounts[0]
 
         return {
@@ -225,7 +226,7 @@ export function useSpendCreation({
         }
       }
       case 'SELECT_CATEGORY': {
-        const selectedCategory = api.utils.findCategory(
+        const selectedCategory = MisGastosUtils.findCategory(
           action.data.id,
           prevState.lists.filtered.categories
         )
@@ -242,14 +243,12 @@ export function useSpendCreation({
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = api.utils
-          .filterAccounts(
-            prevState.lists.original.accounts,
-            [selectedCategory],
-            [selectedSubcategory],
-            [selectedGroup]
-          )
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccounts(
+          prevState.lists.original.accounts,
+          [selectedCategory],
+          [selectedSubcategory],
+          [selectedGroup]
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -274,7 +273,7 @@ export function useSpendCreation({
         }
       }
       case 'SELECT_SUBCATEGORY': {
-        const selectedSubcategory = api.utils.findSubcategory(
+        const selectedSubcategory = MisGastosUtils.findSubcategory(
           action.data.id,
           prevState.lists.filtered.subcategories
         )
@@ -285,14 +284,12 @@ export function useSpendCreation({
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = api.utils
-          .filterAccounts(
-            prevState.lists.original.accounts,
-            [prevState.values.category!],
-            [selectedSubcategory],
-            [selectedGroup]
-          )
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccounts(
+          prevState.lists.original.accounts,
+          [prevState.values.category!],
+          [selectedSubcategory],
+          [selectedGroup]
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -315,16 +312,17 @@ export function useSpendCreation({
         }
       }
       case 'SELECT_GROUP': {
-        const selectedGroup = api.utils.findGroup(action.data.id, prevState.lists.filtered.groups)
+        const selectedGroup = MisGastosUtils.findGroup(
+          action.data.id,
+          prevState.lists.filtered.groups
+        )
 
-        const filteredAccounts = api.utils
-          .filterAccounts(
-            prevState.lists.original.accounts,
-            [prevState.values.category!],
-            [prevState.values.subcategory!],
-            [selectedGroup]
-          )
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccounts(
+          prevState.lists.original.accounts,
+          [prevState.values.category!],
+          [prevState.values.subcategory!],
+          [selectedGroup]
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -345,7 +343,7 @@ export function useSpendCreation({
         }
       }
       case 'SELECT_ACCOUNT': {
-        const selectedAccount = api.utils.findAccount(
+        const selectedAccount = MisGastosUtils.findAccount(
           action.data.id,
           prevState.lists.filtered.accounts
         )

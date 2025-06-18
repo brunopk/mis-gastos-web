@@ -5,7 +5,7 @@ import { useNotifications } from '@toolpad/core/useNotifications'
 import { Dayjs } from 'dayjs'
 import { FormEvent, memo, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
-import * as api from '../../../../../api/mis-gastos'
+import { Api } from '../../../../../api/mis-gastos'
 import * as constants from '../../../../../constants'
 import { useSpendCreation } from '../../../../../hooks/useSpendCreation'
 import { toDate } from '../../../../../utils'
@@ -62,7 +62,7 @@ function NewSpend() {
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: api.createSpend,
+    mutationFn: Api.createSpend,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spends'] })
       notifications.show('Spend added correctly', {
@@ -70,7 +70,7 @@ function NewSpend() {
       })
     },
     onError: (error) => {
-      if (error instanceof api.ApiError && error.statusCode < 500) {
+      if (error instanceof Api.ApiError && error.statusCode < 500) {
         notifications.show(error.message, {
           severity: 'warning'
         })
@@ -220,7 +220,7 @@ function NewSpend() {
 
   const descriptionAutocompleteProps: UI.AutocompleteProps = {
     reset: !values.description,
-    queryFn: api.getAutocompleteOptionsForSpendDescription,
+    queryFn: Api.getAutocompleteOptionsForSpendDescription,
     onChange: handleDescriptionChange
   }
 

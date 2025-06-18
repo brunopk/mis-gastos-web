@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { useEffect } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import { getIncomes } from '../../../../../api/mis-gastos'
+import { Api } from '../../../../../api/mis-gastos'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
@@ -46,7 +46,7 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
           spendAccountId: income.spend?.accountId,
           spendValue: income.spend?.value
         }
-    }))
+      }))
 }
 
 function buildColumnList(apiLists: {
@@ -128,7 +128,7 @@ function IncomeList() {
 
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['incomes'],
-    queryFn: getIncomes,
+    queryFn: Api.getIncomes,
     staleTime: Infinity,
     gcTime: Infinity,
     retry: 2

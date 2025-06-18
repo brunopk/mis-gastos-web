@@ -5,7 +5,7 @@ import { useNotifications } from '@toolpad/core'
 import dayjs, { Dayjs } from 'dayjs'
 import { ChangeEvent, FormEvent, memo, useEffect, useMemo } from 'react'
 import { useLoaderData, useLocation } from 'react-router-dom'
-import * as api from '../../../../../api/mis-gastos'
+import { Api, MisGastosUtils } from '../../../../../api/mis-gastos'
 import * as constants from '../../../../../constants'
 import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
 import { buildDateFormatter, toDate } from '../../../../../utils'
@@ -93,7 +93,7 @@ function loadReimbursedSpend(spend: Api.Spend, apiLists: ApiLists): ReimbursedSp
 
   let categoryName
   try {
-    const category = api.utils.findCategory(spend.categoryId!, apiLists.categories)
+    const category = MisGastosUtils.findCategory(spend.categoryId!, apiLists.categories)
     categoryName = category.name
   } catch {
     categoryName = constants.UNKNOWN_STRING
@@ -101,7 +101,7 @@ function loadReimbursedSpend(spend: Api.Spend, apiLists: ApiLists): ReimbursedSp
 
   let subcategoryName
   try {
-    const subcategory = api.utils.findSubcategory(spend.subcategoryId!, apiLists.subcategories)
+    const subcategory = MisGastosUtils.findSubcategory(spend.subcategoryId!, apiLists.subcategories)
     subcategoryName = subcategory.name
   } catch {
     subcategoryName = constants.UNKNOWN_STRING
@@ -109,7 +109,7 @@ function loadReimbursedSpend(spend: Api.Spend, apiLists: ApiLists): ReimbursedSp
 
   let groupName
   try {
-    const group = api.utils.findGroup(spend.groupId!, apiLists.groups)
+    const group = MisGastosUtils.findGroup(spend.groupId!, apiLists.groups)
     groupName = group.name
   } catch {
     groupName = constants.UNKNOWN_STRING
@@ -117,7 +117,7 @@ function loadReimbursedSpend(spend: Api.Spend, apiLists: ApiLists): ReimbursedSp
 
   let accountName
   try {
-    const account = api.utils.findAccount(spend.accountId, apiLists.accounts)
+    const account = MisGastosUtils.findAccount(spend.accountId, apiLists.accounts)
     accountName = account.name
   } catch {
     accountName = constants.UNKNOWN_STRING
@@ -171,7 +171,7 @@ function NewIncome() {
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: api.createIncome,
+    mutationFn: Api.createIncome,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] })
       notifications.show('Income added correctly', {
@@ -179,7 +179,7 @@ function NewIncome() {
       })
     },
     onError: (error) => {
-      if (error instanceof api.ApiError && error.statusCode < 500) {
+      if (error instanceof Api.ApiError && error.statusCode < 500) {
         notifications.show(error.message, {
           severity: 'warning'
         })
@@ -281,8 +281,8 @@ function NewIncome() {
 
   const descriptionAutocompleteProps: UI.AutocompleteProps = {
     reset: !values.description,
-    queryFn: api.getAutocompleteOptionsForIncomeDescription,
-    onChange: handleDescriptionChange,
+    queryFn: Api.getAutocompleteOptionsForIncomeDescription,
+    onChange: handleDescriptionChange
   }
 
   const valueFieldProps: Mui.TextFieldProps = {
@@ -308,15 +308,17 @@ function NewIncome() {
         accountId: values.account!.id,
         description: values.description ? values.description : undefined,
         value: values.value!,
-        spend: spend ? { 
-          id: spend.id!,
-          date: dayjs(),
-          categoryId: 0,
-          subcategoryId: null,
-          groupId: null,
-          accountId: 0,
-          value: 0
-        } : undefined
+        spend: spend
+          ? {
+              id: spend.id!,
+              date: dayjs(),
+              categoryId: 0,
+              subcategoryId: null,
+              groupId: null,
+              accountId: 0,
+              value: 0
+            }
+          : undefined
       })
     } else if (isWarning) {
       notifications.show(warning, {

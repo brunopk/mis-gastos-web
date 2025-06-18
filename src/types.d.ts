@@ -58,6 +58,10 @@ declare namespace Api {
     value: number
     spend?: Spend
   }
+
+  type CategoriesMap = Map<number, ListItem>
+
+  type SubcategoriesMap = Map<number, Subcategory>
 }
 
 // TODO: create different namespaces (Components, Hooks, etc)and delete UI namespace

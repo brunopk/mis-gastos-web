@@ -1,8 +1,8 @@
 import { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-
-// TODO: filter accounts by category/subcategory/group
+import { MisGastosUtils } from '../api/mis-gastos'
+import * as Utils from '../utils'
 
 const INITIAL_STATE: State = {
   isError: false,
@@ -21,11 +21,23 @@ const INITIAL_STATE: State = {
       accounts: []
     },
     filtered: {
-      categories: [],
-      subcategories: [],
-      groups: [],
-      accounts: []
+      initial: {
+        categories: [],
+        subcategories: [],
+        groups: [],
+        accounts: []
+      },
+      last: {
+        categories: [],
+        subcategories: [],
+        groups: [],
+        accounts: []
+      }
     }
+  },
+  maps: {
+    categories: new Map<number, Api.ListItem>(),
+    subcategories: new Map<number, Api.Subcategory>()
   },
   functions: {
     categories: {
@@ -56,17 +68,24 @@ const INITIAL_STATE: State = {
     }
   },
   selection: {
-    startDate: null,
-    finalDate: null,
-    categoryIds: [],
-    subcategoryIds: [],
-    groupIds: [],
-    accountIds: []
+    initial: {
+      startDate: null,
+      finalDate: null,
+      categoryIds: [],
+      subcategoryIds: [],
+      groupIds: [],
+      accountIds: []
+    },
+    last: {
+      startDate: null,
+      finalDate: null,
+      categoryIds: [],
+      subcategoryIds: [],
+      groupIds: [],
+      accountIds: []
+    }
   }
 }
-
-const sortFunction = (itemA: Api.ListItem, itemB: Api.ListItem) =>
-  itemA.name.localeCompare(itemB.name)
 
 interface SelectItemAction {
   type: 'SELECT_CATEGORIES' | 'SELECT_SUBCATEGORIES' | 'SELECT_GROUPS' | 'SELECT_ACCOUNTS'
@@ -75,8 +94,8 @@ interface SelectItemAction {
   }
 }
 
-interface SelectDateAction {
-  type: 'SELECT_START_DATE' | 'SELECT_FINAL_DATE'
+interface SetDateAction {
+  type: 'SET_START_DATE' | 'SET_FINAL_DATE'
   data: {
     date: Dayjs
   }
@@ -84,6 +103,10 @@ interface SelectDateAction {
 
 interface ToggleAction {
   type: 'TOGGLE_CATEGORIES' | 'TOGGLE_SUBCATEGORIES' | 'TOGGLE_GROUPS' | 'TOGGLE_ACCOUNTS'
+}
+
+interface ResetFiltersAction {
+  type: 'RESET_FILTERS'
 }
 
 interface InitializeAction {
@@ -107,14 +130,18 @@ interface InitializeAction {
 }
 
 interface State {
-  error: string | null,
-  isError: boolean,
+  error: string | null
+  isError: boolean
   isOpen: {
     categories: boolean
     subcategories: boolean
     groups: boolean
     accounts: boolean
-  },
+  }
+  maps: {
+    categories: Map<number, Api.ListItem>
+    subcategories: Map<number, Api.Subcategory>
+  }
   lists: {
     original: {
       categories: ExtendedCategory[]
@@ -123,10 +150,18 @@ interface State {
       accounts: ExtendedAccount[]
     }
     filtered: {
-      categories: Item[]
-      subcategories: Item[][]
-      groups: Item[][]
-      accounts: Item[]
+      initial: {
+        categories: ListItem[]
+        subcategories: ListItem[][]
+        groups: ListItem[][]
+        accounts: ListItem[]
+      }
+      last: {
+        categories: ListItem[]
+        subcategories: ListItem[][]
+        groups: ListItem[][]
+        accounts: ListItem[]
+      }
     }
   }
   functions: {
@@ -146,40 +181,60 @@ interface State {
     }
   }
   selection: {
-    startDate: Dayjs | null
-    finalDate: Dayjs | null
-    categoryIds: number[]
-    subcategoryIds: number[]
-    groupIds: number[]
-    accountIds: number[]
+    initial: {
+      startDate: Dayjs | null
+      finalDate: Dayjs | null
+      categoryIds: number[]
+      subcategoryIds: number[]
+      groupIds: number[]
+      accountIds: number[]
+    }
+    last: {
+      startDate: Dayjs | null
+      finalDate: Dayjs | null
+      categoryIds: number[]
+      subcategoryIds: number[]
+      groupIds: number[]
+      accountIds: number[]
+    }
   }
 }
 
-type Action = ToggleAction | SelectItemAction | SelectDateAction | InitializeAction
-
-interface Item {
+interface ListItem {
   id: number
   name: string
   checked: boolean
-  visible: boolean
   parentId?: number
 }
 
-type ExtendedCategory = Api.ListItem & Item
+type Action =
+  | ResetFiltersAction
+  | ToggleAction
+  | SelectItemAction
+  | SetDateAction
+  | InitializeAction
 
-type ExtendedSubcategory = Api.Subcategory & Item
+type ListItemInternal = ListItem & { visible: boolean }
 
-type ExtendedGroup = Api.Group & Item
+type ExtendedCategory = Api.ListItem & ListItemInternal
 
-type ExtendedAccount = Api.ListItem & Item
+type ExtendedSubcategory = Api.Subcategory & ListItemInternal
 
-function getNames(list: Item[], ids: unknown) {
+type ExtendedGroup = Api.Group & ListItemInternal
+
+type ExtendedAccount = Api.ListItem & ListItemInternal
+
+function getNames(list: ListItem[], ids: unknown) {
   const strings = (ids as number[]).map((id) => list.find((item) => item.id == id)!.name)
   return strings.join(', ')
 }
 
-function getParentName(list: Item[], parentId: number) {
+function getParentName(list: ListItem[], parentId: number) {
   return list.find((item) => item.id == parentId)!.name
+}
+
+function sortFunction(itemA: Api.ListItem, itemB: Api.ListItem) {
+  return itemA.name.localeCompare(itemB.name)
 }
 
 function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
@@ -188,70 +243,118 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
   const reducer = (prevState: State, action: Action): State => {
     switch (action.type) {
       case 'INITIALIZE': {
-        const selectedStartDate = action.data.filters.startDate
+        let visibleAccountIds = new Set()
 
-        const selectedFinalDate = action.data.filters.finalDate
+        const accountIds = new Set(action.data.lists.accounts.map((account) => account.id))
 
-        const selectedCategories = action.data.filters.categoryIds
+        const startDate = action.data.filters.startDate
+
+        const finalDate = action.data.filters.finalDate
+
+        const categoriesMap = MisGastosUtils.buildCategoriesMap(action.data.lists.categories)
+        const selectedCategoriesIds = action.data.filters.categoryIds
           ? action.data.filters.categoryIds
           : action.data.lists.categories.map((category) => category.id)
         const categories = action.data.lists.categories
-          .map((category) => ({
-            ...category,
-            checked: selectedCategories.includes(category.id),
-            visible: true
-          }))
+          .map((category) => {
+            if (typeof category.accountIds == 'undefined') visibleAccountIds = accountIds
+            else if (visibleAccountIds.size != accountIds.size) {
+              const associatedAccountIds = MisGastosUtils.getCategoryAccounts(
+                category,
+                action.data.lists.accounts
+              )
+              visibleAccountIds = Utils.union(visibleAccountIds, associatedAccountIds)
+            }
+            return {
+              ...category,
+              checked: selectedCategoriesIds.includes(category.id),
+              visible: true
+            }
+          })
           .sort(sortFunction)
 
-        const selectedSubcategories = action.data.filters.subcategoryIds
+        // Mark as checked all subcategories that are associated to selected categories
+
+        const selectedSubcategoriesIds = action.data.filters.subcategoryIds
           ? action.data.filters.subcategoryIds
           : action.data.lists.subcategories.map((subcategory) => subcategory.id)
         const subcategories: ExtendedSubcategory[][] = categories.map((category) =>
           action.data.lists.subcategories
             .filter((subcategory) => subcategory.categoryId == category.id)
             .map((subcategory) => {
-              const checked = selectedSubcategories.includes(subcategory.id)
+              const checked = selectedSubcategoriesIds.includes(subcategory.id)
               const visible = checked || category.checked
+              if (visibleAccountIds.size != accountIds.size)
+                if (typeof subcategory.accountIds == 'undefined') visibleAccountIds = accountIds
+                else if (visibleAccountIds.size != accountIds.size) {
+                  const associatedAccountIds = MisGastosUtils.getSubcategoryAccounts(
+                    subcategory,
+                    action.data.lists.accounts,
+                    categoriesMap
+                  )
+                  visibleAccountIds = Utils.union(visibleAccountIds, associatedAccountIds)
+                }
               return { ...subcategory, checked, visible, parentId: category.id }
             })
             .sort(sortFunction)
         )
-        const subcategoriesPlainList = subcategories.flatMap((subList) => subList.flat())
+        const subcategoriesPlainList = subcategories.flatMap((subcategories) =>
+          subcategories.flat()
+        )
         const filteredSubcategories = subcategories
-          .map((subList) => subList.filter((subcategory) => subcategory.visible))
-          .filter((subList) => subList.length > 0)
+          .map((subcategories) => subcategories.filter((subcategory) => subcategory.visible))
+          .filter((subcategories) => subcategories.length > 0)
 
-        const selectedGroups = action.data.filters.groupIds
+        // Mark as checked all groups that are associated to selected subcategories
+        const subcategoriesMap = MisGastosUtils.buildSubcategoriesMap(
+          action.data.lists.subcategories
+        )
+        const selectedGroupsIds = action.data.filters.groupIds
           ? action.data.filters.groupIds
           : action.data.lists.groups.map((group) => group.id)
         const groups = subcategoriesPlainList.map((subcategory) =>
           action.data.lists.groups
             .filter((group) => group.subcategoryId == subcategory.id)
             .map((group) => {
-              const checked = selectedGroups.includes(group.id)
+              const checked = selectedGroupsIds.includes(group.id)
               const visible = checked || subcategory.checked
+              if (visibleAccountIds.size != accountIds.size)
+                if (typeof group.accountIds == 'undefined') visibleAccountIds = accountIds
+                else if (visibleAccountIds.size != accountIds.size) {
+                  const associatedAccountIds = MisGastosUtils.getGroupAccounts(
+                    group,
+                    accounts,
+                    subcategoriesMap,
+                    categoriesMap
+                  )
+                  visibleAccountIds = Utils.union(visibleAccountIds, associatedAccountIds)
+                }
               return { ...group, checked, visible, parentId: subcategory.id }
             })
             .sort(sortFunction)
         )
-        const groupsPlainList = groups.flatMap((subList) => subList.flat())
+        const groupsPlainList = groups.flatMap((groups) => groups.flat())
         const filteredGroups = groups
-          .map((subList) => subList.filter((group) => group.visible))
-          .filter((subList) => subList.length > 0)
+          .map((groups) => groups.filter((group) => group.visible))
+          .filter((groups) => groups.length > 0)
 
-        const selectedAccounts = action.data.filters.accountIds
+        // Mark as checked  all accounts that are associated to selected categories, subcategories and groups
+        const selectedAccountsIds = action.data.filters.accountIds
           ? action.data.filters.accountIds
           : action.data.lists.accounts.map((account) => account.id)
-        const accounts = action.data.lists.accounts
-          .map((account) => ({
-            ...account,
-            checked: selectedAccounts.includes(account.id),
-            visible: true
-          }))
-          .sort(sortFunction)
+        const accounts = action.data.lists.accounts.map((account) => ({
+          ...account,
+          checked: selectedAccountsIds.includes(account.id),
+          visible: visibleAccountIds.has(account.id)
+        }))
+        const filteredAccounts = accounts.filter((account) => account.visible).sort(sortFunction)
 
         return {
           ...prevState,
+          maps: {
+            categories: categoriesMap,
+            subcategories: subcategoriesMap
+          },
           lists: {
             original: {
               categories,
@@ -260,19 +363,37 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
               accounts
             },
             filtered: {
-              categories,
-              subcategories: filteredSubcategories,
-              groups: filteredGroups,
-              accounts
+              initial: {
+                categories: Utils.deepCopyArray(categories),
+                subcategories: Utils.deepCopyNestedArray(filteredSubcategories),
+                groups: Utils.deepCopyNestedArray(filteredGroups),
+                accounts: Utils.deepCopyArray(filteredAccounts)
+              },
+              last: {
+                categories,
+                subcategories: filteredSubcategories,
+                groups: filteredGroups,
+                accounts: filteredAccounts
+              }
             }
           },
           selection: {
-            startDate: selectedStartDate,
-            finalDate: selectedFinalDate,
-            categoryIds: selectedCategories,
-            subcategoryIds: selectedSubcategories,
-            groupIds: selectedGroups,
-            accountIds: selectedAccounts
+            initial: {
+              startDate,
+              finalDate,
+              categoryIds: selectedCategoriesIds,
+              subcategoryIds: selectedSubcategoriesIds,
+              groupIds: selectedGroupsIds,
+              accountIds: selectedAccountsIds
+            },
+            last: {
+              startDate,
+              finalDate,
+              categoryIds: selectedCategoriesIds,
+              subcategoryIds: selectedSubcategoriesIds,
+              groupIds: selectedGroupsIds,
+              accountIds: selectedAccountsIds
+            }
           },
           functions: {
             categories: {
@@ -293,152 +414,435 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
         }
       }
 
-      case 'SELECT_START_DATE': {
-        const isError = action.data.date.isAfter(prevState.selection.finalDate)
-        const error = isError ? 'Start date cannot be after final date' : null
-        const startDate = !isError ? action.data.date : prevState.selection.startDate
-        
+      case 'RESET_FILTERS': {
         return {
           ...prevState,
-          isError,
-          error,
+          lists: {
+            ...prevState.lists,
+            filtered: {
+              ...prevState.lists.filtered,
+              last: {
+                ...prevState.lists.filtered.initial
+              }
+            }
+          },
           selection: {
             ...prevState.selection,
-            startDate
+            last: {
+              ...prevState.selection.initial
+            }
           }
         }
       }
 
-      case 'SELECT_FINAL_DATE': {
-        const isError = action.data.date.isBefore(prevState.selection.startDate)
-        const error = isError ? 'Final date cannot be before start date' : null
-        const finalDate = !isError ? action.data.date : prevState.selection.finalDate
-        
+      case 'SET_START_DATE': {
+        const isError = action.data.date.isAfter(prevState.selection.last.finalDate)
+        const error = isError ? 'Start date cannot be after final date' : null
+        const startDate = !isError ? action.data.date : prevState.selection.last.startDate
+
         return {
           ...prevState,
           isError,
           error,
           selection: {
             ...prevState.selection,
-            finalDate
+            last: {
+              ...prevState.selection.last,
+              startDate
+            }
+          }
+        }
+      }
+
+      case 'SET_FINAL_DATE': {
+        const isError = action.data.date.isBefore(prevState.selection.last.startDate)
+        const error = isError ? 'Final date cannot be before start date' : null
+        const finalDate = !isError ? action.data.date : prevState.selection.last.finalDate
+
+        return {
+          ...prevState,
+          isError,
+          error,
+          selection: {
+            ...prevState.selection,
+            last: {
+              ...prevState.selection.last,
+              finalDate
+            }
           }
         }
       }
 
       case 'SELECT_CATEGORIES': {
-        const selectedCategories = action.data.ids
-        prevState.lists.original.categories.forEach(
-          (category) => (category.checked = selectedCategories.includes(category.id))
-        )
-        prevState.lists.filtered.categories.forEach(
-          (category) => (category.checked = selectedCategories.includes(category.id))
+        const accounts = prevState.lists.original.accounts
+
+        let accountsIdsToAdd = new Set<number>()
+        let accountsIdsToUncheck1 = new Set<number>()
+        let accountsIdsToUncheck2 = new Set<number>()
+
+        const selectedCategoriesIds = new Set(action.data.ids)
+        const prevSelectedCategoriesIds = new Set(prevState.selection.last.categoryIds)
+
+        const newSelectedCategoriesIds = Utils.difference(
+          selectedCategoriesIds,
+          prevSelectedCategoriesIds
         )
 
-        // Select all subcategories that are children of selected categories
-        const selectedSubcategories: number[] = []
-        prevState.lists.original.subcategories.forEach((subList) =>
-          subList.forEach((subcategory) => {
-            subcategory.checked = selectedCategories.includes(subcategory.categoryId)
-            subcategory.visible = subcategory.checked
-            if (subcategory.checked) selectedSubcategories.push(subcategory.id)
+        const uncheckedCategoriesIds = Utils.difference(
+          prevSelectedCategoriesIds,
+          selectedCategoriesIds
+        )
+
+        if (newSelectedCategoriesIds.size > 0 && uncheckedCategoriesIds.size > 0)
+          throw new Error(
+            'newSelectedCategoriesIds and uncheckedCategoriesIds cannot be both empty'
+          )
+        if (newSelectedCategoriesIds.size > 1 || uncheckedCategoriesIds.size > 1)
+          throw new Error(
+            'newSelectedCategoriesIds and uncheckedCategoriesIds cannot have both more than one entries'
+          )
+
+        prevState.lists.original.categories.forEach((category) => {
+          const accountIds = MisGastosUtils.getCategoryAccounts(category, accounts)
+          const isChecked = newSelectedCategoriesIds.has(category.id)
+          const isUnchecked = uncheckedCategoriesIds.has(category.id)
+
+          if (isChecked) accountsIdsToAdd = Utils.union(accountsIdsToAdd, accountIds)
+
+          if (isUnchecked) accountsIdsToUncheck1 = Utils.union(accountsIdsToUncheck1, accountIds)
+          else if (category.checked)
+            accountsIdsToUncheck2 = Utils.union(accountsIdsToUncheck2, accountIds)
+
+          category.checked = (category.checked && !isUnchecked) || isChecked
+        })
+        prevState.lists.filtered.last.categories.forEach(
+          (category) => (category.checked = selectedCategoriesIds.has(category.id))
+        )
+
+        const accountsIdsToUncheck = Utils.difference(accountsIdsToUncheck1, accountsIdsToUncheck2)
+
+        if (accountsIdsToAdd.size > 0 && accountsIdsToUncheck.size > 0)
+          throw new Error('accountsIdsToAdd and accountsIdsToUncheck cannot be both non-empty')
+
+        // Mark as checked  all subcategories that are associated to selected categories
+
+        const selectedSubcategoriesIds = new Set<number>()
+        const newSelectedSubcategoriesIds = new Set()
+
+        prevState.lists.original.subcategories.forEach((subcategories) =>
+          subcategories.forEach((subcategory) => {
+            const isParentChecked = newSelectedCategoriesIds.has(subcategory.categoryId)
+            if (isParentChecked) newSelectedSubcategoriesIds.add(subcategory.id)
+
+            subcategory.visible = selectedCategoriesIds.has(subcategory.categoryId)
+            subcategory.checked = subcategory.visible && (subcategory.checked || isParentChecked)
+
+            if (subcategory.checked) selectedSubcategoriesIds.add(subcategory.id)
           })
         )
-        const filteredSubcategories = prevState.lists.original.subcategories
-          .map((subList) => subList.filter((subcategory) => subcategory.visible))
-          .filter((subList) => subList.length > 0)
 
-        // Select all groups that are children of selected subcategories
-        const selectedGroups: number[] = []
-        prevState.lists.original.groups.forEach((subList) =>
-          subList.forEach((group) => {
-            group.checked = selectedSubcategories.includes(group.subcategoryId)
-            group.visible = group.checked
-            if (group.checked) selectedGroups.push(group.id)
+        const filteredSubcategories = prevState.lists.original.subcategories
+          .map((subcategories) => subcategories.filter((subcategory) => subcategory.visible))
+          .filter((subcategories) => subcategories.length > 0)
+
+        // Mark as checked all groups that are associated to selected subcategories
+
+        const selectedGroupsIds = new Set<number>()
+
+        prevState.lists.original.groups.forEach((groups) =>
+          groups.forEach((group) => {
+            const isParentChecked = newSelectedSubcategoriesIds.has(group.id)
+
+            group.visible = selectedSubcategoriesIds.has(group.subcategoryId)
+            group.checked = group.visible && (group.checked || isParentChecked)
+
+            if (group.checked) selectedGroupsIds.add(group.id)
           })
         )
         const filteredGroups = prevState.lists.original.groups
-          .map((subList) => subList.filter((group) => group.visible))
-          .filter((subList) => subList.length > 0)
+          .map((groups) => groups.filter((group) => group.visible))
+          .filter((groups) => groups.length > 0)
+
+        // Mark as checked all accounts based on selected categories, subcategories and groups.
+        // If it is the case that there are accounts to remove (because some category was removed) and
+        // intersection (see intersection constant below) is not empty, it's because there are some
+        // accounts that are associated to subcategories and not related to the recently removed category
+
+        const filteredAccounts: ListItem[] = []
+        const selectedAccountIds = new Set<number>()
+        prevState.lists.original.accounts.forEach((account) => {
+          const isUnchecked = accountsIdsToUncheck.has(account.id)
+          if (isUnchecked) {
+            account.visible = false
+            account.checked = false
+          } else {
+            const isChecked = accountsIdsToAdd.has(account.id)
+
+            account.visible = true
+            account.checked = account.checked || isChecked
+
+            filteredAccounts.push({ ...account })
+            if (account.checked || isChecked) selectedAccountIds.add(account.id)
+          }
+        })
 
         return {
           ...prevState,
           lists: {
-            original: prevState.lists.original,
+            ...prevState.lists,
             filtered: {
-              categories: prevState.lists.filtered.categories,
-              subcategories: filteredSubcategories,
-              groups: filteredGroups,
-              accounts: prevState.lists.filtered.accounts
+              ...prevState.lists.filtered,
+              last: {
+                ...prevState.lists.filtered.last,
+                subcategories: filteredSubcategories,
+                groups: filteredGroups,
+                accounts: filteredAccounts
+              }
             }
           },
           selection: {
             ...prevState.selection,
-            categoryIds: selectedCategories,
-            subcategoryIds: selectedSubcategories,
-            groupIds: selectedGroups
+            last: {
+              ...prevState.selection.last,
+              categoryIds: [...selectedCategoriesIds],
+              subcategoryIds: [...selectedSubcategoriesIds],
+              groupIds: [...selectedGroupsIds],
+              accountIds: [...selectedAccountIds]
+            }
           }
         }
       }
 
       case 'SELECT_SUBCATEGORIES': {
-        const selectedSubcategories = action.data.ids
-        prevState.lists.original.subcategories.forEach((subList) =>
-          subList.forEach(
-            (subcategory) => (subcategory.checked = selectedSubcategories.includes(subcategory.id))
-          )
+        const accounts = prevState.lists.original.accounts
+
+        let accountsIdsToAdd = new Set<number>()
+        let accountsIdsToUncheck1 = new Set<number>()
+        let accountsIdsToUncheck2 = new Set<number>()
+
+        const selectedSubcategoriesIds = new Set(action.data.ids)
+        const prevSelectedSubcategoriesIds = new Set(prevState.selection.last.subcategoryIds)
+
+        const newSelectedSubcategoriesIds = Utils.difference(
+          selectedSubcategoriesIds,
+          prevSelectedSubcategoriesIds
         )
-        prevState.lists.filtered.subcategories.forEach((subList) =>
-          subList.forEach(
-            (subcategory) => (subcategory.checked = selectedSubcategories.includes(subcategory.id))
+
+        const uncheckedSubcategoriesIds = Utils.difference(
+          prevSelectedSubcategoriesIds,
+          selectedSubcategoriesIds
+        )
+
+        if (newSelectedSubcategoriesIds.size > 0 && uncheckedSubcategoriesIds.size > 0)
+          throw new Error(
+            'newSelectedSubcategoriesIds and uncheckedSubcategoriesIds cannot be both empty'
+          )
+        if (newSelectedSubcategoriesIds.size > 1 || uncheckedSubcategoriesIds.size > 1)
+          throw new Error(
+            'newSelectedSubcategoriesIds and uncheckedSubcategoriesIds cannot have both more than one entries'
+          )
+
+        prevState.lists.original.subcategories.forEach((subcategories) => {
+          subcategories.forEach((subcategory) => {
+            const accountIds = MisGastosUtils.getSubcategoryAccounts(
+              subcategory,
+              accounts,
+              prevState.maps.categories
+            )
+
+            const isChecked = newSelectedSubcategoriesIds.has(subcategory.id)
+            const isUnchecked = uncheckedSubcategoriesIds.has(subcategory.id)
+
+            if (isChecked) accountsIdsToAdd = Utils.union(accountsIdsToAdd, accountIds)
+
+            if (isUnchecked) accountsIdsToUncheck1 = Utils.union(accountsIdsToUncheck1, accountIds)
+            else if (subcategory.checked)
+              accountsIdsToUncheck2 = Utils.union(accountsIdsToUncheck2, accountIds)
+
+            subcategory.checked = (subcategory.checked && !isUnchecked) || isChecked
+          })
+        })
+        prevState.lists.filtered.last.subcategories.forEach((subcategories) =>
+          subcategories.forEach(
+            (subcategory) => (subcategory.checked = selectedSubcategoriesIds.has(subcategory.id))
           )
         )
 
-        // Select all groups that are children of selected subcategories
-        const selectedGroups: number[] = []
-        prevState.lists.original.groups.forEach((subList) =>
-          subList.forEach((group) => {
-            group.checked = selectedSubcategories.includes(group.subcategoryId)
-            group.visible = group.checked
-            if (group.checked) selectedGroups.push(group.id)
+        const accountsIdsToUncheck = Utils.difference(accountsIdsToUncheck1, accountsIdsToUncheck2)
+
+        if (accountsIdsToAdd.size > 0 && accountsIdsToUncheck.size > 0)
+          throw new Error('accountsIdsToAdd and accountsIdsToUncheck cannot be both non-empty')
+
+        const filteredSubcategories = prevState.lists.original.subcategories
+          .map((subcategories) => subcategories.filter((subcategory) => subcategory.visible))
+          .filter((subcategories) => subcategories.length > 0)
+
+        // Mark as checked all groups that are associated to selected subcategories
+
+        const selectedGroupsIds = new Set<number>()
+
+        prevState.lists.original.groups.forEach((groups) =>
+          groups.forEach((group) => {
+            const isParentChecked = newSelectedSubcategoriesIds.has(group.subcategoryId)
+
+            group.visible = selectedSubcategoriesIds.has(group.subcategoryId)
+            group.checked = group.visible && (group.checked || isParentChecked)
+
+            if (group.checked) selectedGroupsIds.add(group.id)
           })
         )
+
         const filteredGroups = prevState.lists.original.groups
-          .map((subList) => subList.filter((group) => group.visible))
-          .filter((subList) => subList.length > 0)
+          .map((groups) => groups.filter((group) => group.visible))
+          .filter((groups) => groups.length > 0)
+
+        // Mark as checked all accounts based on selected subcategories and groups.
+        // If it is the case that there are accounts to remove (because some subcategory was removed) and
+        // intersection (intersection constant below) is not empty, it's because there are some
+        // accounts that are associated to groups not related to the recently removed subcategory
+
+        const filteredAccounts: ListItem[] = []
+        const selectedAccountIds = new Set<number>()
+        prevState.lists.original.accounts.forEach((account) => {
+          const isUnchecked = accountsIdsToUncheck.has(account.id)
+          if (isUnchecked) {
+            account.visible = false
+            account.checked = false
+          } else {
+            const isChecked = accountsIdsToAdd.has(account.id)
+
+            account.visible = true
+            account.checked = account.checked || isChecked
+
+            filteredAccounts.push({ ...account })
+            if (account.checked || isChecked) selectedAccountIds.add(account.id)
+          }
+        })
 
         return {
           ...prevState,
           lists: {
-            original: prevState.lists.original,
+            ...prevState.lists,
             filtered: {
-              categories: prevState.lists.filtered.categories,
-              subcategories: prevState.lists.filtered.subcategories,
-              groups: filteredGroups,
-              accounts: prevState.lists.filtered.accounts
+              ...prevState.lists.filtered,
+              last: {
+                ...prevState.lists.filtered.last,
+                subcategories: filteredSubcategories,
+                groups: filteredGroups,
+                accounts: filteredAccounts
+              }
             }
           },
           selection: {
             ...prevState.selection,
-            subcategoryIds: selectedSubcategories,
-            groupIds: selectedGroups
+            last: {
+              ...prevState.selection.last,
+              subcategoryIds: [...selectedSubcategoriesIds],
+              groupIds: [...selectedGroupsIds],
+              accountIds: [...selectedAccountIds]
+            }
           }
         }
       }
 
       case 'SELECT_GROUPS': {
-        const selectedGroups = action.data.ids
-        prevState.lists.original.groups.forEach((subList) =>
-          subList.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
+        const accounts = prevState.lists.original.accounts
+
+        let accountsIdsToAdd = new Set<number>()
+        let accountsIdsToUncheck1 = new Set<number>()
+        let accountsIdsToUncheck2 = new Set<number>()
+
+        const selectedGroupsIds = new Set(action.data.ids)
+        const prevSelectedGroupsIds = new Set(prevState.selection.last.groupIds)
+
+        const newSelectedGroupsIds = Utils.difference(selectedGroupsIds, prevSelectedGroupsIds)
+
+        const uncheckedGroupsIds = Utils.difference(prevSelectedGroupsIds, selectedGroupsIds)
+
+        if (newSelectedGroupsIds.size > 0 && uncheckedGroupsIds.size > 0)
+          throw new Error('newSelectedGroupsIds and uncheckedGroupsIds cannot be both empty')
+        if (newSelectedGroupsIds.size > 1 || uncheckedGroupsIds.size > 1)
+          throw new Error(
+            'newSelectedGroupsIds and uncheckedGroupsIds cannot have both more than one entries'
+          )
+
+        prevState.lists.original.groups.forEach((groups) => {
+          groups.forEach((group) => {
+            const accountIds = MisGastosUtils.getGroupAccounts(
+              group,
+              accounts,
+              prevState.maps.subcategories,
+              prevState.maps.categories
+            )
+            const isChecked = newSelectedGroupsIds.has(group.id)
+            const isUnchecked = uncheckedGroupsIds.has(group.id)
+
+            if (isChecked) accountsIdsToAdd = Utils.union(accountsIdsToAdd, accountIds)
+
+            if (isUnchecked) accountsIdsToUncheck1 = Utils.union(accountsIdsToUncheck1, accountIds)
+            else if (group.checked)
+              accountsIdsToUncheck2 = Utils.union(accountsIdsToUncheck2, accountIds)
+
+            group.checked = (group.checked && !isUnchecked) || isChecked
+          })
+        })
+        prevState.lists.filtered.last.groups.forEach((groups) =>
+          groups.forEach((group) => (group.checked = selectedGroupsIds.has(group.id)))
         )
-        prevState.lists.filtered.groups.forEach((subList) =>
-          subList.forEach((group) => (group.checked = selectedGroups.includes(group.id)))
-        )
+
+        const accountsIdsToUncheck = Utils.difference(accountsIdsToUncheck1, accountsIdsToUncheck2)
+
+        if (accountsIdsToAdd.size > 0 && accountsIdsToUncheck.size > 0)
+          throw new Error('accountsIdsToAdd and accountsIdsToUncheck cannot be both non-empty')
+
+        const filteredGroups = prevState.lists.original.groups
+          .map((groups) => groups.filter((group) => group.visible))
+          .filter((groups) => groups.length > 0)
+
+        // Mark as checked all accounts based on selected groups.
+        // If it is the case that there are accounts to remove (because some group was removed) and
+        // intersection (intersection constant below) is not empty, it's because there are some
+        // accounts that are associated to other groups different to the recently removed group and the
+        // recently removed group itself.
+
+        const filteredAccounts: ListItem[] = []
+        const selectedAccountIds = new Set<number>()
+        prevState.lists.original.accounts.forEach((account) => {
+          const isUnchecked = accountsIdsToUncheck.has(account.id)
+          if (isUnchecked) {
+            account.visible = false
+            account.checked = false
+          } else {
+            const isChecked = accountsIdsToAdd.has(account.id)
+
+            account.visible = true
+            account.checked = account.checked || isChecked
+
+            filteredAccounts.push({ ...account })
+            if (account.checked || isChecked) selectedAccountIds.add(account.id)
+          }
+        })
 
         return {
           ...prevState,
+          lists: {
+            ...prevState.lists,
+            filtered: {
+              ...prevState.lists.filtered,
+              last: {
+                ...prevState.lists.filtered.last,
+                groups: filteredGroups,
+                accounts: filteredAccounts
+              }
+            }
+          },
           selection: {
             ...prevState.selection,
-            groupIds: selectedGroups
+            last: {
+              ...prevState.selection.last,
+              groupIds: [...selectedGroupsIds],
+              accountIds: [...selectedAccountIds]
+            }
           }
         }
       }
@@ -448,7 +852,7 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
         prevState.lists.original.accounts.forEach(
           (account) => (account.checked = selectedAccounts.includes(account.id))
         )
-        prevState.lists.filtered.accounts.forEach(
+        prevState.lists.filtered.last.accounts.forEach(
           (account) => (account.checked = selectedAccounts.includes(account.id))
         )
 
@@ -456,7 +860,10 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
           ...prevState,
           selection: {
             ...prevState.selection,
-            accountIds: selectedAccounts
+            last: {
+              ...prevState.selection.last,
+              accountIds: selectedAccounts
+            }
           }
         }
       }
@@ -513,13 +920,15 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
-  const selectStartDate = useCallback(
-    (date: Dayjs) => dispatch({ type: 'SELECT_START_DATE', data: { date } }),
+  const resetFilters = useCallback(() => dispatch({ type: 'RESET_FILTERS' }), [dispatch])
+
+  const setStartDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SET_START_DATE', data: { date } }),
     [dispatch]
   )
 
-  const selectFinalDate = useCallback(
-    (date: Dayjs) => dispatch({ type: 'SELECT_FINAL_DATE', data: { date } }),
+  const setFinalDate = useCallback(
+    (date: Dayjs) => dispatch({ type: 'SET_FINAL_DATE', data: { date } }),
     [dispatch]
   )
 
@@ -544,20 +953,21 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
   )
 
   const toggleCategories = useCallback(() => {
-    if (state.lists.filtered.categories.length > 0) dispatch({ type: 'TOGGLE_CATEGORIES' })
-  }, [dispatch, state.lists.filtered.categories.length])
+    if (state.lists.filtered.last.categories.length > 0) dispatch({ type: 'TOGGLE_CATEGORIES' })
+  }, [dispatch, state.lists.filtered.last.categories.length])
 
   const toggleSubcategories = useCallback(() => {
-    if (state.lists.filtered.subcategories.length > 0) dispatch({ type: 'TOGGLE_SUBCATEGORIES' })
-  }, [dispatch, state.lists.filtered.subcategories.length])
+    if (state.lists.filtered.last.subcategories.length > 0)
+      dispatch({ type: 'TOGGLE_SUBCATEGORIES' })
+  }, [dispatch, state.lists.filtered.last.subcategories.length])
 
   const toggleGroups = useCallback(() => {
-    if (state.lists.filtered.groups.length > 0) dispatch({ type: 'TOGGLE_GROUPS' })
-  }, [dispatch, state.lists.filtered.groups.length])
+    if (state.lists.filtered.last.groups.length > 0) dispatch({ type: 'TOGGLE_GROUPS' })
+  }, [dispatch, state.lists.filtered.last.groups.length])
 
   const toggleAccounts = useCallback(() => {
-    if (state.lists.filtered.accounts.length > 0) dispatch({ type: 'TOGGLE_ACCOUNTS' })
-  }, [dispatch, state.lists.filtered.accounts.length])
+    if (state.lists.filtered.last.accounts.length > 0) dispatch({ type: 'TOGGLE_ACCOUNTS' })
+  }, [dispatch, state.lists.filtered.last.accounts.length])
 
   useEffect(() => {
     dispatch({
@@ -570,14 +980,15 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
     isOpen: { ...state.isOpen },
     isError: state.isError,
     error: state.error,
-    selection: { ...state.selection },
-    lists: { ...state.lists.filtered },
+    selection: { ...state.selection.last },
+    lists: { ...state.lists.filtered.last },
     functions: {
+      resetFilters,
       startDate: {
-        select: selectStartDate
+        set: setStartDate
       },
       finalDate: {
-        select: selectFinalDate
+        set: setFinalDate
       },
       categories: {
         select: selectCategories,

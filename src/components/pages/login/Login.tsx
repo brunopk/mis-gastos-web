@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import GoogleButton from 'react-google-button'
 import { useLocation, useNavigate } from 'react-router-dom'
-import * as api from '../../../api/mis-gastos'
+import { Api } from '../../../api/mis-gastos'
 import * as constants from '../../../constants'
 import { UserContext } from '../../../context/UserContext'
 import { authorizeWithGoogle, generateCodeVerifier } from '../../../utils'
@@ -52,13 +52,13 @@ function Login() {
   const navigate = useNavigate()
 
   const { mutate: authCallback } = useMutation({
-    mutationFn: api.authCallback,
+    mutationFn: Api.authCallback,
     onSuccess: () => {
       setLoginInformation({ isAuthenticated: true })
       navigate(constants.PATHS.SPENDS.INDEX + constants.PATHS.SPENDS.NEW)
     },
     onError: (error) => {
-      if (error instanceof api.ApiError && error.statusCode < 500) {
+      if (error instanceof Api.ApiError && error.statusCode < 500) {
         setResult({ isError: true, severity: 'warning', message: error.message })
       } else {
         setResult({ isError: true, severity: 'error', message: error.message })

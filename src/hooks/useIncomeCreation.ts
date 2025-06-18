@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import * as api from '../api/mis-gastos'
+import { MisGastosUtils } from '../api/mis-gastos'
 import * as constants from '../constants'
 import { toDate } from '../utils'
 
@@ -126,7 +126,7 @@ export default function useIncomeCreation({
         // If default income type is set, the list have only this income type
         let filteredIncomeTypes = action.data.defaultValues.incomeTypeId
           ? [
-              api.utils.findIncomeType(
+              MisGastosUtils.findIncomeType(
                 action.data.defaultValues.incomeTypeId,
                 action.data.lists.incomeTypes
               )
@@ -137,9 +137,10 @@ export default function useIncomeCreation({
           .sort((incomeTypeA, incomeTypeB) => incomeTypeA.name.localeCompare(incomeTypeB.name))
         const selectedIncomeType = filteredIncomeTypes[0]
 
-        const filteredAccounts = api.utils
-          .filterAccountsByIncomeTypes(action.data.lists.accounts, selectedIncomeType)
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccountsByIncomeTypes(
+          action.data.lists.accounts,
+          selectedIncomeType
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -193,14 +194,15 @@ export default function useIncomeCreation({
         }
       }
       case 'SELECT_INCOME_TYPE': {
-        const selectedIncomeType = api.utils.findIncomeType(
+        const selectedIncomeType = MisGastosUtils.findIncomeType(
           action.data.id,
           prevState.lists.original.incomeTypes
         )
 
-        const filteredAccounts = api.utils
-          .filterAccountsByIncomeTypes(prevState.lists.original.accounts, selectedIncomeType)
-          .sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
+        const filteredAccounts = MisGastosUtils.filterAccountsByIncomeTypes(
+          prevState.lists.original.accounts,
+          selectedIncomeType
+        ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
         const selectedAccount = filteredAccounts[0]
 
         return {
@@ -221,7 +223,7 @@ export default function useIncomeCreation({
         }
       }
       case 'SELECT_ACCOUNT': {
-        const selectedAccount = api.utils.findAccount(
+        const selectedAccount = MisGastosUtils.findAccount(
           action.data.id,
           prevState.lists.original.accounts
         )

@@ -3,13 +3,13 @@ import { useNotifications } from '@toolpad/core/useNotifications'
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
-import { getSpends } from '../../../../../api/mis-gastos'
+import { Api } from '../../../../../api/mis-gastos'
+import { PATHS } from '../../../../../constants'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
 import MainMenu from '../../MainMenu'
 import SpendFilters from './SpendFilters'
-import { PATHS } from '../../../../../constants'
 
 // TODO: set new spend page as default page for spends (and new income page as default for incomes)
 
@@ -71,7 +71,8 @@ function buildTableRows(
             {
               id: 'newReimbursementBtn',
               label: 'ADD REIMBURSEMENT',
-              clickHandler: () => navigate(PATHS.INCOME.INDEX + PATHS.INCOME.NEW, { state: { spend } })
+              clickHandler: () =>
+                navigate(PATHS.INCOME.INDEX + PATHS.INCOME.NEW, { state: { spend } })
             }
           ]
         }))
@@ -136,6 +137,7 @@ function SpendList() {
 
   const apiLists = useLoaderData()
 
+  // Initially, as filters are set with null values, all spends will be shown (no filtering when null values are set)
   const [filters, setFilters] = useState<SpendFilters>(INITIAL_SPEND_FILTERS)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -148,7 +150,7 @@ function SpendList() {
 
   const { data, error, isFetching, isError } = useQuery({
     queryKey: ['spends'],
-    queryFn: getSpends,
+    queryFn: Api.getSpends,
     staleTime: Infinity,
     gcTime: Infinity,
     retry: 2

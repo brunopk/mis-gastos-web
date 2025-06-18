@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import * as RRD from 'react-router-dom'
-import * as api from '../api/mis-gastos'
+import { MisGastosUtils } from '../api/mis-gastos'
 import { PATHS } from '../constants'
 import ErrorBoundary from './ErrorBoundary'
 import NotFound from './NotFound'
@@ -22,7 +22,7 @@ const createRoutesFromElements = RRD.createRoutesFromElements
 export const router = (queryClient: QueryClient) => {
   const landingPage = PATHS.SPENDS.INDEX + PATHS.SPENDS.NEW
   const commonRouteProps: RRD.RouteProps = {
-    loader: api.utils.loaderFunctionBuilder(queryClient),
+    loader: MisGastosUtils.loaderFunctionBuilder(queryClient),
     errorElement: <ErrorBoundary />
   }
 
