@@ -47,7 +47,7 @@ export const ButtonBox = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
   padding: `${BOX_PADDING_IN_REM}rem`,
   [theme.breakpoints.down('sm')]: {
     flex: 1,
-    flexDirection: 'column-reverse'
+    flexDirection: 'column'
   }
 }))
 

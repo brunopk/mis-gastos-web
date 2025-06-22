@@ -4,7 +4,7 @@ import { memo, useState } from 'react'
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   marginTop: '1rem',
   overflow: 'hidden',
-  flex: 1
+  flex: 0.9
 }))
 
 const TableContainer = Mui.styled(Mui.TableContainer)(() => ({

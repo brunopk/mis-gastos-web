@@ -7,7 +7,7 @@ import { styled, useTheme } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import { Dispatch, Fragment, ReactNode } from 'react'
+import { Dispatch, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MENU_WIDTH_IN_REM, PATHS } from '../constants'
 import DrawerHeader from './DrawerHeader'
@@ -45,17 +45,12 @@ const ListItemIcon = Mui.styled(
   ]
 }))
 
-const Divider = styled(Mui.Divider)<Mui.DividerProps>(() => ({
-  width: `${MENU_WIDTH_IN_REM}rem`
-}))
-
 type BaseMenuProps = {
-  content?: ReactNode
   open: boolean
   setOpen: Dispatch<boolean>
 }
 
-function MainMenu({ content, open, setOpen }: BaseMenuProps) {
+function MainMenu({ open, setOpen }: BaseMenuProps) {
   const theme = useTheme()
 
   const navigate = useNavigate()
@@ -92,8 +87,6 @@ function MainMenu({ content, open, setOpen }: BaseMenuProps) {
             </ListItemButton>
           </ListItem>
         </List>
-        <Divider />
-        {typeof content !== 'undefined' ? <List>{content}</List> : <></>}
       </Mui.Drawer>
     </Fragment>
   )

@@ -6,7 +6,7 @@ import { Api } from '../../../../../api/mis-gastos'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
-import MainMenu from '../../MainMenu'
+import BottomNavigation from '../../BottomNavigation'
 
 interface Income {
   id: number
@@ -149,7 +149,7 @@ function IncomeList() {
   }, [error, isError, notifications])
 
   return (
-    <Page isFetching={isFetching} mainMenu={<MainMenu />}>
+    <Page isFetching={isFetching} bottomNavigation={<BottomNavigation />}>
       <Table rows={rows} columns={columns} />
     </Page>
   )

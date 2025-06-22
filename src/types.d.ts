@@ -153,8 +153,8 @@ declare namespace UI {
   }
 
   type PageProps = {
-    mainMenu?: ReactNode
     children: ReactNode
+    bottomNavigation?: ReactNode
     isFetching?: boolean
     onThreeDotsIconClick?: () => void
   }

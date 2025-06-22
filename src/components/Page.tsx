@@ -28,7 +28,7 @@ const DashboardTitle = styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 1
 }))
 
-function Page({ children, mainMenu, isFetching, onThreeDotsIconClick }: UI.PageProps) {
+function Page({ children, bottomNavigation, isFetching, onThreeDotsIconClick }: UI.PageProps) {
   const location = useLocation()
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
@@ -66,7 +66,14 @@ function Page({ children, mainMenu, isFetching, onThreeDotsIconClick }: UI.PageP
           children
         )}
       </Main>
-      <MainMenu content={mainMenu} open={mainMenuOpen} setOpen={setMainMenuOpen} />
+      <MainMenu open={mainMenuOpen} setOpen={setMainMenuOpen} />
+      {typeof bottomNavigation != 'undefined' ? (
+        <Mui.Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={5}>
+          {bottomNavigation}
+        </Mui.Paper>
+      ) : (
+        <></>
+      )}
     </Box>
   )
 }

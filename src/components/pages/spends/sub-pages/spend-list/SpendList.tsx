@@ -8,7 +8,7 @@ import { PATHS } from '../../../../../constants'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
-import MainMenu from '../../MainMenu'
+import BottomNavigation from '../../BottomNavigation'
 import SpendFilters from './SpendFilters'
 
 // TODO: set new spend page as default page for spends (and new income page as default for incomes)
@@ -200,7 +200,7 @@ function SpendList() {
 
   const pageProps: Omit<UI.PageProps, 'children'> = {
     isFetching,
-    mainMenu: <MainMenu />,
+    bottomNavigation: <BottomNavigation />,
     onThreeDotsIconClick: handleThreeDotsIconClick
   }
 

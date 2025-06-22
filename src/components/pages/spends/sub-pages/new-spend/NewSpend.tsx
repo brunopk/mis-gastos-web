@@ -12,7 +12,7 @@ import { toDate } from '../../../../../utils'
 import Autocomplete from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
-import MainMenu from '../../MainMenu'
+import BottomNavigation from '../../BottomNavigation'
 
 const FormControl = Styled.FormControl
 
@@ -257,7 +257,7 @@ function NewSpend() {
   }, [mutate, notifications, warning, functions, values, isWarning, isValidated])
 
   return (
-    <Page mainMenu={<MainMenu />}>
+    <Page bottomNavigation={<BottomNavigation />}>
       <FormControl component="form" onSubmit={handleSubmit}>
         <FieldBox>
           <DatePicker {...datePickerProps} />
