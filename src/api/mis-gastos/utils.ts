@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { LoaderFunction } from 'react-router-dom'
-import * as api from './main'
+import * as api from './api'
 import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../../constants'
 
 export function buildCategoriesMap(categories: Api.ListItem[]): Api.CategoriesMap {
@@ -13,59 +13,6 @@ export function buildSubcategoriesMap(subcategories: Api.Subcategory[]): Api.Sub
   const result = new Map<number, Api.Subcategory>()
   subcategories.forEach((subcategory) => result.set(subcategory.id, subcategory))
   return result
-}
-
-export function filterAccounts(
-  accounts: Api.ListItem[],
-  selectedCategories: Api.ListItem[],
-  selectedSubcategories: Api.Subcategory[],
-  selectedGroups: Api.Group[]
-): Api.ListItem[] {
-  const accountsCopy = accounts.slice(0)
-
-  let filteredAccounts = accountsCopy
-  if (selectedCategories.length > 0) {
-    const accountIds = flatAccountIds(selectedCategories)
-    if (accountIds.length > 0)
-      filteredAccounts = accountsCopy.filter((account) => accountIds.includes(account.id))
-  }
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-  if (
-    selectedSubcategories.length > 1 ||
-    (selectedSubcategories.length == 1 && selectedSubcategories[0].id != UNDEFINED_SUBCATEGORY.id)
-  ) {
-    const accountIds = flatAccountIds(selectedSubcategories)
-    if (accountIds.length > 0)
-      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
-  }
-
-  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-  if (
-    selectedGroups.length > 1 ||
-    (selectedGroups.length == 1 && selectedGroups[0].id != UNDEFINED_GROUP.id)
-  ) {
-    const accountIds = flatAccountIds(selectedGroups)
-    if (accountIds.length > 0)
-      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
-  }
-
-  return filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
-}
-
-// TODO: move this to src/hooks/useSpendCreation.ts
-
-export function filterAccountsByIncomeTypes(
-  accounts: Api.ListItem[],
-  selectedIncomeType: Api.ListItem
-): Api.ListItem[] {
-  const allAccounts = accounts.slice(0)
-  let filteredAccounts = allAccounts
-  const accountIds = flatAccountIds([selectedIncomeType])
-  if (accountIds.length > 0)
-    filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
-
-  return filteredAccounts.length > 0 ? filteredAccounts : allAccounts
 }
 
 export function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem {
@@ -112,6 +59,14 @@ export function findSubcategory(subcategoryId: number, subcategories: Api.Subcat
   return subcategory
 }
 
+export function flatAccountIds(list: Api.ListItem[]): number[] {
+  return [
+    ...new Set(
+      list.flatMap((item) => (typeof item.accountIds != 'undefined' ? item.accountIds : []))
+    )
+  ]
+}
+
 export function getCategoryAccounts(
   category: Api.ListItem,
   accounts: Api.ListItem[],
@@ -120,21 +75,6 @@ export function getCategoryAccounts(
     return new Set(category.accountIds)
 
   return new Set(accounts.map((account) => account.id))
-}
-
-export function getSubcategoryAccounts(
-  subcategory: Api.Subcategory,
-  accounts: Api.ListItem[],
-  categoriesMap: Api.CategoriesMap
-): Set<number> {
-  if (typeof subcategory.accountIds != 'undefined' && subcategory.accountIds.length > 0)
-    return new Set(subcategory.accountIds)
-
-  const parentCategory = findParentCategory(subcategory, categoriesMap)
-  if (typeof parentCategory.accountIds == 'undefined')
-    return new Set(accounts.map((account) => account.id))
-
-  return new Set(parentCategory.accountIds)
 }
 
 export function getGroupAccounts(
@@ -155,6 +95,21 @@ export function getGroupAccounts(
   }
  
   return new Set(parentSubcategory.accountIds)
+}
+
+export function getSubcategoryAccounts(
+  subcategory: Api.Subcategory,
+  accounts: Api.ListItem[],
+  categoriesMap: Api.CategoriesMap
+): Set<number> {
+  if (typeof subcategory.accountIds != 'undefined' && subcategory.accountIds.length > 0)
+    return new Set(subcategory.accountIds)
+
+  const parentCategory = findParentCategory(subcategory, categoriesMap)
+  if (typeof parentCategory.accountIds == 'undefined')
+    return new Set(accounts.map((account) => account.id))
+
+  return new Set(parentCategory.accountIds)
 }
 
 export function loaderFunctionBuilder(queryClient: QueryClient): LoaderFunction {
@@ -218,12 +173,3 @@ export function loaderFunctionBuilder(queryClient: QueryClient): LoaderFunction 
     return result
   }
 }
-
-function flatAccountIds(list: Api.ListItem[]): number[] {
-  return [
-    ...new Set(
-      list.flatMap((item) => (typeof item.accountIds != 'undefined' ? item.accountIds : []))
-    )
-  ]
-}
-

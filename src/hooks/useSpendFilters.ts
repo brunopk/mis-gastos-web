@@ -1,7 +1,7 @@
 import { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import { MisGastosUtils } from '../api/mis-gastos'
+import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as Utils from '../utils'
 
 const INITIAL_STATE: State = {

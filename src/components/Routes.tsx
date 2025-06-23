@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import * as RRD from 'react-router-dom'
-import { MisGastosUtils } from '../api/mis-gastos'
+import * as MisGastosUtils from '../api/mis-gastos/utils'
 import { PATHS } from '../constants'
 import ErrorBoundary from './ErrorBoundary'
 import NotFound from './NotFound'

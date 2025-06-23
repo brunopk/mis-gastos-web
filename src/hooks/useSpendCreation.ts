@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import { MisGastosUtils } from '../api/mis-gastos'
+import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as constants from '../constants'
 import { toDate } from '../utils'
 
@@ -121,6 +121,45 @@ type Action =
   | ValidateAction
   | InitializeAction
 
+function filterAccounts(
+  accounts: Api.ListItem[],
+  selectedCategories: Api.ListItem[],
+  selectedSubcategories: Api.Subcategory[],
+  selectedGroups: Api.Group[]
+): Api.ListItem[] {
+  const accountsCopy = accounts.slice(0)
+
+  let filteredAccounts = accountsCopy
+  if (selectedCategories.length > 0) {
+    const accountIds = MisGastosUtils.flatAccountIds(selectedCategories)
+    if (accountIds.length > 0)
+      filteredAccounts = accountsCopy.filter((account) => accountIds.includes(account.id))
+  }
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  if (
+    selectedSubcategories.length > 1 ||
+    (selectedSubcategories.length == 1 &&
+      selectedSubcategories[0].id != constants.UNDEFINED_SUBCATEGORY.id)
+  ) {
+    const accountIds = MisGastosUtils.flatAccountIds(selectedSubcategories)
+    if (accountIds.length > 0)
+      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
+  }
+
+  filteredAccounts = filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+  if (
+    selectedGroups.length > 1 ||
+    (selectedGroups.length == 1 && selectedGroups[0].id != constants.UNDEFINED_GROUP.id)
+  ) {
+    const accountIds = MisGastosUtils.flatAccountIds(selectedGroups)
+    if (accountIds.length > 0)
+      filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
+  }
+
+  return filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
+}
+
 export function useSpendCreation({
   defaultCategoryId,
   defaultSubcategoryId,
@@ -158,7 +197,7 @@ export function useSpendCreation({
           ? MisGastosUtils.findGroup(action.data.defaultValues.groupId, action.data.lists.groups)
           : filteredGroups[0]
 
-        const filteredAccounts = MisGastosUtils.filterAccounts(
+        const filteredAccounts = filterAccounts(
           action.data.lists.accounts,
           [selectedCategory],
           [selectedSubcategory],
@@ -243,7 +282,7 @@ export function useSpendCreation({
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = MisGastosUtils.filterAccounts(
+        const filteredAccounts = filterAccounts(
           prevState.lists.original.accounts,
           [selectedCategory],
           [selectedSubcategory],
@@ -284,7 +323,7 @@ export function useSpendCreation({
           .concat([constants.UNDEFINED_GROUP])
         const selectedGroup = filteredGroups[0]
 
-        const filteredAccounts = MisGastosUtils.filterAccounts(
+        const filteredAccounts = filterAccounts(
           prevState.lists.original.accounts,
           [prevState.values.category!],
           [selectedSubcategory],
@@ -317,7 +356,7 @@ export function useSpendCreation({
           prevState.lists.filtered.groups
         )
 
-        const filteredAccounts = MisGastosUtils.filterAccounts(
+        const filteredAccounts = filterAccounts(
           prevState.lists.original.accounts,
           [prevState.values.category!],
           [prevState.values.subcategory!],

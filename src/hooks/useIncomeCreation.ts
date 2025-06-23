@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
-import { MisGastosUtils } from '../api/mis-gastos'
+import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as constants from '../constants'
 import { toDate } from '../utils'
 
@@ -114,6 +114,19 @@ type Action =
   | ValidateAction
   | InitializeAction
 
+function filterAccountsByIncomeTypes(
+  accounts: Api.ListItem[],
+  selectedIncomeType: Api.ListItem
+): Api.ListItem[] {
+  const allAccounts = accounts.slice(0)
+  let filteredAccounts = allAccounts
+  const accountIds = MisGastosUtils.flatAccountIds([selectedIncomeType])
+  if (accountIds.length > 0)
+    filteredAccounts = filteredAccounts.filter((account) => accountIds.includes(account.id))
+
+  return filteredAccounts.length > 0 ? filteredAccounts : allAccounts
+}
+
 export default function useIncomeCreation({
   defaultIncomeTypeId,
   excludedIncomeTypeIds
@@ -137,7 +150,7 @@ export default function useIncomeCreation({
           .sort((incomeTypeA, incomeTypeB) => incomeTypeA.name.localeCompare(incomeTypeB.name))
         const selectedIncomeType = filteredIncomeTypes[0]
 
-        const filteredAccounts = MisGastosUtils.filterAccountsByIncomeTypes(
+        const filteredAccounts = filterAccountsByIncomeTypes(
           action.data.lists.accounts,
           selectedIncomeType
         ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
@@ -199,7 +212,7 @@ export default function useIncomeCreation({
           prevState.lists.original.incomeTypes
         )
 
-        const filteredAccounts = MisGastosUtils.filterAccountsByIncomeTypes(
+        const filteredAccounts = filterAccountsByIncomeTypes(
           prevState.lists.original.accounts,
           selectedIncomeType
         ).sort((accountA, accountB) => accountA.name.localeCompare(accountB.name))
