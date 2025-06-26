@@ -25,6 +25,8 @@ To run in development mode with HMR (hot module reloading):
 yarn dev
 ```
 
+For more information read `/doc/development.md`.
+
 ## Links
 
 - [Home Assistant Add-on: NGINX Home Assistant SSL proxy](https://github.com/home-assistant/addons/tree/master/nginx_proxy).
