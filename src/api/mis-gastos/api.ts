@@ -143,7 +143,7 @@ export async function getIncomes(): Promise<Api.Income[]> {
           description: income.spend.description,
           value: income.spend.value
         }
-      : null // TODO: should be `undefined` to match Api.Income.spend type (Spend | undefined); using null causes TS2322
+      : undefined
   }))
 }
 

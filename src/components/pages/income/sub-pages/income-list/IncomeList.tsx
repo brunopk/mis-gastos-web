@@ -50,7 +50,7 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
 }
 
 function buildColumnList(apiLists: {
-  [name: string]: Api.ListItem[]
+  [name: string]: ApiNamespace.ListItem[]
 }): UI.Table.Column<Income, void>[] {
   return [
     { id: 'id', label: 'ID', minWidth: 100 },
