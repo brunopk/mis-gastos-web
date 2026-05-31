@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { LoaderFunction } from 'react-router-dom'
 import * as api from './api'
-import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../../constants'
+import { UNDEFINED_GROUP, UNDEFINED_SUBCATEGORY } from '../../constants' // TODO: TS6192 — these imports are flagged as unused; verify if UNDEFINED_GROUP/UNDEFINED_SUBCATEGORY are still needed
 
 export function buildCategoriesMap(categories: Api.ListItem[]): Api.CategoriesMap {
   const result = new Map<number, Api.ListItem>()
