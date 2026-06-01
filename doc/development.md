@@ -7,7 +7,7 @@ This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claud
 - `.claude`
 - `openspec`
 
-To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section of the [OpenSpec]((https://github.com/Fission-AI/OpenSpec/) GitHub repository.
+To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section of the [OpenSpec](https://github.com/Fission-AI/OpenSpec/) GitHub repository.
 
 **Important:**
 
