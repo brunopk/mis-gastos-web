@@ -9,6 +9,17 @@ schema: spec-driven
 #     We use conventional commits
 #     Domain: e-commerce platform
 
+context: |
+  TSX file ordering convention:
+  1. Imports
+  2. Interfaces 
+  3. Types (type aliases)
+  4. Constants (not Mui.styled(...) nor components)
+  3. Helper functions (plain functions used by the component)
+  4. Local styled components (Mui.styled(...))
+  5. Main component function
+  6. Export
+
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
