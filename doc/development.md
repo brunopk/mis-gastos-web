@@ -22,7 +22,9 @@ To install OpenSpec follow instructions in the [Quick Start](https://github.com/
 
 3. Start Claude Code and configure it to use this API key **not** the default login
 
-> This is important to use prompt caching to reduce cost
+<br>
+
+> **This is important to use prompt caching to reduce cost.**
 
 ## Configuring Claude Code status line to show token usage
 
