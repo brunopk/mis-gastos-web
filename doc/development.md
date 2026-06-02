@@ -11,7 +11,7 @@ This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claud
 
 To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section of the [OpenSpec](https://github.com/Fission-AI/OpenSpec/) GitHub repository.
 
-## Configure Claude Code with a custom API key to use prompt caching
+## Configure Claude Code with a custom API key
 
 1. Generate the API key in https://platform.claude.com/settings/workspaces/default/keys
 2. Set the `ANTHROPIC_API_KEY` the environment variable in `~/.zshrc` or the corresponding shell configuration file : 
@@ -21,6 +21,8 @@ To install OpenSpec follow instructions in the [Quick Start](https://github.com/
     ```
 
 3. Start Claude Code and configure it to use this API key **not** the default login
+
+> This is important to use prompt caching to reduce cost
 
 ## Configuring Claude Code status line to show token usage
 
