@@ -77,7 +77,7 @@ Notes:
 
 - Use `interface` instead of `type` if possible.
 - Use `function` for the main component.
-- If some `interface` must be exported, declare it and export it at the end of the file, before the `export default ...`.
+- If some `interface` must be exported, declare it and export at the end of the file.
 
 ## TS files (hooks)
 
