@@ -62,7 +62,7 @@ All files (TSX and TS files) are organized in **sections** and each section shou
 /**************************************************************************************************/
 ```
 
-## TSX file ordering convention
+## TSX files
   
 1. Imports
 2. Interfaces
@@ -79,8 +79,8 @@ Notes:
 - Use `function` for the main component.
 - If some `interface` must be exported, declare it and export it at the end of the file, before the `export default ...`.
 
-## TS (hooks) file ordering convention
-  
+## TS files (hooks)
+
 1. Imports
 2. Interfaces
 3. Types
