@@ -5,8 +5,39 @@ import { Dayjs } from 'dayjs'
 import { useEffect } from 'react'
 import * as constants from '../../../../../constants'
 import useSpendFilters from '../../../../../hooks/useSpendFilters'
+import type { DayjsDate } from '../../../../../utils'
 import ModalBase from '../../../../modal/ModalBase'
+import type { ModalBaseProps } from '../../../../modal/ModalBase'
 import { Button, Select, SmallFieldBox } from '../../../../styled'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface SpendFilterProps {
+  isModalOpen: boolean
+  filters: {
+    startDate: DayjsDate
+    finalDate: DayjsDate
+    categoryIds: number[] | null
+    subcategoryIds: number[] | null
+    groupIds: number[] | null
+    accountIds: number[] | null
+  }
+  onModalClose: () => void
+  onFiltersSet: (
+    startDate: DayjsDate,
+    finalDate: DayjsDate,
+    categoryIds: number[],
+    subcategoryIds: number[],
+    groupIds: number[],
+    accountIds: number[]
+  ) => void
+}
+
+/**************************************************************************************************/
+/*                                           CONSTANTS                                            */
+/**************************************************************************************************/
 
 const FieldGroupStack = Mui.styled(Mui.Stack)<Mui.StackProps>(() => ({
   display: 'flex'
@@ -34,7 +65,11 @@ const FieldGroupBoxTitle = Mui.styled(Mui.Box)(() => ({
   marginTop: `${constants.BOX_SMALL_PADDING_IN_REM}rem`
 }))
 
-function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.SpendFilterProps) {
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
+
+function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: SpendFilterProps) {
   const notifications = useNotifications()
 
   const { error, lists, selection, functions, isOpen, isError } = useSpendFilters({ filters })
@@ -439,5 +474,11 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: UI.S
     </ModalBase>
   )
 }
+
+/**************************************************************************************************/
+/*                                            EXPORTS                                             */
+/**************************************************************************************************/
+
+export type { SpendFilterProps }
 
 export default SpendFilters

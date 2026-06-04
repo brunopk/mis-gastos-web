@@ -1,7 +1,9 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { GOOGLE_AUTH_SCOPES, PATHS } from './constants'
 
-type Formatter = (id: number | string | Dayjs | null) => string
+export type DayjsDate = Dayjs
+
+export type Formatter = (id: number | string | Dayjs | null) => string
 
 export function getPageTitle(path: string) {
   if (path.startsWith(PATHS.SPENDS.INDEX + PATHS.SPENDS.LIST)) {

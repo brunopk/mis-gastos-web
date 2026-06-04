@@ -2,10 +2,25 @@ import * as Mui from '@mui/material'
 import { useNotifications } from '@toolpad/core'
 import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 import { debounce, throttle } from 'throttle-debounce'
+import type { ApiAutocompleteOptions } from '../api/mis-gastos/types'
 import * as Styled from './styled'
 import { TextField } from './styled'
 
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface AutocompleteProps {
+  reset: boolean
+  queryFn: (query: string) => Promise<ApiAutocompleteOptions>
+  onChange: (text: string) => void
+}
+
 // TODO: adjust throttle and debounce params (times)
+
+/**************************************************************************************************/
+/*                                           FUNCTIONS                                            */
+/**************************************************************************************************/
 
 function buildThrottledFunction(callback: (text: string) => void) {
   return throttle(500, callback, { noLeading: true, noTrailing: false })
@@ -15,7 +30,11 @@ function buildDebouncedFunction(callback: (text: string) => void) {
   return debounce(500, callback)
 }
 
-function Autocomplete({ reset, queryFn, onChange }: UI.AutocompleteProps) {
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
+
+function Autocomplete({ reset, queryFn, onChange }: AutocompleteProps) {
   const notifications = useNotifications()
 
   const [value, setValue] = useState(() => '')
@@ -97,7 +116,7 @@ function Autocomplete({ reset, queryFn, onChange }: UI.AutocompleteProps) {
   const descriptionAutocompleteProps: Mui.AutocompleteProps<string, false, true, true> = {
     id: 'description-autocomplete',
     freeSolo: true,
-    disableClearable: true, 
+    disableClearable: true,
     value,
     options,
     renderInput: (params: Mui.AutocompleteRenderInputParams) => (
@@ -111,5 +130,11 @@ function Autocomplete({ reset, queryFn, onChange }: UI.AutocompleteProps) {
 
   return <Styled.Autocomplete {...descriptionAutocompleteProps} />
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
+
+export type {AutocompleteProps}
 
 export default Autocomplete

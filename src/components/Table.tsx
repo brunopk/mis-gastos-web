@@ -1,5 +1,39 @@
 import * as Mui from '@mui/material'
-import { memo, useState } from 'react'
+import { memo, useState, type MouseEventHandler } from 'react'
+import type { Formatter } from '../utils'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface BaseRow<R, B> {
+  id: number
+  data: R
+  buttons?: TableButton<B>[]
+}
+
+interface Column<R, B> {
+  id: keyof R | keyof B
+  label: string
+  isButton?: boolean
+  minWidth?: number
+  format?: Formatter
+}
+
+interface TableButton<B> {
+  id: keyof B
+  label: string
+  clickHandler: MouseEventHandler<HTMLButtonElement>
+}
+
+interface TableProps<R, B> {
+  rows: BaseRow<R, B>[]
+  columns: Column<R, B>[]
+}
+
+/**************************************************************************************************/
+/*                                           CONSTANTS                                            */
+/**************************************************************************************************/
 
 const Paper = Mui.styled(Mui.Paper)<Mui.PaperProps>(() => ({
   marginTop: '1rem',
@@ -11,19 +45,27 @@ const TableContainer = Mui.styled(Mui.TableContainer)(() => ({
   maxHeight: '90%'
 }))
 
-function buildTableCellProps<R, B>(column: UI.Table.Column<R, B>): Mui.TableCellProps {
+/**************************************************************************************************/
+/*                                           FUNCTIONS                                            */
+/**************************************************************************************************/
+
+function buildTableCellProps<R, B>(column: Column<R, B>): Mui.TableCellProps {
   return {
     style: { minWidth: column.minWidth }
   }
 }
 
-function findButton<R>(buttonId: string, buttons: UI.Table.Button<R>[]): UI.Table.Button<R> {
+function findButton<B>(buttonId: string, buttons: TableButton<B>[]): TableButton<B> {
   const button = buttons.find((button) => button.id == buttonId)
   if (typeof button == 'undefined') throw Error(`Cannot find button "${buttonId}"`)
   return button
 }
 
-function Table<R, B>({rows, columns }: UI.Table.TableProps<R, B>) {
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
+
+function Table<R, B>({rows, columns }: TableProps<R, B>) {
   const [page, setPage] = useState(0)
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -75,10 +117,10 @@ function Table<R, B>({rows, columns }: UI.Table.TableProps<R, B>) {
                         </Mui.TableCell>
                       )
                     } else {
-                      const value = row.data[column.id as keyof R]
+                      const value = row.data[column.id as keyof R] as unknown
                       return (
                         <Mui.TableCell key={column.id.toString()}>
-                          {column.format ? column.format(value) : value}
+                          {column.format ? column.format(value as Parameters<Formatter>[0]) : value as React.ReactNode}
                         </Mui.TableCell>
                       )
                     }
@@ -94,6 +136,12 @@ function Table<R, B>({rows, columns }: UI.Table.TableProps<R, B>) {
   )
 }
 
+/**************************************************************************************************/
+/*                                            EXPORTS                                             */
+/**************************************************************************************************/
+
+export type { BaseRow, Column, TableButton, TableProps }
+
 export default memo(Table) as <R, B>(
-  props: UI.Table.TableProps<R, B>
+  props: TableProps<R, B>
 ) => React.ReactElement;;

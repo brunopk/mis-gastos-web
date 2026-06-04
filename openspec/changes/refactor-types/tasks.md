@@ -1,20 +1,20 @@
 ## 1. Prepare shared utilities
 
-- [ ] 1.1 Export `Formatter` type from `src/utils.ts`
-- [ ] 1.2 Export `DayjsDate` type alias from `src/utils.ts`
+- [x] 1.1 Export `Formatter` type from `src/utils.ts`
+- [x] 1.2 Export `DayjsDate` type alias from `src/utils.ts`
 
 ## 2. Create API types module
 
-- [ ] 2.1 Create `src/api/mis-gastos/types.ts` with all API domain types using `Api` prefix (`ApiListItem`, `ApiSubcategory`, `ApiGroup`, `ApiSpend`, `ApiIncome`, `ApiAuthCallbackRequest`, `ApiAutocompleteOptions`, `ApiCategoriesMap`, `ApiSubcategoriesMap`)
-- [ ] 2.2 Import `DayjsDate` from `src/utils.ts` inside `types.ts`
+- [x] 2.1 Create `src/api/mis-gastos/types.ts` with all API domain types using `Api` prefix (`ApiListItem`, `ApiSubcategory`, `ApiGroup`, `ApiSpend`, `ApiIncome`, `ApiAuthCallbackRequest`, `ApiAutocompleteOptions`, `ApiCategoriesMap`, `ApiSubcategoriesMap`)
+- [x] 2.2 Import `DayjsDate` from `src/utils.ts` inside `types.ts`
 
 ## 3. Move component prop types
 
-- [ ] 3.1 Move `ModalBaseProps` into `src/components/modal/ModalBase.tsx` and export it
-- [ ] 3.2 Move `UI.AutocompleteProps` into `src/components/Autocomplete.tsx` as `AutocompleteProps` and export it
-- [ ] 3.3 Move `UI.PageProps` into `src/components/Page.tsx` as `PageProps` and export it
-- [ ] 3.4 Move `UI.Table.*` types into `src/components/Table.tsx` and export them
-- [ ] 3.5 Move `UI.SpendFilterProps` into `src/components/pages/spends/sub-pages/spend-list/SpendFilters.tsx` as `SpendFilterProps` and export it
+- [x] 3.1 Move `ModalBaseProps` into `src/components/modal/ModalBase.tsx` and export it
+- [x] 3.2 Move `UI.AutocompleteProps` into `src/components/Autocomplete.tsx` as `AutocompleteProps` and export it
+- [x] 3.3 Move `UI.PageProps` into `src/components/Page.tsx` as `PageProps` and export it
+- [x] 3.4 Move `UI.Table.*` types into `src/components/Table.tsx` and export them
+- [x] 3.5 Move `UI.SpendFilterProps` into `src/components/pages/spends/sub-pages/spend-list/SpendFilters.tsx` as `SpendFilterProps` and export it
 
 ## 4. Move hook param types
 

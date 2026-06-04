@@ -1,37 +1,20 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useReducer } from 'react'
 import { useLoaderData } from 'react-router-dom'
+import type { ApiGroup, ApiListItem, ApiSubcategory } from '../api/mis-gastos/types'
 import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as constants from '../constants'
 import { toDate } from '../utils'
 
-const INITIAL_STATE: State = {
-  isWarning: false,
-  isValidated: false,
-  warning: null,
-  lists: {
-    original: {
-      categories: [],
-      subcategories: [],
-      groups: [],
-      accounts: []
-    },
-    filtered: {
-      categories: [],
-      subcategories: [],
-      groups: [],
-      accounts: []
-    }
-  },
-  values: {
-    date: null,
-    category: null,
-    subcategory: null,
-    group: null,
-    account: null,
-    description: null,
-    value: null
-  }
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface UseSpendCreationParams {
+  defaultCategoryId: number | null
+  defaultSubcategoryId: number | null
+  defaultGroupId: number | null
+  defaultAccountId: number | null
 }
 
 interface SelectListItemAction {
@@ -70,10 +53,10 @@ interface InitializeAction {
   type: 'INITIALIZE'
   data: {
     lists: {
-      categories: Api.ListItem[]
-      subcategories: Api.Subcategory[]
-      groups: Api.Group[]
-      accounts: Api.ListItem[]
+      categories: ApiListItem[]
+      subcategories: ApiSubcategory[]
+      groups: ApiGroup[]
+      accounts: ApiListItem[]
     }
     defaultValues: {
       categoryId: number | null
@@ -90,28 +73,32 @@ interface State {
   warning: string | null
   lists: {
     original: {
-      categories: Api.ListItem[]
-      subcategories: Api.Subcategory[]
-      groups: Api.Group[]
-      accounts: Api.ListItem[]
+      categories: ApiListItem[]
+      subcategories: ApiSubcategory[]
+      groups: ApiGroup[]
+      accounts: ApiListItem[]
     }
     filtered: {
-      categories: Api.ListItem[]
-      subcategories: Api.Subcategory[]
-      groups: Api.Group[]
-      accounts: Api.ListItem[]
+      categories: ApiListItem[]
+      subcategories: ApiSubcategory[]
+      groups: ApiGroup[]
+      accounts: ApiListItem[]
     }
   }
   values: {
     date: Dayjs | null
-    category: Api.ListItem | null
-    subcategory: Api.Subcategory | null
-    group: Api.Group | null
-    account: Api.ListItem | null
+    category: ApiListItem | null
+    subcategory: ApiSubcategory | null
+    group: ApiGroup | null
+    account: ApiListItem | null
     value: number | null
     description: string | null
   }
 }
+
+/**************************************************************************************************/
+/*                                              TYPES                                             */
+/**************************************************************************************************/
 
 type Action =
   | SetDateAction
@@ -121,12 +108,49 @@ type Action =
   | ValidateAction
   | InitializeAction
 
+/**************************************************************************************************/
+/*                                           CONSTANTS                                            */
+/**************************************************************************************************/
+
+const INITIAL_STATE: State = {
+  isWarning: false,
+  isValidated: false,
+  warning: null,
+  lists: {
+    original: {
+      categories: [],
+      subcategories: [],
+      groups: [],
+      accounts: []
+    },
+    filtered: {
+      categories: [],
+      subcategories: [],
+      groups: [],
+      accounts: []
+    }
+  },
+  values: {
+    date: null,
+    category: null,
+    subcategory: null,
+    group: null,
+    account: null,
+    description: null,
+    value: null
+  }
+}
+
+/**************************************************************************************************/
+/*                                           FUNCTIONS                                            */
+/**************************************************************************************************/
+
 function filterAccounts(
-  accounts: Api.ListItem[],
-  selectedCategories: Api.ListItem[],
-  selectedSubcategories: Api.Subcategory[],
-  selectedGroups: Api.Group[]
-): Api.ListItem[] {
+  accounts: ApiListItem[],
+  selectedCategories: ApiListItem[],
+  selectedSubcategories: ApiSubcategory[],
+  selectedGroups: ApiGroup[]
+): ApiListItem[] {
   const accountsCopy = accounts.slice(0)
 
   let filteredAccounts = accountsCopy
@@ -160,12 +184,16 @@ function filterAccounts(
   return filteredAccounts.length > 0 ? filteredAccounts : accountsCopy
 }
 
-export function useSpendCreation({
+/**************************************************************************************************/
+/*                                              HOOK                                              */
+/**************************************************************************************************/
+
+function useSpendCreation({
   defaultCategoryId,
   defaultSubcategoryId,
   defaultGroupId,
   defaultAccountId
-}: UI.Hooks.UseSpendCreation.Params) {
+}: UseSpendCreationParams) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
@@ -507,3 +535,11 @@ export function useSpendCreation({
     }
   }
 }
+
+/**************************************************************************************************/
+/*                                            EXPORTS                                             */
+/**************************************************************************************************/
+
+export type { UseSpendCreationParams }
+
+export {useSpendCreation}

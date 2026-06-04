@@ -1,6 +1,23 @@
 import * as Mui from '@mui/material'
-import { Fragment, memo } from 'react'
+import { Fragment, memo, ReactElement, ReactNode } from 'react'
 import { MODAL_WIDTH } from '../../constants'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface ModalBaseProps {
+  children: ReactNode
+  title: string
+  open: boolean
+  primaryActionButton: ReactElement
+  secondaryActionButton: ReactElement
+  onClose: () => void
+}
+
+/**************************************************************************************************/
+/*                                            CONSTANTS                                           */
+/**************************************************************************************************/
 
 const PADDING_IN_REM = 0.25
 
@@ -29,6 +46,10 @@ const DialogActions = Mui.styled(
   flexGrow: 1,
   padding: `${PADDING_IN_REM * 4}rem ${PADDING_IN_REM * 6}rem`
 }))
+
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
 
 function ModalBase({
   children,
@@ -69,5 +90,11 @@ function ModalBase({
     </Fragment>
   )
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
+
+export type {ModalBaseProps}
 
 export default memo(ModalBase)

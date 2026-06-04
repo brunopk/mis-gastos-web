@@ -4,12 +4,27 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { useCallback, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { getPageTitle } from '../utils'
 import DrawerButton from './DrawerButton'
 import DrawerHeader from './DrawerHeader'
 import MainMenu from './MainMenu'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface PageProps {
+  children: ReactNode
+  bottomNavigation?: ReactNode
+  isFetching?: boolean
+  onThreeDotsIconClick?: () => void
+}
+
+/**************************************************************************************************/
+/*                                            CONSTANTS                                           */
+/**************************************************************************************************/
 
 const Main = styled('main')(() => ({
   position: 'fixed',
@@ -28,7 +43,11 @@ const DashboardTitle = styled(Mui.Typography)<Mui.TypographyProps>(() => ({
   flexGrow: 1
 }))
 
-function Page({ children, bottomNavigation, isFetching, onThreeDotsIconClick }: UI.PageProps) {
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
+
+function Page({ children, bottomNavigation, isFetching, onThreeDotsIconClick }: PageProps) {
   const location = useLocation()
 
   const [mainMenuOpen, setMainMenuOpen] = useState<boolean>(false)
@@ -77,5 +96,11 @@ function Page({ children, bottomNavigation, isFetching, onThreeDotsIconClick }: 
     </Box>
   )
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
+
+export type {PageProps}
 
 export default Page
