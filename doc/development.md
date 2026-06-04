@@ -1,37 +1,10 @@
 <!-- TODO: explain how to use Google authentication (set corresponding environment variables VITE_GOOGLE_CLIENT_ID etc.) and how to modify PrivateRoute.tsx -->
 
-# Conventions
-
-## TSX file ordering convention
-  
-1. Imports
-2. Interfaces
-3. Types (type aliases)
-4. Other constants
-5. Constants (Mui.styled(...) components)
-6. Helper functions
-7. Main component
-8. Exports
-
-Notes:
-
-- Use `interface` instead of `type` if possible.
-- Use `function` for the main component.
-- If some `interface` must be exported, declare it and export it at the end of the file, before the `export default ...`.
-
-## TS (hooks) file ordering convention
-  
-1. Imports
-2. Interfaces
-3. Types
-4. Constants
-5. Helper functions
-6. Hook (function)
-7. Exports
+# Code conventions
 
 ## Sections
 
-Each section should be labeled.
+All files (TSX and TS files) are organized in **sections** and each section should be **labeled**.
 
 **Interfaces**
 
@@ -88,6 +61,33 @@ Each section should be labeled.
 /*                                           EXPORTS                                              */
 /**************************************************************************************************/
 ```
+
+## TSX file ordering convention
+  
+1. Imports
+2. Interfaces
+3. Types (type aliases)
+4. Other constants
+5. Constants (Mui.styled(...) components)
+6. Helper functions
+7. Main component
+8. Exports
+
+Notes:
+
+- Use `interface` instead of `type` if possible.
+- Use `function` for the main component.
+- If some `interface` must be exported, declare it and export it at the end of the file, before the `export default ...`.
+
+## TS (hooks) file ordering convention
+  
+1. Imports
+2. Interfaces
+3. Types
+4. Constants
+5. Helper functions
+6. Hook (function)
+7. Exports
 
 # Claude Code
 
