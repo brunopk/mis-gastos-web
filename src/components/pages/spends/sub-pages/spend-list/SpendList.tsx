@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import dayjs, { Dayjs } from 'dayjs'
-import { useCallback, useEffect, useState } from 'react'
-import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 import * as Api from '../../../../../api/mis-gastos/api'
 import { PATHS } from '../../../../../constants'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
@@ -10,17 +8,12 @@ import Page from '../../../../Page'
 import Table from '../../../../Table'
 import BottomNavigation from '../../BottomNavigation'
 import SpendFilters from './SpendFilters'
+import { useCallback, useEffect, useState } from 'react'
+import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 
-// TODO: show "-" when description == null
-
-const INITIAL_SPEND_FILTERS: SpendFilters = {
-  startDate: dayjs().add(-1, 'month'),
-  finalDate: dayjs(),
-  categoryIds: null,
-  subcategoryIds: null,
-  groupIds: null,
-  accountIds: null
-}
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
 
 interface SpendFilters {
   startDate: Dayjs
@@ -34,6 +27,25 @@ interface SpendFilters {
 interface SpendButtons {
   newReimbursementBtn: unknown
 }
+
+/**************************************************************************************************/
+/*                                            CONSTANTS                                           */
+/**************************************************************************************************/
+
+const formatDate = buildDateFormatter()
+
+const INITIAL_SPEND_FILTERS: SpendFilters = {
+  startDate: dayjs().add(-1, 'month'),
+  finalDate: dayjs(),
+  categoryIds: null,
+  subcategoryIds: null,
+  groupIds: null,
+  accountIds: null
+}
+
+/**************************************************************************************************/
+/*                                           FUNCTIONS                                            */
+/**************************************************************************************************/
 
 function buildTableRows(
   spends: Api.Spend[] | undefined,
@@ -79,63 +91,48 @@ function buildTableRows(
 function buildColumnList(apiLists: {
   [name: string]: Api.ListItem[]
 }): UI.Table.Column<Api.Spend, SpendButtons>[] {
+  const formatCategory = buildListItemFormatter(apiLists.categories)
+  const formatSubcategory = buildListItemFormatter(apiLists.subcategories)
+  const formatGroup = buildListItemFormatter(apiLists.groups)
+  const formatAccount = buildListItemFormatter(apiLists.accounts)
+
   return [
-    { id: 'id', label: 'ID', minWidth: 100 },
-    {
-      id: 'date',
-      label: 'Date',
-      minWidth: 150,
-      format: buildDateFormatter()
-    },
+    { id: 'id', label: 'ID', minWidth: 100, getValue: (s) => s.id },
+    { id: 'date', label: 'Date', minWidth: 150, getValue: (s) => formatDate(s.date) },
     {
       id: 'categoryId',
       label: 'Category',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.categories)
+      getValue: (s) => formatCategory(s.categoryId)
     },
     {
       id: 'subcategoryId',
       label: 'Subcategory',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.subcategories)
+      getValue: (s) => formatSubcategory(s.subcategoryId)
     },
-    {
-      id: 'groupId',
-      label: 'Group',
-      minWidth: 170,
-      format: buildListItemFormatter(apiLists.groups)
-    },
+    { id: 'groupId', label: 'Group', minWidth: 170, getValue: (s) => formatGroup(s.groupId) },
     {
       id: 'accountId',
       label: 'Account',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.accounts)
+      getValue: (s) => formatAccount(s.accountId)
     },
-    {
-      id: 'description',
-      label: 'Description',
-      minWidth: 170
-    },
-    {
-      id: 'value',
-      label: 'Value',
-      minWidth: 170
-    },
-    {
-      id: 'newReimbursementBtn',
-      label: 'Reimbursements',
-      minWidth: 300,
-      isButton: true
-    }
+    { id: 'description', label: 'Description', minWidth: 170, getValue: (s) => s.description },
+    { id: 'value', label: 'Value', minWidth: 170, getValue: (s) => s.value },
+    { id: 'newReimbursementBtn', label: 'Reimbursements', minWidth: 300, isButton: true }
   ]
 }
+
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
 
 function SpendList() {
   const notifications = useNotifications()
 
   const apiLists = useLoaderData()
 
-  // Initially, as filters are set with null values, all spends will be shown (no filtering when null values are set)
   const [filters, setFilters] = useState<SpendFilters>(INITIAL_SPEND_FILTERS)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -214,11 +211,15 @@ function SpendList() {
       {!isError && (
         <>
           <SpendFilters {...listControlsProps} />
-          <Table<Api.Spend, SpendButtons> rows={rows} columns={columns} />
+          <Table<Api.Spend, SpendButtons> data={rows} columns={columns} />
         </>
       )}
     </Page>
   )
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
 
 export default SpendList

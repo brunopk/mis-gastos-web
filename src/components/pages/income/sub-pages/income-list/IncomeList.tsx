@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
-import { useEffect } from 'react'
-import { useLoaderData } from 'react-router-dom'
 import * as Api from '../../../../../api/mis-gastos/api'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
 import Table from '../../../../Table'
 import BottomNavigation from '../../BottomNavigation'
+import { useEffect } from 'react'
+import { useLoaderData } from 'react-router-dom'
 
 interface Income {
   id: number
@@ -52,70 +52,61 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
 function buildColumnList(apiLists: {
   [name: string]: ApiNamespace.ListItem[]
 }): UI.Table.Column<Income, void>[] {
+  const formatDate = buildDateFormatter()
+  const formatIncomeType = buildListItemFormatter(apiLists.incomeTypes)
+  const formatAccount = buildListItemFormatter(apiLists.accounts)
+  const formatCategory = buildListItemFormatter(apiLists.categories)
+  const formatSubcategory = buildListItemFormatter(apiLists.subcategories)
+  const formatGroup = buildListItemFormatter(apiLists.groups)
+
   return [
-    { id: 'id', label: 'ID', minWidth: 100 },
-    {
-      id: 'date',
-      label: 'Date',
-      minWidth: 150,
-      format: buildDateFormatter()
-    },
+    { id: 'id', label: 'ID', minWidth: 100, getValue: (i) => i.id },
+    { id: 'date', label: 'Date', minWidth: 150, getValue: (i) => formatDate(i.date) },
     {
       id: 'incomeTypeId',
       label: 'Type',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.incomeTypes)
+      getValue: (i) => formatIncomeType(i.incomeTypeId)
     },
     {
       id: 'accountId',
       label: 'Account',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.accounts)
+      getValue: (i) => formatAccount(i.accountId)
     },
-    {
-      id: 'description',
-      label: 'Description',
-      minWidth: 170
-    },
-    {
-      id: 'value',
-      label: 'Value',
-      minWidth: 170
-    },
+    { id: 'description', label: 'Description', minWidth: 170, getValue: (i) => i.description },
+    { id: 'value', label: 'Value', minWidth: 170, getValue: (i) => i.value },
     {
       id: 'spendCategoryId',
       label: 'Spend category',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.categories)
+      getValue: (i) => formatCategory(i.spendCategoryId ?? null)
     },
     {
       id: 'spendSubcategoryId',
       label: 'Spend subcategory',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.subcategories)
+      getValue: (i) => formatSubcategory(i.spendSubcategoryId ?? null)
     },
     {
       id: 'spendGroupId',
       label: 'Spend group',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.groups)
+      getValue: (i) => formatGroup(i.spendGroupId ?? null)
     },
     {
       id: 'spendAccountId',
       label: 'Spend account',
       minWidth: 170,
-      format: buildListItemFormatter(apiLists.accounts)
+      getValue: (i) => formatAccount(i.spendAccountId ?? null)
     },
     {
       id: 'spendDescription',
       label: 'Spend description',
-      minWidth: 170
+      minWidth: 170,
+      getValue: (i) => i.spendDescription
     },
-    {
-      id: 'spendValue',
-      label: 'Spend value',
-      minWidth: 170
-    }
+    { id: 'spendValue', label: 'Spend value', minWidth: 170, getValue: (i) => i.spendValue }
   ]
 }
 
@@ -150,7 +141,7 @@ function IncomeList() {
 
   return (
     <Page isFetching={isFetching} bottomNavigation={<BottomNavigation />}>
-      <Table rows={rows} columns={columns} />
+      <Table data={rows} columns={columns} />
     </Page>
   )
 }

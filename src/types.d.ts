@@ -110,13 +110,22 @@ declare namespace UI {
       buttons?: Button<B>[]
     }
 
-    interface Column<R, B> {
-      id: keyof R | keyof B
+    interface DataColumn<R> {
+      id: string
       label: string
-      isButton?: boolean
+      isButton?: false
       minWidth?: number
-      format?: Formatter
+      getValue: (data: R) => ReactNode
     }
+
+    interface ButtonColumn<B> {
+      id: keyof B
+      label: string
+      isButton: true
+      minWidth?: number
+    }
+
+    type Column<R, B> = DataColumn<R> | ButtonColumn<B>
 
     interface Button<B> {
       id: keyof B
