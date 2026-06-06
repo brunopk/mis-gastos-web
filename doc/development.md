@@ -1,5 +1,12 @@
 <!-- TODO: explain how to use Google authentication (set corresponding environment variables VITE_GOOGLE_CLIENT_ID etc.) and how to modify PrivateRoute.tsx -->
 
+# Visual Code
+
+Recommended extensions :
+
+- Prettier - Code formatter (extension ID: esbenp.prettier-vscode)
+- ESLint (extension ID: dbaeumer.vscode-eslint)
+
 # Code conventions
 
 ## Sections
@@ -91,16 +98,13 @@ Notes:
 
 # Claude Code
 
-## OpenSpec
+The easiest way to configure Claude Code is with the `/login` command :
 
-This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claude. The most important folders are these:
+1. Open Claude Code
+2. Invoke the `/login` command
+3. Chose the `Anthropic Console account` option
 
-- `.claude`
-- `openspec`
-
-To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section of the [OpenSpec](https://github.com/Fission-AI/OpenSpec/) GitHub repository.
-
-## Configure Claude Code with a custom API key
+Another way is using an API key :
 
 1. Generate the API key in https://platform.claude.com/settings/workspaces/default/keys
 2. Set the `ANTHROPIC_API_KEY` the environment variable in `~/.zshrc` or the corresponding shell configuration file : 
@@ -129,6 +133,12 @@ To install OpenSpec follow instructions in the [Quick Start](https://github.com/
 ### Status line shows all 0
 
 - Check if `jq` is installed
+
+# OpenSpec
+
+This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claude Code. To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section from the [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec/) `README.md`.
+
+OpenSpec works creating some **artifacts** (`.md` files) in the `openspec` folder.
 
 # Links
 
