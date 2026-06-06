@@ -1,4 +1,13 @@
 import dayjs from 'dayjs'
+import type {
+  ApiAuthCallbackRequest,
+  ApiAutocompleteOptions,
+  ApiGroup,
+  ApiIncome,
+  ApiListItem,
+  ApiSpend,
+  ApiSubcategory
+} from './types'
 
 const API_URL = import.meta.env.VITE_MIS_GASTOS_API_URL
 
@@ -11,14 +20,14 @@ export class ApiError extends Error {
   }
 }
 
-export async function authCallback(authCallbackRequest: Api.AuthCallbackRequest): Promise<void> {
+export async function authCallback(authCallbackRequest: ApiAuthCallbackRequest): Promise<void> {
   await post(`${API_URL}/oauth2/callback`, {
     authorization_code: authCallbackRequest.authorizationCode,
     code_verifier: authCallbackRequest.codeVerifier
   })
 }
 
-export async function getIncomeTypes(): Promise<Api.ListItem[]> {
+export async function getIncomeTypes(): Promise<ApiListItem[]> {
   const response = await get(`${API_URL}/income-types`)
   return (
     response as {
@@ -33,7 +42,7 @@ export async function getIncomeTypes(): Promise<Api.ListItem[]> {
   }))
 }
 
-export async function getCategories(): Promise<Api.ListItem[]> {
+export async function getCategories(): Promise<ApiListItem[]> {
   const response = await get(`${API_URL}/categories`)
   return (
     response as {
@@ -48,7 +57,7 @@ export async function getCategories(): Promise<Api.ListItem[]> {
   }))
 }
 
-export async function getSubcategories(): Promise<Api.Subcategory[]> {
+export async function getSubcategories(): Promise<ApiSubcategory[]> {
   const response = await get(`${API_URL}/subcategories`)
   return (
     response as { id: number; name: string; category_id: number; account_ids: number[] }[]
@@ -60,7 +69,7 @@ export async function getSubcategories(): Promise<Api.Subcategory[]> {
   }))
 }
 
-export async function getGroups(): Promise<Api.Group[]> {
+export async function getGroups(): Promise<ApiGroup[]> {
   const response = await get(`${API_URL}/groups`)
   return (
     response as { id: number; name: string; subcategory_id: number; account_ids: number[] }[]
@@ -72,12 +81,12 @@ export async function getGroups(): Promise<Api.Group[]> {
   }))
 }
 
-export async function getAccounts(): Promise<Api.ListItem[]> {
+export async function getAccounts(): Promise<ApiListItem[]> {
   const response = await get(`${API_URL}/accounts`)
-  return response as Api.ListItem[]
+  return response as ApiListItem[]
 }
 
-export async function getSpends(): Promise<Api.Spend[]> {
+export async function getSpends(): Promise<ApiSpend[]> {
   const response = await get(`${API_URL}/spends`)
   return (
     response as {
@@ -102,7 +111,7 @@ export async function getSpends(): Promise<Api.Spend[]> {
   }))
 }
 
-export async function getIncomes(): Promise<Api.Income[]> {
+export async function getIncomes(): Promise<ApiIncome[]> {
   const response = await get(`${API_URL}/incomes`)
   return (
     response as {
@@ -149,19 +158,19 @@ export async function getIncomes(): Promise<Api.Income[]> {
 
 export async function getAutocompleteOptionsForSpendDescription(
   query: string
-): Promise<Api.AutocompleteOptions> {
+): Promise<ApiAutocompleteOptions> {
   const response = await get(`${API_URL}/autocomplete/spends/description?query=${query}`)
-  return response as Api.AutocompleteOptions
+  return response as ApiAutocompleteOptions
 }
 
 export async function getAutocompleteOptionsForIncomeDescription(
   query: string
-): Promise<Api.AutocompleteOptions> {
+): Promise<ApiAutocompleteOptions> {
   const response = await get(`${API_URL}/autocomplete/incomes/description?query=${query}`)
-  return response as Api.AutocompleteOptions
+  return response as ApiAutocompleteOptions
 }
 
-export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
+export async function createSpend(newSpend: ApiSpend): Promise<ApiSpend> {
   const response = (await post(`${API_URL}/spends`, {
     date: newSpend.date.toISOString(),
     category_id: newSpend.categoryId,
@@ -193,7 +202,7 @@ export async function createSpend(newSpend: Api.Spend): Promise<Api.Spend> {
   }
 }
 
-export async function createIncome(newIncome: Api.Income): Promise<Api.Income> {
+export async function createIncome(newIncome: ApiIncome): Promise<ApiIncome> {
   const response = (await post(`${API_URL}/incomes`, {
     date: newIncome.date.toISOString(),
     income_type_id: newIncome.incomeTypeId,

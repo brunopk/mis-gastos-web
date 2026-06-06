@@ -1,4 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs'
+import type { ApiListItem } from './api/mis-gastos/types'
 import { GOOGLE_AUTH_SCOPES, PATHS } from './constants'
 
 export type DayjsDate = Dayjs
@@ -26,7 +27,7 @@ export function buildDateFormatter(): Formatter {
   }
 }
 
-export function buildListItemFormatter(list: Api.ListItem[]): Formatter {
+export function buildListItemFormatter(list: ApiListItem[]): Formatter {
   return (id: number | string | Dayjs | null) => {
     if (!id) return '-'
 
@@ -63,11 +64,11 @@ export function intersection<T>(A: T[] | Set<T>, B: T[] | Set<T>): Set<T> {
 }
 
 export function deepCopyNestedArray<T>(source: T[][]): T[][] {
-  return source.map((subList) => subList.map((t) => ({...t})))
+  return source.map((subList) => subList.map((t) => ({ ...t })))
 }
 
 export function deepCopyArray<T>(source: T[]): T[] {
-  return source.map((t) => ({...t}))
+  return source.map((t) => ({ ...t }))
 }
 
 /**

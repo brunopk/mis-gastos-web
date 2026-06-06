@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import dayjs, { Dayjs } from 'dayjs'
 import * as Api from '../../../../../api/mis-gastos/api'
+import type { ApiListItem, ApiSpend } from '../../../../../api/mis-gastos/types'
 import { PATHS } from '../../../../../constants'
 import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
-import Page from '../../../../Page'
-import Table from '../../../../Table'
+import Page, { type PageProps } from '../../../../Page'
+import Table, { type BaseRow, type Column } from '../../../../Table'
 import BottomNavigation from '../../BottomNavigation'
-import SpendFilters from './SpendFilters'
+import SpendFilters, { type SpendFilterProps } from './SpendFilters'
 import { useCallback, useEffect, useState } from 'react'
 import { NavigateFunction, useLoaderData, useNavigate } from 'react-router-dom'
 
@@ -48,10 +49,10 @@ const INITIAL_SPEND_FILTERS: SpendFilters = {
 /**************************************************************************************************/
 
 function buildTableRows(
-  spends: Api.Spend[] | undefined,
+  spends: ApiSpend[] | undefined,
   filters: SpendFilters,
   navigate: NavigateFunction
-): UI.Table.BaseRow<Api.Spend, SpendButtons>[] {
+): BaseRow<ApiSpend, SpendButtons>[] {
   return typeof spends == 'undefined'
     ? []
     : spends
@@ -89,8 +90,8 @@ function buildTableRows(
 }
 
 function buildColumnList(apiLists: {
-  [name: string]: Api.ListItem[]
-}): UI.Table.Column<Api.Spend, SpendButtons>[] {
+  [name: string]: ApiListItem[]
+}): Column<ApiSpend, SpendButtons>[] {
   const formatCategory = buildListItemFormatter(apiLists.categories)
   const formatSubcategory = buildListItemFormatter(apiLists.subcategories)
   const formatGroup = buildListItemFormatter(apiLists.groups)
@@ -193,13 +194,13 @@ function SpendList() {
     }
   }, [error, isError, notifications])
 
-  const pageProps: Omit<UI.PageProps, 'children'> = {
+  const pageProps: Omit<PageProps, 'children'> = {
     isFetching,
     bottomNavigation: <BottomNavigation />,
     onThreeDotsIconClick: handleThreeDotsIconClick
   }
 
-  const listControlsProps: UI.SpendFilterProps = {
+  const listControlsProps: SpendFilterProps = {
     filters,
     isModalOpen,
     onModalClose: handleModalClose,
@@ -211,7 +212,7 @@ function SpendList() {
       {!isError && (
         <>
           <SpendFilters {...listControlsProps} />
-          <Table<Api.Spend, SpendButtons> data={rows} columns={columns} />
+          <Table<ApiSpend, SpendButtons> data={rows} columns={columns} />
         </>
       )}
     </Page>

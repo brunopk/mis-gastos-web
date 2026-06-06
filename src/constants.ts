@@ -1,3 +1,5 @@
+import type { ApiGroup, ApiSubcategory } from './api/mis-gastos/types'
+
 export const PATHS = {
   INDEX: '/',
   LOGIN: '/login',
@@ -13,9 +15,9 @@ export const PATHS = {
   }
 }
 
-export const SESSION_STORAGE_PKCE_CODE_VERIFIER = "pkce_code_verifier"
+export const SESSION_STORAGE_PKCE_CODE_VERIFIER = 'pkce_code_verifier'
 
-export const GOOGLE_AUTH_SCOPES = "openid email https://www.googleapis.com/auth/tasks.readonly"
+export const GOOGLE_AUTH_SCOPES = 'openid email https://www.googleapis.com/auth/tasks.readonly'
 
 export const ICONS_MARGIN_IN_REM = 1
 
@@ -37,23 +39,22 @@ export const REIMBURSEMENT = 1
 
 export const UNKNOWN_STRING = '-'
 
-export const NOT_DEFINED = "Sin definir"
+export const NOT_DEFINED = 'Sin definir'
 
 export const DATE_WARNING_MSG = 'Date cannot be in the future'
 
 export const VALUE_WARNING_MSG = 'Value must greater than 0'
 
-export const UNDEFINED_SUBCATEGORY: Api.Subcategory = {
+export const UNDEFINED_SUBCATEGORY: ApiSubcategory = {
   id: -1,
   name: NOT_DEFINED,
   categoryId: -1,
   accountIds: []
 }
 
-export const UNDEFINED_GROUP: Api.Group = {
+export const UNDEFINED_GROUP: ApiGroup = {
   id: -1,
   name: NOT_DEFINED,
   subcategoryId: -1,
   accountIds: []
 }
-

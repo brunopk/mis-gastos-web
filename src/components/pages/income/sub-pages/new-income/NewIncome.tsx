@@ -1,19 +1,27 @@
-import * as Mui from '@mui/material'
-import * as XDatePickers from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core'
 import dayjs, { Dayjs } from 'dayjs'
-import { ChangeEvent, FormEvent, memo, useEffect, useMemo } from 'react'
-import { useLoaderData, useLocation } from 'react-router-dom'
+import * as Mui from '@mui/material'
+import * as XDatePickers from '@mui/x-date-pickers'
 import * as Api from '../../../../../api/mis-gastos/api'
-import * as MisGastosUtils from '../../../../../api/mis-gastos/api'
+import type {
+  ApiGroup,
+  ApiListItem,
+  ApiSpend,
+  ApiSubcategory
+} from '../../../../../api/mis-gastos/types'
+import * as MisGastosUtils from '../../../../../api/mis-gastos/utils'
 import * as constants from '../../../../../constants'
-import useIncomeCreation from '../../../../../hooks/useIncomeCreation'
+import useIncomeCreation, {
+  type UseIncomeCreationParams
+} from '../../../../../hooks/useIncomeCreation'
 import { buildDateFormatter, toDate } from '../../../../../utils'
-import Autocomplete from '../../../../Autocomplete'
+import Autocomplete, { type AutocompleteProps } from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import BottomNavigation from '../../BottomNavigation'
+import { ChangeEvent, FormEvent, memo, useEffect, useMemo } from 'react'
+import { useLoaderData, useLocation } from 'react-router-dom'
 
 const formatDate = buildDateFormatter()
 
@@ -72,13 +80,13 @@ interface ReimbursedSpend {
 }
 
 interface ApiLists {
-  categories: Api.ListItem[]
-  subcategories: Api.Subcategory[]
-  groups: Api.Group[]
-  accounts: Api.ListItem[]
+  categories: ApiListItem[]
+  subcategories: ApiSubcategory[]
+  groups: ApiGroup[]
+  accounts: ApiListItem[]
 }
 
-function loadReimbursedSpend(spend: Api.Spend, apiLists: ApiLists): ReimbursedSpend {
+function loadReimbursedSpend(spend: ApiSpend, apiLists: ApiLists): ReimbursedSpend {
   if (!spend) {
     return {
       id: constants.UNKNOWN_STRING,
@@ -154,11 +162,11 @@ function NewIncome() {
 
   const { state } = useLocation()
 
-  const { spend }: { spend: Api.Spend } = state || { spend: null }
+  const { spend }: { spend: ApiSpend } = state || { spend: null }
 
   const reimbursedSpend = loadReimbursedSpend(spend, apiLists)
 
-  const hookParams: UI.Hooks.UseIncomeCreation.Params = useMemo(
+  const hookParams: UseIncomeCreationParams = useMemo(
     () => ({
       defaultIncomeTypeId: spend ? constants.REIMBURSEMENT : null,
       excludedIncomeTypeIds: spend ? [] : [constants.REIMBURSEMENT]
@@ -280,7 +288,7 @@ function NewIncome() {
     id: accountSelectLabelId
   }
 
-  const descriptionAutocompleteProps: UI.AutocompleteProps = {
+  const descriptionAutocompleteProps: AutocompleteProps = {
     reset: !values.description,
     queryFn: Api.getAutocompleteOptionsForIncomeDescription,
     onChange: handleDescriptionChange

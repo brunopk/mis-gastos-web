@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import * as Api from '../../../../../api/mis-gastos/api'
-import { buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
+import type { ApiIncome, ApiListItem } from '../../../../../api/mis-gastos/types'
+import { type DayjsDate, buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
 import Page from '../../../../Page'
-import Table from '../../../../Table'
+import Table, { type BaseRow, type Column } from '../../../../Table'
 import BottomNavigation from '../../BottomNavigation'
 import { useEffect } from 'react'
 import { useLoaderData } from 'react-router-dom'
@@ -25,7 +26,7 @@ interface Income {
   value: number
 }
 
-function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Income, void>[] {
+function buildTableRows(incomes: ApiIncome[] | undefined): BaseRow<Income, void>[] {
   return typeof incomes == 'undefined'
     ? []
     : incomes.map((income) => ({
@@ -49,9 +50,7 @@ function buildTableRows(incomes: Api.Income[] | undefined): UI.Table.BaseRow<Inc
       }))
 }
 
-function buildColumnList(apiLists: {
-  [name: string]: ApiNamespace.ListItem[]
-}): UI.Table.Column<Income, void>[] {
+function buildColumnList(apiLists: { [name: string]: ApiListItem[] }): Column<Income, void>[] {
   const formatDate = buildDateFormatter()
   const formatIncomeType = buildListItemFormatter(apiLists.incomeTypes)
   const formatAccount = buildListItemFormatter(apiLists.accounts)

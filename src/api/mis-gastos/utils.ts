@@ -1,64 +1,80 @@
 import { QueryClient } from '@tanstack/react-query'
-import { LoaderFunction } from 'react-router-dom'
 import * as api from './api'
+import type {
+  ApiCategoriesMap,
+  ApiGroup,
+  ApiListItem,
+  ApiSubcategoriesMap,
+  ApiSubcategory
+} from './types'
+import { LoaderFunction } from 'react-router-dom'
 
-export function buildCategoriesMap(categories: Api.ListItem[]): Api.CategoriesMap {
-  const result = new Map<number, Api.ListItem>()
+export function buildCategoriesMap(categories: ApiListItem[]): ApiCategoriesMap {
+  const result = new Map<number, ApiListItem>()
   categories.forEach((category) => result.set(category.id, category))
   return result
 }
 
-export function buildSubcategoriesMap(subcategories: Api.Subcategory[]): Api.SubcategoriesMap {
-  const result = new Map<number, Api.Subcategory>()
+export function buildSubcategoriesMap(subcategories: ApiSubcategory[]): ApiSubcategoriesMap {
+  const result = new Map<number, ApiSubcategory>()
   subcategories.forEach((subcategory) => result.set(subcategory.id, subcategory))
   return result
 }
 
-export function findAccount(accountId: number, accounts: Api.ListItem[]): Api.ListItem {
+export function findAccount(accountId: number, accounts: ApiListItem[]): ApiListItem {
   const account = accounts.find((account) => account.id == accountId)
   if (typeof account == 'undefined') throw new Error(`Account ${accountId} not found`)
   return account
 }
 
-export function findCategory(categoryId: number, categories: Api.ListItem[]): Api.ListItem {
+export function findCategory(categoryId: number, categories: ApiListItem[]): ApiListItem {
   const category = categories.find((category) => category.id == categoryId)
   if (typeof category == 'undefined') throw new Error(`Category ${categoryId} not found`)
   return category
 }
 
-export function findGroup(groupId: number, groups: Api.Group[]): Api.Group {
+export function findGroup(groupId: number, groups: ApiGroup[]): ApiGroup {
   const group = groups.find((group) => group.id == groupId)
   if (typeof group == 'undefined') throw new Error(`Group ${groupId} not found`)
   return group
 }
 
-export function findIncomeType(incomeTypeId: number, incomeTypes: Api.ListItem[]): Api.ListItem {
+export function findIncomeType(incomeTypeId: number, incomeTypes: ApiListItem[]): ApiListItem {
   const incomeType = incomeTypes.find((incomeType) => incomeType.id == incomeTypeId)
   if (typeof incomeType == 'undefined') throw new Error(`Income type ${incomeTypeId} not found`)
   return incomeType
 }
 
-export function findParentCategory(subcategory: Api.Subcategory, categoriesMap: Api.CategoriesMap): Api.ListItem {
+export function findParentCategory(
+  subcategory: ApiSubcategory,
+  categoriesMap: ApiCategoriesMap
+): ApiListItem {
   const result = categoriesMap.get(subcategory.categoryId)
   if (typeof result == 'undefined')
     throw new Error(`Parent category of '${subcategory.name}' not found.`)
   return result
 }
 
-export function findParentSubcategory(group: Api.Group, subcategoriesMap: Api.SubcategoriesMap): Api.Subcategory {
+export function findParentSubcategory(
+  group: ApiGroup,
+  subcategoriesMap: ApiSubcategoriesMap
+): ApiSubcategory {
   const result = subcategoriesMap.get(group.subcategoryId)
   if (typeof result == 'undefined')
     throw new Error(`Parent subcategory of '${group.name}' not found.`)
   return result
 }
 
-export function findSubcategory(subcategoryId: number, subcategories: Api.Subcategory[]): Api.Subcategory {
+export function findSubcategory(
+  subcategoryId: number,
+  subcategories: ApiSubcategory[]
+): ApiSubcategory {
   const subcategory = subcategories.find((subcategory) => subcategory.id == subcategoryId)
   if (typeof subcategory == 'undefined') throw new Error(`Subcategory ${subcategoryId} not found`)
   return subcategory
 }
 
-export function flatAccountIds(list: Api.ListItem[]): number[] {
+export function flatAccountIds(list: ApiListItem[]): number[] {
   return [
     ...new Set(
       list.flatMap((item) => (typeof item.accountIds != 'undefined' ? item.accountIds : []))
@@ -66,10 +82,7 @@ export function flatAccountIds(list: Api.ListItem[]): number[] {
   ]
 }
 
-export function getCategoryAccounts(
-  category: Api.ListItem,
-  accounts: Api.ListItem[],
-): Set<number> {
+export function getCategoryAccounts(category: ApiListItem, accounts: ApiListItem[]): Set<number> {
   if (typeof category.accountIds != 'undefined' && category.accountIds.length > 0)
     return new Set(category.accountIds)
 
@@ -77,10 +90,10 @@ export function getCategoryAccounts(
 }
 
 export function getGroupAccounts(
-  group: Api.Group,
-  accounts: Api.ListItem[],
-  subcategoriesMap: Api.SubcategoriesMap,
-  categoriesMap: Api.CategoriesMap
+  group: ApiGroup,
+  accounts: ApiListItem[],
+  subcategoriesMap: ApiSubcategoriesMap,
+  categoriesMap: ApiCategoriesMap
 ): Set<number> {
   if (typeof group.accountIds != 'undefined' && group.accountIds.length > 0)
     return new Set(group.accountIds)
@@ -92,14 +105,14 @@ export function getGroupAccounts(
       return new Set(accounts.map((account) => account.id))
     return new Set(parentCategory.accountIds)
   }
- 
+
   return new Set(parentSubcategory.accountIds)
 }
 
 export function getSubcategoryAccounts(
-  subcategory: Api.Subcategory,
-  accounts: Api.ListItem[],
-  categoriesMap: Api.CategoriesMap
+  subcategory: ApiSubcategory,
+  accounts: ApiListItem[],
+  categoriesMap: ApiCategoriesMap
 ): Set<number> {
   if (typeof subcategory.accountIds != 'undefined' && subcategory.accountIds.length > 0)
     return new Set(subcategory.accountIds)
@@ -116,7 +129,7 @@ export function loaderFunctionBuilder(queryClient: QueryClient): LoaderFunction 
     // For more information about staleTime and gcTime see :
     // - https://dev.to/delisrey/react-query-staletime-vs-cachetime-hml
     // - https://www.codemzy.com/blog/react-query-cachetime-staletime
-    
+
     const queryCommonAttributes = {
       staleTime: Infinity,
       gcTime: Infinity,

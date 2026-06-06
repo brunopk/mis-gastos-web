@@ -18,21 +18,21 @@
 
 ## 4. Move hook param types
 
-- [ ] 4.1 Move `UI.Hooks.UseSpendCreation.Params` into `src/hooks/useSpendCreation.ts` as `UseSpendCreationParams` and export it
-- [ ] 4.2 Move `UI.Hooks.UseIncomeCreation.Params` into `src/hooks/useIncomeCreation.ts` as `UseIncomeCreationParams` and export it
-- [ ] 4.3 Move `UI.Hooks.UseSpendFilters.Params` into `src/hooks/useSpendFilters.ts` as `UseSpendFiltersParams` and export it
+- [x] 4.1 Move `UI.Hooks.UseSpendCreation.Params` into `src/hooks/useSpendCreation.ts` as `UseSpendCreationParams` and export it
+- [x] 4.2 Move `UI.Hooks.UseIncomeCreation.Params` into `src/hooks/useIncomeCreation.ts` as `UseIncomeCreationParams` and export it
+- [x] 4.3 Move `UI.Hooks.UseSpendFilters.Params` into `src/hooks/useSpendFilters.ts` as `UseSpendFiltersParams` and export it
 
 ## 5. Update consumers to use explicit imports
 
-- [ ] 5.1 Update `src/api/mis-gastos/api.ts` to import from `./types`
-- [ ] 5.2 Update `src/api/mis-gastos/utils.ts` to import from `./types`
-- [ ] 5.3 Update `src/hooks/useSpendCreation.ts` to import from `../api/mis-gastos/types`
-- [ ] 5.4 Update `src/hooks/useIncomeCreation.ts` to import from `../api/mis-gastos/types`
-- [ ] 5.5 Update `src/hooks/useSpendFilters.ts` to import from `../api/mis-gastos/types`
-- [ ] 5.6 Update all component files that reference `Api.*` or `UI.*` types to use explicit imports
-- [ ] 5.7 Update `src/constants.ts` to import from `../api/mis-gastos/types`
+- [x] 5.1 Update `src/api/mis-gastos/api.ts` to import from `./types`
+- [x] 5.2 Update `src/api/mis-gastos/utils.ts` to import from `./types`
+- [x] 5.3 Update `src/hooks/useSpendCreation.ts` to import from `../api/mis-gastos/types`
+- [x] 5.4 Update `src/hooks/useIncomeCreation.ts` to import from `../api/mis-gastos/types`
+- [x] 5.5 Update `src/hooks/useSpendFilters.ts` to import from `../api/mis-gastos/types`
+- [x] 5.6 Update all component files that reference `Api.*` or `UI.*` types to use explicit imports
+- [x] 5.7 Update `src/constants.ts` to import from `../api/mis-gastos/types`
 
 ## 6. Delete types.d.ts and verify
 
-- [ ] 6.1 Delete `src/types.d.ts`
-- [ ] 6.2 Run `tsc --noEmit` and confirm zero type errors
+- [x] 6.1 Delete `src/types.d.ts`
+- [x] 6.2 Run `tsc --noEmit` and confirm zero type errors

@@ -1,18 +1,21 @@
-import * as Mui from '@mui/material'
-import * as XDatePickers from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@toolpad/core/useNotifications'
 import { Dayjs } from 'dayjs'
-import { FormEvent, memo, useEffect, useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import * as Mui from '@mui/material'
+import * as XDatePickers from '@mui/x-date-pickers'
 import * as Api from '../../../../../api/mis-gastos/api'
 import * as constants from '../../../../../constants'
-import { useSpendCreation } from '../../../../../hooks/useSpendCreation'
+import {
+  type UseSpendCreationParams,
+  useSpendCreation
+} from '../../../../../hooks/useSpendCreation'
 import { toDate } from '../../../../../utils'
-import Autocomplete from '../../../../Autocomplete'
+import Autocomplete, { type AutocompleteProps } from '../../../../Autocomplete'
 import Page from '../../../../Page'
 import * as Styled from '../../../../styled'
 import BottomNavigation from '../../BottomNavigation'
+import { FormEvent, memo, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const FormControl = Styled.FormControl
 
@@ -28,9 +31,7 @@ const TextField = Styled.TextField
 
 const Select = Styled.Select
 
-function buildUseSpendCreationHookParams(
-  searchParams: URLSearchParams
-): UI.Hooks.UseSpendCreation.Params {
+function buildUseSpendCreationHookParams(searchParams: URLSearchParams): UseSpendCreationParams {
   const categoryId = searchParams.get('categoryId')
     ? parseInt(searchParams.get('categoryId')!)
     : null
@@ -218,7 +219,7 @@ function NewSpend() {
     id: accountSelectLabelId
   }
 
-  const descriptionAutocompleteProps: UI.AutocompleteProps = {
+  const descriptionAutocompleteProps: AutocompleteProps = {
     reset: !values.description,
     queryFn: Api.getAutocompleteOptionsForSpendDescription,
     onChange: handleDescriptionChange

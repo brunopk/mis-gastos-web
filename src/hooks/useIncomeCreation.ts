@@ -1,9 +1,106 @@
 import dayjs, { Dayjs } from 'dayjs'
-import { useCallback, useEffect, useReducer } from 'react'
-import { useLoaderData } from 'react-router-dom'
+import type { ApiListItem } from '../api/mis-gastos/types'
 import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as constants from '../constants'
 import { toDate } from '../utils'
+import { useCallback, useEffect, useReducer } from 'react'
+import { useLoaderData } from 'react-router-dom'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface UseIncomeCreationParams {
+  defaultIncomeTypeId: number | null
+  excludedIncomeTypeIds: number[]
+}
+
+interface SelectListItemAction {
+  type: 'SELECT_INCOME_TYPE' | 'SELECT_ACCOUNT'
+  data: {
+    id: number
+  }
+}
+
+interface SetDateAction {
+  type: 'SET_DATE'
+  data: {
+    date: Dayjs
+  }
+}
+
+interface SetValueAction {
+  type: 'SET_VALUE'
+  data: {
+    value: number
+  }
+}
+
+interface SetDescriptionAction {
+  type: 'SET_DESCRIPTION'
+  data: {
+    text: string
+  }
+}
+
+interface ValidateAction {
+  type: 'VALIDATE'
+}
+
+interface InitializeAction {
+  type: 'INITIALIZE'
+  data: {
+    lists: {
+      incomeTypes: ApiListItem[]
+      accounts: ApiListItem[]
+    }
+    defaultValues: {
+      incomeTypeId: number | null
+    }
+    excludedValues: {
+      incomeTypeId: number[]
+    }
+  }
+}
+
+interface State {
+  isWarning: boolean
+  isValidated: boolean
+  warning: string | null
+  lists: {
+    original: {
+      incomeTypes: ApiListItem[]
+      accounts: ApiListItem[]
+    }
+    filtered: {
+      incomeTypes: ApiListItem[]
+      accounts: ApiListItem[]
+    }
+  }
+  values: {
+    date: Dayjs | null
+    incomeType: ApiListItem | null
+    account: ApiListItem | null
+    value: number | null
+    description: string | null
+  }
+}
+
+/**************************************************************************************************/
+/*                                              TYPES                                             */
+/**************************************************************************************************/
+
+type Action =
+  | SetDateAction
+  | SetDescriptionAction
+  | SetValueAction
+  | SelectListItemAction
+  | ValidateAction
+  | InitializeAction
+
+/**************************************************************************************************/
+/*                                            CONSTANTS                                           */
+/**************************************************************************************************/
 
 const INITIAL_STATE: State = {
   isWarning: false,
@@ -28,96 +125,14 @@ const INITIAL_STATE: State = {
   }
 }
 
-interface SelectListItemAction {
-  type: 'SELECT_INCOME_TYPE' | 'SELECT_ACCOUNT'
-  data: {
-    id: number
-  }
-}
-
-interface SetDateAction {
-  type: 'SET_DATE'
-  data: {
-    date: Dayjs
-  }
-}
-
-interface SetValueAction {
-  type: 'SET_VALUE'
-  data: {
-    value: number
-  }
-}
-
-interface SetValueAction {
-  type: 'SET_VALUE'
-  data: {
-    value: number
-  }
-}
-
-interface SetDescriptionAction {
-  type: 'SET_DESCRIPTION'
-  data: {
-    text: string
-  }
-}
-
-interface ValidateAction {
-  type: 'VALIDATE'
-}
-
-type InitializeAction = {
-  type: 'INITIALIZE'
-  data: {
-    lists: {
-      incomeTypes: Api.ListItem[]
-      accounts: Api.ListItem[]
-    }
-    defaultValues: {
-      incomeTypeId: number | null
-    }
-    excludedValues: {
-      incomeTypeId: number[]
-    }
-  }
-}
-
-interface State {
-  isWarning: boolean
-  isValidated: boolean
-  warning: string | null
-  lists: {
-    original: {
-      incomeTypes: Api.ListItem[]
-      accounts: Api.ListItem[]
-    }
-    filtered: {
-      incomeTypes: Api.ListItem[]
-      accounts: Api.ListItem[]
-    }
-  }
-  values: {
-    date: Dayjs | null
-    incomeType: Api.ListItem | null
-    account: Api.ListItem | null
-    value: number | null
-    description: string | null
-  }
-}
-
-type Action =
-  | SetDateAction
-  | SetDescriptionAction
-  | SetValueAction
-  | SelectListItemAction
-  | ValidateAction
-  | InitializeAction
+/**************************************************************************************************/
+/*                                           FUNCTIONS                                            */
+/**************************************************************************************************/
 
 function filterAccountsByIncomeTypes(
-  accounts: Api.ListItem[],
-  selectedIncomeType: Api.ListItem
-): Api.ListItem[] {
+  accounts: ApiListItem[],
+  selectedIncomeType: ApiListItem
+): ApiListItem[] {
   const allAccounts = accounts.slice(0)
   let filteredAccounts = allAccounts
   const accountIds = MisGastosUtils.flatAccountIds([selectedIncomeType])
@@ -127,10 +142,14 @@ function filterAccountsByIncomeTypes(
   return filteredAccounts.length > 0 ? filteredAccounts : allAccounts
 }
 
+/**************************************************************************************************/
+/*                                              HOOK                                              */
+/**************************************************************************************************/
+
 export default function useIncomeCreation({
   defaultIncomeTypeId,
   excludedIncomeTypeIds
-}: UI.Hooks.UseIncomeCreation.Params) {
+}: UseIncomeCreationParams) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
@@ -292,7 +311,7 @@ export default function useIncomeCreation({
     (id: number) => {
       if (typeof defaultIncomeTypeId != 'undefined')
         throw new Error(
-          `Income source selection is not allowed when typeof defaultIncomeTypeId != 'undefined', 
+          `Income source selection is not allowed when typeof defaultIncomeTypeId != 'undefined',
             invoke useIncomeCreation without arguments to enable income source selection`
         )
       dispatch({ type: 'SELECT_INCOME_TYPE', data: { id } })
@@ -360,3 +379,9 @@ export default function useIncomeCreation({
     }
   }
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
+
+export type { UseIncomeCreationParams }

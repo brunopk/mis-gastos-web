@@ -1,8 +1,9 @@
 import { Dayjs } from 'dayjs'
-import { useCallback, useEffect, useReducer } from 'react'
-import { useLoaderData } from 'react-router-dom'
+import type { ApiGroup, ApiListItem, ApiSubcategory } from '../api/mis-gastos/types'
 import * as MisGastosUtils from '../api/mis-gastos/utils'
 import * as Utils from '../utils'
+import { useCallback, useEffect, useReducer } from 'react'
+import { useLoaderData } from 'react-router-dom'
 
 const INITIAL_STATE: State = {
   isError: false,
@@ -36,8 +37,8 @@ const INITIAL_STATE: State = {
     }
   },
   maps: {
-    categories: new Map<number, Api.ListItem>(),
-    subcategories: new Map<number, Api.Subcategory>()
+    categories: new Map<number, ApiListItem>(),
+    subcategories: new Map<number, ApiSubcategory>()
   },
   functions: {
     categories: {
@@ -87,6 +88,17 @@ const INITIAL_STATE: State = {
   }
 }
 
+interface UseSpendFiltersParams {
+  filters: {
+    startDate: Dayjs
+    finalDate: Dayjs
+    categoryIds: number[] | null
+    subcategoryIds: number[] | null
+    groupIds: number[] | null
+    accountIds: number[] | null
+  }
+}
+
 interface SelectItemAction {
   type: 'SELECT_CATEGORIES' | 'SELECT_SUBCATEGORIES' | 'SELECT_GROUPS' | 'SELECT_ACCOUNTS'
   data: {
@@ -113,10 +125,10 @@ interface InitializeAction {
   type: 'INITIALIZE'
   data: {
     lists: {
-      categories: Api.ListItem[]
-      subcategories: Api.Subcategory[]
-      groups: Api.Group[]
-      accounts: Api.ListItem[]
+      categories: ApiListItem[]
+      subcategories: ApiSubcategory[]
+      groups: ApiGroup[]
+      accounts: ApiListItem[]
     }
     filters: {
       startDate: Dayjs
@@ -139,8 +151,8 @@ interface State {
     accounts: boolean
   }
   maps: {
-    categories: Map<number, Api.ListItem>
-    subcategories: Map<number, Api.Subcategory>
+    categories: Map<number, ApiListItem>
+    subcategories: Map<number, ApiSubcategory>
   }
   lists: {
     original: {
@@ -216,13 +228,13 @@ type Action =
 
 type ListItemInternal = ListItem & { visible: boolean }
 
-type ExtendedCategory = Api.ListItem & ListItemInternal
+type ExtendedCategory = ApiListItem & ListItemInternal
 
-type ExtendedSubcategory = Api.Subcategory & ListItemInternal
+type ExtendedSubcategory = ApiSubcategory & ListItemInternal
 
-type ExtendedGroup = Api.Group & ListItemInternal
+type ExtendedGroup = ApiGroup & ListItemInternal
 
-type ExtendedAccount = Api.ListItem & ListItemInternal
+type ExtendedAccount = ApiListItem & ListItemInternal
 
 function getNames(list: ListItem[], ids: unknown) {
   const strings = (ids as number[]).map((id) => list.find((item) => item.id == id)!.name)
@@ -233,11 +245,11 @@ function getParentName(list: ListItem[], parentId: number) {
   return list.find((item) => item.id == parentId)!.name
 }
 
-function sortFunction(itemA: Api.ListItem, itemB: Api.ListItem) {
+function sortFunction(itemA: ApiListItem, itemB: ApiListItem) {
   return itemA.name.localeCompare(itemB.name)
 }
 
-function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
+function useSpendFilters({ filters }: UseSpendFiltersParams) {
   const apiLists = useLoaderData()
 
   const reducer = (prevState: State, action: Action): State => {
@@ -1015,5 +1027,7 @@ function useSpendFilters({ filters }: UI.Hooks.UseSpendFilters.Params) {
     }
   }
 }
+
+export type { UseSpendFiltersParams }
 
 export default useSpendFilters
