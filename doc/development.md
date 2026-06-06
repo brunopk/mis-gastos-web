@@ -7,6 +7,12 @@ Recommended extensions :
 - Prettier - Code formatter (extension ID: esbenp.prettier-vscode)
 - ESLint (extension ID: dbaeumer.vscode-eslint)
 
+> Sometimes, mostly when fixing import order issues, VS Code may mistakenly delete imports. In this case, revert the changes and use Prettier in the console instead.
+>
+> ```bash
+> npx prettier --write File.tsx
+>```
+
 # Code conventions
 
 ## Sections
