@@ -1,10 +1,17 @@
-import * as Mui from '@mui/material'
 import { useNotifications } from '@toolpad/core'
-import { BaseSyntheticEvent, ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 import { debounce, throttle } from 'throttle-debounce'
+import * as Mui from '@mui/material'
 import type { ApiAutocompleteOptions } from '../api/mis-gastos/types'
 import * as Styled from './styled'
 import { TextField } from './styled'
+import {
+  BaseSyntheticEvent,
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 
 /**************************************************************************************************/
 /*                                          INTERFACES                                            */
@@ -135,6 +142,6 @@ function Autocomplete({ reset, queryFn, onChange }: AutocompleteProps) {
 /*                                           EXPORTS                                              */
 /**************************************************************************************************/
 
-export type {AutocompleteProps}
+export type { AutocompleteProps }
 
 export default Autocomplete

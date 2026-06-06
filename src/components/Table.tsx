@@ -1,6 +1,6 @@
 import * as Mui from '@mui/material'
-import { memo, useState, type MouseEventHandler } from 'react'
 import type { Formatter } from '../utils'
+import { type MouseEventHandler, memo, useState } from 'react'
 
 /**************************************************************************************************/
 /*                                          INTERFACES                                            */
@@ -65,7 +65,7 @@ function findButton<B>(buttonId: string, buttons: TableButton<B>[]): TableButton
 /*                                         MAIN COMPONENT                                         */
 /**************************************************************************************************/
 
-function Table<R, B>({rows, columns }: TableProps<R, B>) {
+function Table<R, B>({ rows, columns }: TableProps<R, B>) {
   const [page, setPage] = useState(0)
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -111,16 +111,16 @@ function Table<R, B>({rows, columns }: TableProps<R, B>) {
                       const button = findButton(column.id.toString(), row.buttons!)
                       return (
                         <Mui.TableCell key={column.id.toString()}>
-                          <Mui.Button onClick={button.clickHandler}>
-                            {button.label}
-                          </Mui.Button>
+                          <Mui.Button onClick={button.clickHandler}>{button.label}</Mui.Button>
                         </Mui.TableCell>
                       )
                     } else {
                       const value = row.data[column.id as keyof R] as unknown
                       return (
                         <Mui.TableCell key={column.id.toString()}>
-                          {column.format ? column.format(value as Parameters<Formatter>[0]) : value as React.ReactNode}
+                          {column.format
+                            ? column.format(value as Parameters<Formatter>[0])
+                            : (value as React.ReactNode)}
                         </Mui.TableCell>
                       )
                     }
@@ -142,6 +142,4 @@ function Table<R, B>({rows, columns }: TableProps<R, B>) {
 
 export type { BaseRow, Column, TableButton, TableProps }
 
-export default memo(Table) as <R, B>(
-  props: TableProps<R, B>
-) => React.ReactElement;;
+export default memo(Table) as <R, B>(props: TableProps<R, B>) => React.ReactElement
