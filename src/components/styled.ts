@@ -22,7 +22,7 @@ export const TextField = Mui.styled(Mui.TextField)<Mui.TextFieldProps>(() => ({
   flex: 1
 }))
 
-export const Autocomplete = Mui.styled(Mui.Autocomplete)<Mui.AutocompleteProps>(() => ({
+export const Autocomplete = Mui.styled(Mui.Autocomplete<string, false, true, true>)(() => ({
   flex: 1
 }))
 
