@@ -1,34 +1,90 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import * as Notifications from '@toolpad/core/useNotifications'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './components/Routes'
+import { UserProvider } from './context/UserContext'
+
+const queryClient = new QueryClient()
+
+const NotificationsProvider = Notifications.NotificationsProvider
+
+type NotificationsProviderSlotProps = Notifications.NotificationsProviderSlotProps
 
 function App() {
-  const [count, setCount] = useState(0)
+  const theme = createTheme({
+    palette: {
+      mode: 'dark'
+    },
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          '#root': {
+            padding: '1rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh'
+          }
+        }
+      },
+      MuiPaginationItem: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: 'none'
+            },
+            '&:focus': {
+              outline: 'none'
+            }
+          }
+        }
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: 'none'
+            },
+            '&:focus': {
+              outline: 'none'
+            }
+          }
+        }
+      },
+      MuiMenu: {
+        styleOverrides: {
+          root: {
+            maxHeight: 250
+          }
+        }
+      }
+    }
+  })
+
+  const slotsProps: NotificationsProviderSlotProps = {
+    snackbar: {
+      anchorOrigin: { vertical: 'top', horizontal: 'center' }
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ThemeProvider theme={theme}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <QueryClientProvider client={queryClient}>
+          <NotificationsProvider slotProps={slotsProps}>
+            <UserProvider>
+              <CssBaseline />
+              <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
+              <RouterProvider router={router(queryClient)} />
+            </UserProvider>
+          </NotificationsProvider>
+        </QueryClientProvider>
+      </LocalizationProvider>
+    </ThemeProvider>
   )
 }
 

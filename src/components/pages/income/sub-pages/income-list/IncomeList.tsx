@@ -1,0 +1,148 @@
+import { useQuery } from '@tanstack/react-query'
+import { useNotifications } from '@toolpad/core/useNotifications'
+import * as Api from '../../../../../api/mis-gastos/api'
+import type { ApiIncome, ApiListItem } from '../../../../../api/mis-gastos/types'
+import { type DayjsDate, buildDateFormatter, buildListItemFormatter } from '../../../../../utils'
+import Page from '../../../../Page'
+import Table, { type BaseRow, type Column } from '../../../../Table'
+import BottomNavigation from '../../BottomNavigation'
+import { useEffect } from 'react'
+import { useLoaderData } from 'react-router-dom'
+
+interface Income {
+  id: number
+  date: DayjsDate
+  incomeTypeId: number
+  accountId: number
+  description?: string
+  spendId?: number
+  spendDate?: DayjsDate
+  spendCategoryId?: number
+  spendSubcategoryId?: number
+  spendGroupId?: number
+  spendAccountId?: number
+  spendDescription?: string
+  spendValue?: number
+  value: number
+}
+
+function buildTableRows(incomes: ApiIncome[] | undefined): BaseRow<Income, void>[] {
+  return typeof incomes == 'undefined'
+    ? []
+    : incomes.map((income) => ({
+        id: income.id!,
+        data: {
+          id: income.id!,
+          date: income.date,
+          incomeTypeId: income.incomeTypeId,
+          accountId: income.accountId,
+          description: income.description,
+          value: income.value,
+          spendId: income.spend?.id,
+          spendDate: income.spend?.date,
+          spendCategoryId: income.spend?.categoryId,
+          spendSubcategoryId: income.spend?.subcategoryId ?? undefined,
+          spendGroupId: income.spend?.groupId ?? undefined,
+          spendDescription: income.spend?.description,
+          spendAccountId: income.spend?.accountId,
+          spendValue: income.spend?.value
+        }
+      }))
+}
+
+function buildColumnList(apiLists: { [name: string]: ApiListItem[] }): Column<Income, void>[] {
+  const formatDate = buildDateFormatter()
+  const formatIncomeType = buildListItemFormatter(apiLists.incomeTypes)
+  const formatAccount = buildListItemFormatter(apiLists.accounts)
+  const formatCategory = buildListItemFormatter(apiLists.categories)
+  const formatSubcategory = buildListItemFormatter(apiLists.subcategories)
+  const formatGroup = buildListItemFormatter(apiLists.groups)
+
+  return [
+    { id: 'id', label: 'ID', minWidth: 100, getValue: (i) => i.id },
+    { id: 'date', label: 'Date', minWidth: 150, getValue: (i) => formatDate(i.date) },
+    {
+      id: 'incomeTypeId',
+      label: 'Type',
+      minWidth: 170,
+      getValue: (i) => formatIncomeType(i.incomeTypeId)
+    },
+    {
+      id: 'accountId',
+      label: 'Account',
+      minWidth: 170,
+      getValue: (i) => formatAccount(i.accountId)
+    },
+    { id: 'description', label: 'Description', minWidth: 170, getValue: (i) => i.description },
+    { id: 'value', label: 'Value', minWidth: 170, getValue: (i) => i.value },
+    {
+      id: 'spendCategoryId',
+      label: 'Spend category',
+      minWidth: 170,
+      getValue: (i) => formatCategory(i.spendCategoryId ?? null)
+    },
+    {
+      id: 'spendSubcategoryId',
+      label: 'Spend subcategory',
+      minWidth: 170,
+      getValue: (i) => formatSubcategory(i.spendSubcategoryId ?? null)
+    },
+    {
+      id: 'spendGroupId',
+      label: 'Spend group',
+      minWidth: 170,
+      getValue: (i) => formatGroup(i.spendGroupId ?? null)
+    },
+    {
+      id: 'spendAccountId',
+      label: 'Spend account',
+      minWidth: 170,
+      getValue: (i) => formatAccount(i.spendAccountId ?? null)
+    },
+    {
+      id: 'spendDescription',
+      label: 'Spend description',
+      minWidth: 170,
+      getValue: (i) => i.spendDescription
+    },
+    { id: 'spendValue', label: 'Spend value', minWidth: 170, getValue: (i) => i.spendValue }
+  ]
+}
+
+function IncomeList() {
+  const apiLists = useLoaderData()
+
+  // For more information about staleTime and gcTime see :
+  // - https://dev.to/delisrey/react-query-staletime-vs-cachetime-hml
+  // - https://www.codemzy.com/blog/react-query-cachetime-staletime
+
+  const { data, error, isFetching, isError } = useQuery({
+    queryKey: ['incomes'],
+    queryFn: Api.getIncomes,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 2
+  })
+
+  const notifications = useNotifications()
+
+  const rows = buildTableRows(data)
+
+  const columns = buildColumnList(apiLists)
+
+  useEffect(() => {
+    if (isError) {
+      notifications.show(error.toString(), {
+        severity: 'error'
+      })
+    }
+  }, [error, isError, notifications])
+
+  return (
+    <Page isFetching={isFetching} bottomNavigation={<BottomNavigation />}>
+      <Table data={rows} columns={columns} />
+    </Page>
+  )
+}
+
+export default IncomeList
