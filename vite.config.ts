@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
@@ -9,7 +9,6 @@ export default defineConfig({
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'firebase-messaging-sw.ts',
       injectRegister: 'auto',
       manifest: {
         name: 'Mis Gastos',
@@ -23,24 +22,24 @@ export default defineConfig({
           {
             src: '/icons/icon-192.png',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/png'
           },
           {
             src: '/icons/icon-512.png',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/png'
           },
           {
             src: '/icons/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
+            purpose: 'maskable'
+          }
+        ]
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/auth\//],
-      },
-    }),
-  ],
+        navigateFallbackDenylist: [/^\/auth\//]
+      }
+    })
+  ]
 })
