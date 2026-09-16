@@ -146,6 +146,10 @@ This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claud
 
 OpenSpec works creating some **artifacts** (`.md` files) in the `openspec` folder.
 
+# PWA
+
+For more information about PWA support refer to [`/doc/pwa.md`](/doc/pwa.md).
+
 # Links
 
 - [Fission-AI OpenSpec](https://github.com/Fission-AI/OpenSpec/)

@@ -23,4 +23,3 @@ yarn dev
 ```
 
 For more information read `/doc/development.md`.
-
