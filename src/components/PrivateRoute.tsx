@@ -1,17 +1,30 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { PATHS } from '../constants';
-import { useContext } from 'react';
-import { UserContext } from '../context/UserContext';
+import { PATHS } from '../constants'
+import { UserContext } from '../context/UserContext'
+import { useContext } from 'react'
+import { Navigate, Outlet } from 'react-router-dom'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
 
 interface PrivateRoute {
-  isPrivate: boolean, 
+  isPrivate: boolean
   isAuthenticated: boolean
 }
 
-function PrivateRoute() {
-  const { loginInformation: { isAuthenticated } } = useContext(UserContext)
-  const ENV = import.meta.env
-  return !ENV.PROD || isAuthenticated ? <Outlet /> : <Navigate to={PATHS.LOGIN} />;
-};
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
 
-export default PrivateRoute;
+function PrivateRoute() {
+  const {
+    loginInformation: { isAuthenticated }
+  } = useContext(UserContext)
+  return isAuthenticated ? <Outlet /> : <Navigate to={PATHS.LOGIN} />
+}
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
+
+export default PrivateRoute
