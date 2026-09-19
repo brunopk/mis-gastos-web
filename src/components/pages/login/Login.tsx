@@ -1,12 +1,25 @@
-import * as Mui from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import GoogleButton from 'react-google-button'
-import { useLocation, useNavigate } from 'react-router-dom'
+import * as Mui from '@mui/material'
 import * as Api from '../../../api/mis-gastos/api'
 import * as constants from '../../../constants'
 import { UserContext } from '../../../context/UserContext'
-import { authorizeWithGoogle, generateCodeVerifier } from '../../../utils'
+import { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import GoogleButton from 'react-google-button'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+/**************************************************************************************************/
+/*                                          INTERFACES                                            */
+/**************************************************************************************************/
+
+interface LoginResult {
+  isError: boolean
+  severity: 'error' | 'warning' | null
+  message: string | null
+}
+
+/**************************************************************************************************/
+/*                                            CONSTANTS                                           */
+/**************************************************************************************************/
 
 const Container = Mui.styled(Mui.Box)<Mui.BoxProps>(({ theme }) => ({
   backgroundColor: 'inherit',
@@ -28,11 +41,9 @@ const LogoBox = Mui.styled(Mui.Box)<Mui.BoxProps>(() => ({
   justifyContent: 'center'
 }))
 
-interface LoginResult {
-  isError: boolean
-  severity: 'error' | 'warning' | null
-  message: string | null
-}
+/**************************************************************************************************/
+/*                                         MAIN COMPONENT                                         */
+/**************************************************************************************************/
 
 function Login() {
   const { setLoginInformation } = useContext(UserContext)
@@ -66,10 +77,10 @@ function Login() {
     }
   })
 
+  // TODO: Check that after login, user is redirected to the corresponding URL
+
   const handleLogin = () => {
-    const codeVerifier = generateCodeVerifier()
-    sessionStorage.setItem(constants.SESSION_STORAGE_PKCE_CODE_VERIFIER, codeVerifier)
-    authorizeWithGoogle(codeVerifier)
+    window.location.href = import.meta.env.VITE_MIS_GASTOS_OAUTH2_GOOGLE_AUTH_URL
   }
 
   useEffect(() => {
@@ -101,5 +112,9 @@ function Login() {
     </Container>
   )
 }
+
+/**************************************************************************************************/
+/*                                           EXPORTS                                              */
+/**************************************************************************************************/
 
 export default Login

@@ -17,8 +17,6 @@ export const PATHS = {
 
 export const SESSION_STORAGE_PKCE_CODE_VERIFIER = 'pkce_code_verifier'
 
-export const GOOGLE_AUTH_SCOPES = 'openid email https://www.googleapis.com/auth/tasks.readonly'
-
 export const ICONS_MARGIN_IN_REM = 1
 
 export const MENU_WIDTH_IN_REM = 13

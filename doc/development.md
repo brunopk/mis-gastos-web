@@ -15,9 +15,21 @@ Recommended extensions :
 
 # Code conventions
 
-## Sections
+## TS/TSX files
 
-All files (TSX and TS files) are organized in **sections** and each section should be **labeled**.
+All files (TSX and TS files) are organized in **sections** :
+
+1. Imports
+2. Interfaces
+3. Types (type aliases)
+4. Other constants
+5. Constants (Mui.styled(...) components)
+6. Helper functions
+7. Main component
+8. Exports
+
+Each section should be **labeled** : 
+
 
 **Interfaces**
 
@@ -75,18 +87,7 @@ All files (TSX and TS files) are organized in **sections** and each section shou
 /**************************************************************************************************/
 ```
 
-## TSX files
-  
-1. Imports
-2. Interfaces
-3. Types (type aliases)
-4. Other constants
-5. Constants (Mui.styled(...) components)
-6. Helper functions
-7. Main component
-8. Exports
-
-Notes:
+**Notes**
 
 - Use `interface` instead of `type` if possible.
 - Use `function` for the main component.

@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs'
 import type { ApiListItem } from './api/mis-gastos/types'
-import { GOOGLE_AUTH_SCOPES, PATHS } from './constants'
+import { PATHS } from './constants'
 
 export type DayjsDate = Dayjs
 
@@ -86,34 +86,9 @@ export function generateCodeVerifier(length = 128) {
   return base64URLEncode(array)
 }
 
-export async function authorizeWithGoogle(codeVerifier: string) {
-  const codeChallenge = await generateCodeChallenge(codeVerifier)
-  const scope = encodeURI(GOOGLE_AUTH_SCOPES)
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
-
-  const GOOGLE_REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI
-  window.location.href =
-    'https://accounts.google.com/o/oauth2/v2/auth?' +
-    `client_id=${GOOGLE_CLIENT_ID}` +
-    `&redirect_uri=${GOOGLE_REDIRECT_URI}` +
-    '&response_type=code' +
-    `&scope=${scope}` +
-    `&code_challenge=${codeChallenge}` +
-    '&code_challenge_method=S256' +
-    '&access_type=offline' +
-    '&prompt=consent'
-}
-
 function base64URLEncode(buffer: Uint8Array<ArrayBuffer> | ArrayBuffer) {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '')
-}
-
-async function generateCodeChallenge(codeVerifier: string) {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(codeVerifier)
-  const digest = await crypto.subtle.digest('SHA-256', data)
-  return base64URLEncode(digest)
 }
