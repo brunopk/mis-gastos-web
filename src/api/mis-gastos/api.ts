@@ -20,13 +20,6 @@ export class ApiError extends Error {
   }
 }
 
-export async function authCallback(authCallbackRequest: ApiAuthCallbackRequest): Promise<void> {
-  await post(`${API_URL}/oauth2/callback`, {
-    authorization_code: authCallbackRequest.authorizationCode,
-    code_verifier: authCallbackRequest.codeVerifier
-  })
-}
-
 export async function getIncomeTypes(): Promise<ApiListItem[]> {
   const response = await get(`${API_URL}/income-types`)
   return (
