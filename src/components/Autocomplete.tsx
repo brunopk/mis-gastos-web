@@ -110,8 +110,7 @@ function Autocomplete({ reset, queryFn, onChange }: AutocompleteProps) {
     variant,
     slotProps: {
       input: {
-        type: 'search',
-        ...params.InputProps
+        type: 'search'
       },
       inputLabel: {
         shrink: true

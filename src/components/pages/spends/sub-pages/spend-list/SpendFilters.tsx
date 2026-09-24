@@ -271,13 +271,13 @@ function SpendFilters({ isModalOpen, filters, onModalClose, onFiltersSet }: Spen
     open: false
   }
 
-  const startDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+  const startDateProps: Partial<XDatePickers.DatePickerProps<Dayjs>> = {
     value: selection.startDate,
     format: constants.DATE_PICKER_FORMAT,
     onChange: handleStartDateChange
   }
 
-  const finalDateProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+  const finalDateProps: Partial<XDatePickers.DatePickerProps<Dayjs>> = {
     value: selection.finalDate,
     format: constants.DATE_PICKER_FORMAT,
     onChange: handleFinalDateChange

@@ -235,7 +235,7 @@ function NewIncome() {
     functions.validate()
   }
 
-  const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+  const datePickerProps: Partial<XDatePickers.DatePickerProps> = {
     value: values.date,
     format: constants.DATE_PICKER_FORMAT,
     onChange: handleDateChange

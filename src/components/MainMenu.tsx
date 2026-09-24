@@ -1,16 +1,16 @@
 import AddCircle from '@mui/icons-material/AddCircle'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutlined'
 import * as Mui from '@mui/material'
 import { styled, useTheme } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import { Dispatch, Fragment } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { MENU_WIDTH_IN_REM, PATHS } from '../constants'
 import DrawerHeader from './DrawerHeader'
+import { Dispatch, Fragment } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const List = styled(Mui.List)<Mui.ListProps>(() => ({
   width: `${MENU_WIDTH_IN_REM}rem`

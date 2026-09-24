@@ -153,7 +153,7 @@ function NewSpend() {
 
   const accountSelectLabelId = 'account-select-label'
 
-  const datePickerProps: Partial<XDatePickers.DatePickerFieldProps<Dayjs>> = {
+  const datePickerProps: Partial<XDatePickers.DatePickerProps> = {
     value: values.date,
     format: constants.DATE_PICKER_FORMAT,
     onChange: handleDateChange

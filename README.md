@@ -22,4 +22,4 @@ To run in development mode with HMR (hot module reloading):
 yarn dev
 ```
 
-For more information read `/doc/development.md`.
+For more information read [`/doc/development.md`](/doc/development.md).

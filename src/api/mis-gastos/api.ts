@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import type {
-  ApiAuthCallbackRequest,
   ApiAutocompleteOptions,
   ApiGroup,
   ApiIncome,
