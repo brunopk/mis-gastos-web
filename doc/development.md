@@ -141,12 +141,6 @@ Another way is using an API key :
 
 - Check if `jq` is installed
 
-# OpenSpec
-
-This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec/) with Claude Code. To install OpenSpec follow instructions in the [Quick Start](https://github.com/Fission-AI/OpenSpec/#quick-start) section from the [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec/) `README.md`.
-
-OpenSpec works creating some **artifacts** (`.md` files) in the `openspec` folder.
-
 # PWA
 
 For more information about PWA support refer to [`/doc/pwa.md`](/doc/pwa.md).
